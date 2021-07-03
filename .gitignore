@@ -15,3 +15,5 @@
 vendor/
 
 .envrc
+.idea/
+httptest

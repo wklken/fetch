@@ -1,0 +1,10 @@
+title = "case 01"
+description = "the description of case 01"
+
+[request]
+method = "get"
+url = "http://www.qq.com"
+
+[assert]
+status = "ok"
+statusCode = 200

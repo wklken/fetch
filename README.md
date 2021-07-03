@@ -1,6 +1,14 @@
 # httptest
 A command line http test tool. Maintain the case via git and pure text
 
+## packages
+
+- http client: https://golang.org/src/net/http/request.go
+- config file and cases: toml? https://github.com/pelletier/go-toml
+- assert: use testify data compare? https://github.com/stretchr/testify/blob/master/assert/assertions.go
+
+
+- config file and cases: toml? https://github.com/pelletier/go-toml => use viper to support most config file types
 
 ## how it works
 
@@ -69,3 +77,10 @@ latency: < 20ms
 - [ ] output stats
 - [ ] dns / connection reset/timeout and so on
 - [ ] case set some data, next case read it
+- [ ] support ssl
+
+
+## inspired by
+
+- testify
+- postman & newman https://www.npmjs.com/package/newman
