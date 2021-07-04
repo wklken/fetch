@@ -18,7 +18,7 @@ A command line http test tool. Maintain the case via git and pure text
 - easy to create/change/run
 - maintained by git
 - run quick
-- 
+-
 
 ## example
 
@@ -59,7 +59,7 @@ latency: < 20ms
 - [ ] `run` specific file / dir
 - [ ] `-v` verbose, simple
 - [ ] support config file, like `prod.yaml`/`test.yaml`/`dev.yaml`, `-e prod.yaml`
-- [ ] support environment vars, like `host/basic auth`, 
+- [ ] support environment vars, like `host/basic auth`,
 - [ ] render environment vars in everywhere, like `path/request section/assert section`? which template to use?
 - [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
 - [ ] the case name? where to put that?
@@ -82,5 +82,5 @@ latency: < 20ms
 
 ## inspired by
 
-- testify
+- testify/assert https://github.com/stretchr/testify/tree/master/assert
 - postman & newman https://www.npmjs.com/package/newman

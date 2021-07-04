@@ -1,0 +1,18 @@
+title = "case 04"
+description = "the description of case 04"
+
+[request]
+method = "get"
+url = "https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l"
+
+[assert]
+status = "ok"
+statusCode = 200
+statusCode_in = [400, 500]
+contentLength = 18
+body = "HTTPBIN is awesome"
+body_contains = "awesome2"
+body_not_contains = "awesome"
+body_startswith = "A"
+body_endswith = "a"
+

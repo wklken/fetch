@@ -17,10 +17,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
+	"httptest/pkg/assert"
 	"httptest/pkg/config"
+	"httptest/pkg/util"
+	"io"
 	"net/http"
+	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 // runCmd represents the run command
@@ -59,7 +63,6 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-
 func run(path string) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
@@ -72,34 +75,55 @@ func run(path string) {
 		fmt.Println("err:", err)
 		return
 	}
+	allKeys := util.NewStringSetWithValues(v.AllKeys())
+	fmt.Println("allKeys", allKeys)
 
-	fmt.Println("the case and data", path, c)
+	fmt.Printf("the case and data: %s, %+v\n", path, c)
 
+	var resp *http.Response
+	var err1 error
 	if c.Request.Method == "get" {
-		resp, err := http.Get(c.Request.URL)
-
-		assertNoError(err)
-
-		assertEqual(c.Assert.StatusCode, resp.StatusCode)
-
-		//t := new(testing.T)
-		//assert := assert.New(t)
-		//fmt.Println("c.Assert", c.Assert.Status)
-		//assert.NoError(err, "should not error")
-		//assert.Equal(c.Assert.Status, resp.StatusCode, "status should be")
+		resp, err1 = http.Get(c.Request.URL)
 	}
-}
+	//else if c.Request.Method == "post" {
+	//	resp, err1 = http.Post(c.Request.URL)
+	//}
 
-func assertNoError(err error) {
-	if err != nil {
-		fmt.Println("FAIL: got an error")
+	assert.NoError(err1)
+
+	if c.Assert.StatusCode != 0 {
+		assert.Equal(c.Assert.StatusCode, resp.StatusCode)
 	}
-}
 
-func assertEqual(expected interface{}, actual interface{}) {
-	equal := assert.ObjectsAreEqual(expected, actual)
-	if !equal {
-		fmt.Printf("FAIL: not equal, expected=%d, actual=%d\n", expected,actual)
-		fmt.Println()
+	if allKeys.Has("assert.statuscode_in") {
+		assert.In(resp.StatusCode, c.Assert.StatusCodeIn)
+	}
+
+	if c.Assert.Status != "" {
+		assert.Equal(strings.ToLower(c.Assert.Status), strings.ToLower(http.StatusText(resp.StatusCode)))
+	}
+
+	// TODO: not set ? or is actually == 0, 不知道是==0, 还是没有配置unmarshall
+	if allKeys.Has("assert.contentlength") {
+		assert.Equal(c.Assert.ContentLength, resp.ContentLength)
+	}
+	//https://golang.org/src/net/http/status.go
+
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(err)
+	assert.Equal(c.Assert.Body, string(body))
+
+	if allKeys.Has("assert.body_contains") {
+		assert.Contains(string(body), c.Assert.BodyContains)
+	}
+	if allKeys.Has("assert.body_not_contains") {
+		assert.NotContains(string(body), c.Assert.BodyNotContains)
+	}
+
+	if allKeys.Has("assert.body_startswith") {
+		assert.StartsWith(string(body), c.Assert.BodyStartsWith)
+	}
+	if allKeys.Has("assert.body_endswith") {
+		assert.EndsWith(string(body), c.Assert.BodyEndsWith)
 	}
 }

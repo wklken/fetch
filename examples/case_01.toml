@@ -6,5 +6,5 @@ method = "get"
 url = "http://www.qq.com"
 
 [assert]
-status = "ok"
+status = "OK"
 statusCode = 200
