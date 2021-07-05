@@ -91,22 +91,54 @@ func run(path string) {
 
 	assert.NoError(err1)
 
-	if c.Assert.StatusCode != 0 {
+	//if c.Assert.StatusCode != 0 {
+	if allKeys.Has("assert.statuscode") {
 		assert.Equal(c.Assert.StatusCode, resp.StatusCode)
+	}
+	if allKeys.Has("assert.statuscode_lt") {
+		assert.Less(resp.StatusCode, c.Assert.StatusCodeLt)
+	}
+	if allKeys.Has("assert.statuscode_lte") {
+		assert.LessOrEqual(resp.StatusCode, c.Assert.StatusCodeLte)
+	}
+	if allKeys.Has("assert.statuscode_gt") {
+		assert.Greater(resp.StatusCode, c.Assert.StatusCodeGt)
+
+	}
+	if allKeys.Has("assert.statuscode_gte") {
+		assert.GreaterOrEqual(resp.StatusCode, c.Assert.StatusCodeGte)
+
 	}
 
 	if allKeys.Has("assert.statuscode_in") {
 		assert.In(resp.StatusCode, c.Assert.StatusCodeIn)
 	}
 
-	if c.Assert.Status != "" {
+	//if c.Assert.Status != "" {
+	if allKeys.Has("assert.status") {
 		assert.Equal(strings.ToLower(c.Assert.Status), strings.ToLower(http.StatusText(resp.StatusCode)))
 	}
+
+	// TODO assert is the first or second params? the first?
 
 	// TODO: not set ? or is actually == 0, 不知道是==0, 还是没有配置unmarshall
 	if allKeys.Has("assert.contentlength") {
 		assert.Equal(c.Assert.ContentLength, resp.ContentLength)
 	}
+	if allKeys.Has("assert.contentlength_lt") {
+		assert.Less(resp.ContentLength, c.Assert.ContentLengthLt)
+
+	}
+	if allKeys.Has("assert.contentlength_lte") {
+		assert.LessOrEqual(resp.ContentLength, c.Assert.ContentLengthLte)
+	}
+	if allKeys.Has("assert.contentlength_gt") {
+		assert.Greater(resp.ContentLength, c.Assert.ContentLengthGt)
+	}
+	if allKeys.Has("assert.contentlength_gte") {
+		assert.GreaterOrEqual(resp.ContentLength, c.Assert.ContentLengthGte)
+	}
+
 	//https://golang.org/src/net/http/status.go
 
 	body, err := io.ReadAll(resp.Body)
@@ -126,4 +158,5 @@ func run(path string) {
 	if allKeys.Has("assert.body_endswith") {
 		assert.EndsWith(string(body), c.Assert.BodyEndsWith)
 	}
+
 }
