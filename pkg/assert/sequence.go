@@ -1,7 +1,6 @@
 package assert
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -11,11 +10,11 @@ import (
 func Contains(s, contains interface{}) bool {
 	ok, found := includeElement(s, contains)
 	if !ok {
-		fmt.Println("FAIL: contains error")
+		Fail("FAIL: contains error")
 		return false
 	}
 	if !found {
-		fmt.Printf("FAIL: contains, list=%v, contains=%v\n", s, contains)
+		Fail("FAIL: contains, list=%v, contains=%v\n", s, contains)
 		return false
 	}
 
@@ -25,11 +24,11 @@ func Contains(s, contains interface{}) bool {
 func NotContains(s, contains interface{}) bool {
 	ok, found := includeElement(s, contains)
 	if !ok {
-		fmt.Println("FAIL: not contains error")
+		Fail("FAIL: not contains error")
 		return false
 	}
 	if found {
-		fmt.Printf("FAIL: not contains, list=%v, not_contains=%v\n", s, contains)
+		Fail("FAIL: not contains, list=%v, not_contains=%v\n", s, contains)
 		return false
 	}
 

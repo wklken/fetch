@@ -1,7 +1,6 @@
 package assert
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -10,18 +9,18 @@ func Greater(e1 interface{}, e2 interface{}) bool {
 	e1Kind := reflect.ValueOf(e1).Kind()
 	e2Kind := reflect.ValueOf(e2).Kind()
 	if e1Kind != e2Kind {
-		fmt.Println("FAIL: greater error, elemtnes should be the same type")
+		Fail("FAIL: greater error, elemtnes should be the same type")
 		return false
 	}
 
 	res, isComparable := compare(e1, e2, e1Kind)
 	if !isComparable {
-		fmt.Printf("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
+		Fail("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
 		return false
 	}
 
 	if res != -1 {
-		fmt.Printf("FAIL: greater, \"%v\" is not greater than \"%v\"\n", e1, e2)
+		Fail("FAIL: greater, \"%v\" is not greater than \"%v\"\n", e1, e2)
 		return false
 	}
 
@@ -32,18 +31,18 @@ func GreaterOrEqual(e1 interface{}, e2 interface{}) bool {
 	e1Kind := reflect.ValueOf(e1).Kind()
 	e2Kind := reflect.ValueOf(e2).Kind()
 	if e1Kind != e2Kind {
-		fmt.Println("FAIL: greater or equal error, elements should be the same type")
+		Fail("FAIL: greater or equal error, elements should be the same type")
 		return false
 	}
 
 	res, isComparable := compare(e1, e2, e1Kind)
 	if !isComparable {
-		fmt.Printf("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
+		Fail("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
 		return false
 	}
 
 	if res != -1 && res != 0 {
-		fmt.Printf("FAIL: greater or equal, \"%v\" is not greater than or equal to \"%v\"\n", e1, e2)
+		Fail("FAIL: greater or equal, \"%v\" is not greater than or equal to \"%v\"\n", e1, e2)
 		return false
 	}
 
@@ -54,18 +53,18 @@ func Less(e1 interface{}, e2 interface{}) bool {
 	e1Kind := reflect.ValueOf(e1).Kind()
 	e2Kind := reflect.ValueOf(e2).Kind()
 	if e1Kind != e2Kind {
-		fmt.Println("FAIL: less error, elements should be the same type")
+		Fail("FAIL: less error, elements should be the same type")
 		return false
 	}
 
 	res, isComparable := compare(e1, e2, e1Kind)
 	if !isComparable {
-		fmt.Printf("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
+		Fail("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
 		return false
 	}
 
 	if res != 1 {
-		fmt.Printf("FAIL: less, \"%v\" is not less than \"%v\"\n", e1, e2)
+		Fail("FAIL: less, \"%v\" is not less than \"%v\"\n", e1, e2)
 		return false
 	}
 
@@ -76,18 +75,18 @@ func LessOrEqual(e1 interface{}, e2 interface{}) bool {
 	e1Kind := reflect.ValueOf(e1).Kind()
 	e2Kind := reflect.ValueOf(e2).Kind()
 	if e1Kind != e2Kind {
-		fmt.Println("FAIL: less or equal error, elements should be the same type")
+		Fail("FAIL: less or equal error, elements should be the same type")
 		return false
 	}
 
 	res, isComparable := compare(e1, e2, e1Kind)
 	if !isComparable {
-		fmt.Printf("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
+		Fail("FAIL: Can not compare type \"%s\"\n", reflect.TypeOf(e1))
 		return false
 	}
 
 	if res != 1 && res != 0 {
-		fmt.Printf("FAIL: less or equal, \"%v\" is not less than or equal to \"%v\"\n", e1, e2)
+		Fail("FAIL: less or equal, \"%v\" is not less than or equal to \"%v\"\n", e1, e2)
 		return false
 	}
 

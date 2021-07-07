@@ -23,6 +23,8 @@ type Assert struct {
 	ContentLengthGt  int64 `mapstructure:"contentLength_gt"`
 	ContentLengthGte int64 `mapstructure:"contentLength_gte"`
 
+	// TODO: header
+
 	Body string
 
 	BodyContains    string `mapstructure:"body_contains"`
