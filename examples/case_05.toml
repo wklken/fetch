@@ -3,7 +3,7 @@ description = "the description of case 04"
 
 [request]
 method = "get"
-url = "https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l"
+url = "http://httpbin.org/response-headers?freeform="
 
 [assert]
 status = "ok"
@@ -21,7 +21,7 @@ contentLength_gte = 180
 body = "HTTPBIN is awesome"
 body_contains = "awesome2"
 body_not_contains = "awesome"
-body_startswith = "Ab"
-body_endswith = "aE"
-#header.ContentType = "text/html; charset=utf-8"
+body_startswith = "A"
+body_endswith = "a"
+contentType = "abc"
 

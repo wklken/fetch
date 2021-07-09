@@ -24,6 +24,7 @@ type Assert struct {
 	ContentLengthGte int64 `mapstructure:"contentLength_gte"`
 
 	// TODO: header
+	ContentType string
 
 	Body string
 

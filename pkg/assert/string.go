@@ -1,22 +1,43 @@
 package assert
 
 import (
+	"reflect"
 	"strings"
 )
 
-func StartsWith(s, prefix string) bool {
-	if !strings.HasPrefix(s, prefix) {
-		Fail("FAIL: startswith, string=%v, prefix=%v\n", s, prefix)
+type stringTestFunc func(s, i string) bool
+
+func test(s, i interface{}, testFunc stringTestFunc) bool {
+	sType := reflect.TypeOf(s)
+	if sType == nil {
 		return false
 	}
-	return true
+	iType := reflect.TypeOf(i)
+	if iType == nil {
+		return false
+	}
 
+	if sType.Kind() == reflect.String || iType.Kind() == reflect.String {
+		return false
+	}
+
+	return testFunc(s.(string), i.(string))
 }
 
-func EndsWith(s, suffix string) bool {
-	if !strings.HasSuffix(s, suffix) {
-		Fail("FAIL: endswith, string=%v, suffix=%v\n", s, suffix)
-		return false
+func StartsWith(s, prefix interface{}) bool {
+	if test(s, prefix, strings.HasPrefix) {
+		return true
 	}
-	return true
+
+	Fail("FAIL: startswith, string=%v, prefix=%v\n", s, prefix)
+	return false
+}
+
+func EndsWith(s, suffix interface{}) bool {
+	if test(s, suffix, strings.HasPrefix) {
+		return true
+	}
+
+	Fail("FAIL: endswith, string=%v, suffix=%v\n", s, suffix)
+	return false
 }

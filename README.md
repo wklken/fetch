@@ -1,5 +1,60 @@
 # httptest
-A command line http test tool. Maintain the case via git and pure text
+
+A command line http test tool. Maintain the cases via git and pure text
+
+
+## target
+
+- all in text(.toml/.yaml/.json)
+- easy to create/modify/copy and delete
+- maintained by git
+- run fast
+
+## examples
+
+```
+[request]
+method = "get"
+url = "http://httpbin.org"
+
+[assert]
+status = "OK"
+statusCode = 200
+```
+
+## assertions
+
+```toml
+# status
+status = "ok"
+statusCode = 200
+statusCode_in = [400, 500]
+statusCode_lt = 100
+statusCode_lte = 100
+statusCode_gt = 500
+statusCode_gte = 500
+
+# content-length
+contentLength = 18
+contentLength_lt = 1
+contentLength_lte = 1
+contentLength_gt = 180
+contentLength_gte = 180
+
+# body
+body = "HTTPBIN is awesome"
+body_contains = "awesome2"
+body_not_contains = "awesome"
+body_startswith = "A"
+body_endswith = "a"
+```
+
+## inspired by
+
+- testify/assert https://github.com/stretchr/testify/tree/master/assert (use this module, and copied some un-exported codes from it, follow the license)
+- postman & newman https://www.npmjs.com/package/newman
+
+----------------------------------------
 
 ## packages
 
@@ -7,51 +62,30 @@ A command line http test tool. Maintain the case via git and pure text
 - config file and cases: toml? https://github.com/pelletier/go-toml
 - assert: use testify data compare? https://github.com/stretchr/testify/blob/master/assert/assertions.go
 
-
 - config file and cases: toml? https://github.com/pelletier/go-toml => use viper to support most config file types
 
 ## how it works
 
-## rule
-
-- all in text
-- easy to create/change/run
-- maintained by git
-- run quick
--
-
-## example
-
-simplest
-
-```
-[request]
-method: get
-url: /
-[assert]
-status: 200
-```
-
-```
-# a.case
-[request]
-method: post
-url: /api/v1
-timeout: 5
-body: ??? josn or form
-
-will got response, then do the assert
-[assert]
-status: 200
-type: json
-body.code = 0
-body.data.length = 10
-latency: < 20ms
-```
 
 ## TODO
 
+
+High: DO POST, the parse the json, do assert
+- https://github.com/tidwall/gjson
+- https://github.com/oliveagle/jsonpath
+
+High:
+- timeout: 5
+
+High:
+- content-type assert
+
+High:
+- latency assert
+
 - [x] init project
+- [x] the case name? where to put that?
+
 - [ ] `-h/--help`
 - [ ] `bootstrap` create the raw template, like `a.hp`
 - [ ] `generate x` generate a case
@@ -62,15 +96,14 @@ latency: < 20ms
 - [ ] support environment vars, like `host/basic auth`,
 - [ ] render environment vars in everywhere, like `path/request section/assert section`? which template to use?
 - [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
-- [ ] the case name? where to put that?
 - [ ] how to control the execute order?
 - [ ] multiple cases in one file, like ginkgo?
 - [ ] should support all request method
 - [ ] should support all request body, json/form/msgpack/zip.....
 - [ ] how to: long-live / file download / static file
 - [ ] support retry
-- [ ] support repeat, like run 5 times
 - [ ] support latency assertion, less than/greater than, or between
+- [ ] support repeat, like run 5 times
 - [ ] support assert redirect
 - [ ] how to share the cookie between cases? claim? or default same dir
 - [ ] run in parallel
@@ -78,9 +111,26 @@ latency: < 20ms
 - [ ] dns / connection reset/timeout and so on
 - [ ] case set some data, next case read it
 - [ ] support ssl
+- [ ] invalid assert or not used assert
+- [ ] case with line number
+- [ ] post json in toml
+- [ ] assert json
+- [ ] assert header application/json
+- [ ] keep alive
+- [ ] websocket
 
 
-## inspired by
+## go mod
 
-- testify/assert https://github.com/stretchr/testify/tree/master/assert
-- postman & newman https://www.npmjs.com/package/newman
+command line:
+- github.com/spf13/cobra
+- github.com/spf13/viper
+- github.com/fatih/color
+
+unittest:
+- github.com/onsi/ginkgo
+- github.com/onsi/gomega
+- github.com/stretchr/testify
+
+- gin? https://github.com/gin-gonic/gin/blob/master/context.go
+

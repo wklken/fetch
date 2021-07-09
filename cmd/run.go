@@ -24,6 +24,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/fatih/color"
+
+	"github.com/gin-gonic/gin/binding"
 	"github.com/spf13/cobra"
 )
 
@@ -42,9 +45,12 @@ to quickly create a Cobra application.`,
 			fmt.Println("args required")
 			return
 		}
-		path := args[0]
+		//path := args[0]
+		for _, path := range args {
 
-		run(path)
+			run(path)
+		}
+
 		fmt.Print("done")
 	},
 }
@@ -63,7 +69,13 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+var (
+	Info = color.New(color.FgWhite).PrintfFunc()
+	Tip  = color.New(color.FgYellow).PrintfFunc()
+)
+
 func run(path string) {
+
 	v, err := config.ReadFromFile(path)
 	if err != nil {
 		fmt.Println("err:", err)
@@ -76,87 +88,244 @@ func run(path string) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	fmt.Println("allKeys", allKeys)
+	//fmt.Println("allKeys", allKeys)
 
-	fmt.Printf("the case and data: %s, %+v\n", path, c)
+	Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
 	var resp *http.Response
 	var err1 error
 	if c.Request.Method == "get" {
 		resp, err1 = http.Get(c.Request.URL)
 	}
+	// TODO: post / head / put / delete / Patch
 	//else if c.Request.Method == "post" {
 	//	resp, err1 = http.Post(c.Request.URL)
 	//}
 
 	assert.NoError(err1)
 
-	//if c.Assert.StatusCode != 0 {
-	if allKeys.Has("assert.statuscode") {
-		assert.Equal(c.Assert.StatusCode, resp.StatusCode)
-	}
-	if allKeys.Has("assert.statuscode_lt") {
-		assert.Less(resp.StatusCode, c.Assert.StatusCodeLt)
-	}
-	if allKeys.Has("assert.statuscode_lte") {
-		assert.LessOrEqual(resp.StatusCode, c.Assert.StatusCodeLte)
-	}
-	if allKeys.Has("assert.statuscode_gt") {
-		assert.Greater(resp.StatusCode, c.Assert.StatusCodeGt)
-
-	}
-	if allKeys.Has("assert.statuscode_gte") {
-		assert.GreaterOrEqual(resp.StatusCode, c.Assert.StatusCodeGte)
-
-	}
-
-	if allKeys.Has("assert.statuscode_in") {
-		assert.In(resp.StatusCode, c.Assert.StatusCodeIn)
-	}
-
-	//if c.Assert.Status != "" {
-	if allKeys.Has("assert.status") {
-		assert.Equal(strings.ToLower(c.Assert.Status), strings.ToLower(http.StatusText(resp.StatusCode)))
-	}
-
-	// TODO assert is the first or second params? the first?
-
-	// TODO: not set ? or is actually == 0, 不知道是==0, 还是没有配置unmarshall
-	if allKeys.Has("assert.contentlength") {
-		assert.Equal(c.Assert.ContentLength, resp.ContentLength)
-	}
-	if allKeys.Has("assert.contentlength_lt") {
-		assert.Less(resp.ContentLength, c.Assert.ContentLengthLt)
-
-	}
-	if allKeys.Has("assert.contentlength_lte") {
-		assert.LessOrEqual(resp.ContentLength, c.Assert.ContentLengthLte)
-	}
-	if allKeys.Has("assert.contentlength_gt") {
-		assert.Greater(resp.ContentLength, c.Assert.ContentLengthGt)
-	}
-	if allKeys.Has("assert.contentlength_gte") {
-		assert.GreaterOrEqual(resp.ContentLength, c.Assert.ContentLengthGte)
-	}
-
-	//https://golang.org/src/net/http/status.go
-
 	body, err := io.ReadAll(resp.Body)
 	assert.NoError(err)
-	assert.Equal(c.Assert.Body, string(body))
 
-	if allKeys.Has("assert.body_contains") {
-		assert.Contains(string(body), c.Assert.BodyContains)
-	}
-	if allKeys.Has("assert.body_not_contains") {
-		assert.NotContains(string(body), c.Assert.BodyNotContains)
+	// TODO:
+	//   1. POST
+	//   2. json response assert
+	//   3. content-type assert
+	//   4. latency assert
+	//   5. set timeout=x, each case?
+	//   6. `-e env.toml` support envs => can render
+
+	bodyStr := string(body)
+
+	contentType := GetContentType(resp.Header)
+
+	type Ctx struct {
+		f        assert.AssertFunc
+		element1 interface{}
+		element2 interface{}
 	}
 
-	if allKeys.Has("assert.body_startswith") {
-		assert.StartsWith(string(body), c.Assert.BodyStartsWith)
+	// TODO: how to keep the order!!!!!!
+	keyAssertFuncs := map[string]Ctx{
+		// statuscode
+		"assert.statuscode": {
+			f:        assert.Equal,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCode,
+		},
+		"assert.statuscode_lt": {
+			f:        assert.Less,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeLt,
+		},
+		"assert.statuscode_lte": {
+			f:        assert.LessOrEqual,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeLte,
+		},
+		"assert.statuscode_gt": {
+			f:        assert.Greater,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeGt,
+		},
+		"assert.statuscode_gte": {
+			f:        assert.GreaterOrEqual,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeGte,
+		},
+		"assert.statuscode_in": {
+			f:        assert.In,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeIn,
+		},
+		// status
+		"assert.status": {
+			f:        assert.Equal,
+			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+			element2: strings.ToLower(c.Assert.Status),
+		},
+		// TODO: status_in
+		"assert.contenttype": {
+			f:        assert.Equal,
+			element1: strings.ToLower(contentType),
+			element2: strings.ToLower(c.Assert.ContentType),
+		},
+		// TODO: contentType_in
+
+		// contentlength
+		"assert.contentlength": {
+			f:        assert.Equal,
+			element1: resp.ContentLength,
+			element2: c.Assert.ContentLength,
+		},
+		"assert.contentlength_lt": {
+			f:        assert.Less,
+			element1: resp.ContentLength,
+			element2: c.Assert.ContentLengthLt,
+		},
+		"assert.contentlength_lte": {
+			f:        assert.LessOrEqual,
+			element1: resp.ContentLength,
+			element2: c.Assert.ContentLengthLte,
+		},
+		"assert.contentlength_gt": {
+			f:        assert.Greater,
+			element1: resp.ContentLength,
+			element2: c.Assert.ContentLengthGt,
+		},
+		"assert.contentlength_gte": {
+			f:        assert.GreaterOrEqual,
+			element1: resp.ContentLength,
+			element2: c.Assert.ContentLengthGte,
+		},
+		// body
+		"assert.body": {
+			f:        assert.Equal,
+			element1: bodyStr,
+			element2: c.Assert.Body,
+		},
+		"assert.body_contains": {
+			f:        assert.Contains,
+			element1: bodyStr,
+			element2: c.Assert.BodyContains,
+		},
+		"assert.body_not_contains": {
+			f:        assert.NotContains,
+			element1: bodyStr,
+			element2: c.Assert.BodyNotContains,
+		},
+		"assert.body_startswith": {
+			f:        assert.StartsWith,
+			element1: bodyStr,
+			element2: c.Assert.BodyStartsWith,
+		},
+		"assert.body_endswith": {
+			f:        assert.EndsWith,
+			element1: bodyStr,
+			element2: c.Assert.BodyEndsWith,
+		},
 	}
-	if allKeys.Has("assert.body_endswith") {
-		assert.EndsWith(string(body), c.Assert.BodyEndsWith)
+
+	for key, ctx := range keyAssertFuncs {
+		if allKeys.Has(key) {
+			Info("%s: ", key)
+			ctx.f(ctx.element1, ctx.element2)
+		}
 	}
+
+	// TODO: =============================================
+
+	// parse
+	//fmt.Println("the response content type", resp.Header.Get("Content-Type"))
+	// content-type: text/html; charset=utf-8
+	// TODO: 如果是application/json, 直接转成json path? assert?
+	b := Default("post", GetContentType(resp.Header))
+	if b != nil {
+		var i map[string]interface{}
+		err = b.BindBody(body, &i)
+		assert.NoError(err)
+
+		//fmt.Println("the json body", i)
+	}
+
+	// headers
+	//resp.Proto
+	//resp.ProtoMajor
+	//resp.ProtoMinor
+
+	//contentType := resp.Header.Get("Content-type")
+	//dump, err := httputil.DumpResponse(resp, true)
+	// HTTP/1.1 200 OK
+	//\r\nContent-Length: 76
+	//\r\nContent-Type: text/plain; charset=utf-8
+	//\r\nDate: Wed, 19 Jul 1972 19:00:00 GMT
+	//\r\n\r\nGo is a general-purpose language designed with systems programming in mind."
+
+	//fmt.Println("all headers:", resp.Header)
+	//all headers: map[
+	//Access-Control-Allow-Credentials:[true]
+	//Access-Control-Allow-Origin:[*]
+	//Content-Length:[18]
+	//Content-Type:[text/html; charset=utf-8]
+	//Date:[Mon, 05 Jul 2021 15:48:57 GMT] Server:[gunicorn/19.9.0]]
+
+	//< Content-Type: text/css
+	//< Content-Length: 7832
+
+	//< x-proxy-by: SmartGate-IDC
+	//< set-cookie: x-client-ssid=17a7755884a-545e86e6b94f752cc79eafa76f816a8c6886e4b0; path=/; domain=.oa.com; HttpOnly
+	//< set-cookie: x-host-key-front=17a77558864-76daf86f1e36a8d8f09e66fe6873bd540953e430; path=/; domain=.oa.com; HttpOnly
+	//< set-cookie: x_host_key=17a7755885f-b5ac4643c31f9b89e5d10625aee04b93bdebc0df; path=/; domain=.oa.com; HttpOnly
+	//< set-cookie: x-host-key-ngn=17a7755884a-5ad277cc537abfe3a26b8ec683f670c8fa9ff0a0; path=/; domain=.oa.com; HttpOnly
+	//< x-forwarded-for: 9.146.99.128,9.19.161.39,10.14.87.133,9.218.225.9
+	//< Date: Mon, 05 Jul 2021 15:42:12 GMT
+	//< Connection: keep-alive
+	//< Vary: Accept-Encoding
+	//< Last-Modified: Sun, 25 Apr 2021 09:27:01 GMT
+	//< ETag: "608535e5-1e98"
+	//< Accept-Ranges: bytes
+	//< x-rio-seq: kqqskkfq-147822534
 
 }
+
+func Default(method, contentType string) binding.BindingBody {
+	//if method == http.MethodGet {
+	//	return binding.Form
+	//}
+
+	switch contentType {
+	case binding.MIMEJSON:
+		return binding.JSON
+	case binding.MIMEXML, binding.MIMEXML2:
+		return binding.XML
+	case binding.MIMEPROTOBUF:
+		return binding.ProtoBuf
+	case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+		return binding.MsgPack
+	case binding.MIMEYAML:
+		return binding.YAML
+		//case binding.MIMEMultipartPOSTForm:
+		//	return binding.FormMultipart
+		//default: // case MIMEPOSTForm:
+		//	return binding.Form
+	}
+	return nil
+}
+
+// from gin
+func filterFlags(content string) string {
+	for i, char := range content {
+		if char == ' ' || char == ';' {
+			return content[:i]
+		}
+	}
+	return content
+}
+
+// ContentType returns the Content-Type header of the request.
+func GetContentType(header http.Header) string {
+	return filterFlags(header.Get("Content-Type"))
+}
+
+//https://golang.org/src/net/http/status.go
