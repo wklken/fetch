@@ -28,6 +28,12 @@ type Assert struct {
 	// TODO: header
 	ContentType string
 
+	// latency
+	LatencyLt  int64 `mapstructure:"latency_lt"`
+	LatencyLte int64 `mapstructure:"latency_lte"`
+	LatencyGt  int64 `mapstructure:"latency_gt"`
+	LatencyGte int64 `mapstructure:"latency_gte"`
+
 	Body string
 
 	BodyContains    string `mapstructure:"body_contains"`

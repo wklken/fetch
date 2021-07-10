@@ -22,6 +22,38 @@ status = "OK"
 statusCode = 200
 ```
 
+```toml
+[request]
+method = "get"
+url = "http://httpbin.org/response-headers?freeform="
+[request.header]
+hello = "world"
+
+[assert]
+status = "ok"
+statusCode = 200
+statusCode_in = [400, 500]
+statusCode_lt = 100
+statusCode_lte = 100
+statusCode_gt = 500
+statusCode_gte = 500
+contentLength = 18
+contentLength_lt = 1
+contentLength_lte = 1
+contentLength_gt = 180
+contentLength_gte = 180
+body = "HTTPBIN is awesome"
+body_contains = "awesome2"
+body_not_contains = "awesome"
+body_startswith = "A"
+body_endswith = "a"
+contentType = "abc"
+latency_lt = 0
+latency_lte = 0
+latency_gt = 100
+latency_gte = 100
+```
+
 ## assertions
 
 ```toml
@@ -78,28 +110,30 @@ High:
 - timeout: 5
 
 High:
-- content-type assert
-
-High:
 - latency assert
 
 - [x] init project
 - [x] the case name? where to put that?
+- [x] assert http status/content-length/content-type
+- [x] assert latency
 
 - [ ] `-h/--help`
+- [ ] `-v` verbose, simple => debug the request and response
+- [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
+- [ ] assert json
+- [ ] invalid assert or not used assert
+- [ ] post json in toml
+- [ ] should support all request method
+- [ ] should support all request body, json/form/msgpack/zip.....
 - [ ] `bootstrap` create the raw template, like `a.hp`
 - [ ] `generate x` generate a case
 - [ ] `run` run all cases
 - [ ] `run` specific file / dir
-- [ ] `-v` verbose, simple
 - [ ] support config file, like `prod.yaml`/`test.yaml`/`dev.yaml`, `-e prod.yaml`
 - [ ] support environment vars, like `host/basic auth`,
 - [ ] render environment vars in everywhere, like `path/request section/assert section`? which template to use?
-- [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
 - [ ] how to control the execute order?
 - [ ] multiple cases in one file, like ginkgo?
-- [ ] should support all request method
-- [ ] should support all request body, json/form/msgpack/zip.....
 - [ ] how to: long-live / file download / static file
 - [ ] support retry
 - [ ] support latency assertion, less than/greater than, or between
@@ -111,11 +145,7 @@ High:
 - [ ] dns / connection reset/timeout and so on
 - [ ] case set some data, next case read it
 - [ ] support ssl
-- [ ] invalid assert or not used assert
 - [ ] case with line number
-- [ ] post json in toml
-- [ ] assert json
-- [ ] assert header application/json
 - [ ] keep alive
 - [ ] websocket
 

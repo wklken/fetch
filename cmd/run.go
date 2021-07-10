@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 
@@ -124,9 +125,13 @@ func run(path string) {
 
 	//fmt.Printf("DEBUG request: \n%s\n", strings.ReplaceAll(string(dump), "\n", ">\r\n"))
 
+	start := time.Now()
 	client := &http.Client{}
 	resp, err2 := client.Do(req)
 	assert.NoError(err2)
+
+	latency := time.Since(start).Milliseconds()
+	//fmt.Println("cost:", time.Since(start))
 
 	// dump response, for debug
 	dump, err = httputil.DumpResponse(resp, true)
@@ -234,6 +239,28 @@ func run(path string) {
 			f:        assert.GreaterOrEqual,
 			element1: resp.ContentLength,
 			element2: c.Assert.ContentLengthGte,
+		},
+
+		// latency
+		"assert.latency_lt": {
+			f:        assert.Less,
+			element1: latency,
+			element2: c.Assert.LatencyLt,
+		},
+		"assert.latency_lte": {
+			f:        assert.LessOrEqual,
+			element1: latency,
+			element2: c.Assert.LatencyLte,
+		},
+		"assert.latency_gt": {
+			f:        assert.Greater,
+			element1: latency,
+			element2: c.Assert.LatencyGt,
+		},
+		"assert.latency_gte": {
+			f:        assert.GreaterOrEqual,
+			element1: latency,
+			element2: c.Assert.LatencyGte,
 		},
 		// body
 		"assert.body": {
