@@ -4,6 +4,10 @@ description = "the description of case 04"
 [request]
 method = "get"
 url = "http://httpbin.org/response-headers?freeform="
+[request.header]
+a = "a123"
+b = "b456"
+
 
 [assert]
 status = "ok"

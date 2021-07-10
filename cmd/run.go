@@ -21,7 +21,9 @@ import (
 	"httptest/pkg/config"
 	"httptest/pkg/util"
 	"io"
+	"log"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	"github.com/fatih/color"
@@ -91,19 +93,53 @@ func run(path string) {
 	//fmt.Println("allKeys", allKeys)
 
 	Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-	//fmt.Printf("the case and data: %s, %+v\n", path, c)
+	fmt.Printf("the case and data: %s, %+v\n", path, c)
 
-	var resp *http.Response
+	var req *http.Request
+	//var resp *http.Response
 	var err1 error
 	if c.Request.Method == "get" {
-		resp, err1 = http.Get(c.Request.URL)
+		req, err1 = http.NewRequest("GET", c.Request.URL, nil)
+		//resp, err1 = http.Get(c.Request.URL)
 	}
+	if err1 != nil {
+		fmt.Println("error: make request fail ", err1)
+		return
+	}
+
+	// set header
+	if len(c.Request.Header) > 0 {
+		for k, v := range c.Request.Header {
+			req.Header.Set(k, v)
+		}
+	}
+
+	// dump request, for debug
+	dump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Printf("DEBUG request: \n%q\n", dump)
+	fmt.Printf("DEBUG request: \n%s\n", dump)
+
+	//fmt.Printf("DEBUG request: \n%s\n", strings.ReplaceAll(string(dump), "\n", ">\r\n"))
+
+	client := &http.Client{}
+	resp, err2 := client.Do(req)
+	assert.NoError(err2)
+
+	// dump response, for debug
+	dump, err = httputil.DumpResponse(resp, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Printf("DEBUG response: %q\n", dump)
+	fmt.Printf("DEBUG response: \n%s\n", dump)
+
 	// TODO: post / head / put / delete / Patch
 	//else if c.Request.Method == "post" {
 	//	resp, err1 = http.Post(c.Request.URL)
 	//}
-
-	assert.NoError(err1)
 
 	body, err := io.ReadAll(resp.Body)
 	assert.NoError(err)
