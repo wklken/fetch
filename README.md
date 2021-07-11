@@ -10,6 +10,20 @@ A command line http test tool. Maintain the cases via git and pure text
 - maintained by git
 - run fast
 
+## features
+
+- support http methods: get/post/put/delete/patch/head/options
+- assert status/statusCode/contentLength/contentType/body
+- assert latency
+- assert numberic support `_in/_lt/_lte/_gt/_gte`
+- assert string support `_contains/_not_contains/_startswith/_endswith`
+
+## TODO
+
+- [ ] support string `_not_startswith/_not_endswith`
+- [ ] env vars and render
+
+
 ## examples
 
 ```
@@ -101,29 +115,17 @@ body_endswith = "a"
 
 ## TODO
 
-
 High: DO POST, the parse the json, do assert
 - https://github.com/tidwall/gjson
 - https://github.com/oliveagle/jsonpath
-
 High:
 - timeout: 5
-
-High:
-- latency assert
-
-- [x] init project
-- [x] the case name? where to put that?
-- [x] assert http status/content-length/content-type
-- [x] assert latency
 
 - [ ] `-h/--help`
 - [ ] `-v` verbose, simple => debug the request and response
 - [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
 - [ ] assert json
 - [ ] invalid assert or not used assert
-- [ ] post json in toml
-- [ ] should support all request method
 - [ ] should support all request body, json/form/msgpack/zip.....
 - [ ] `bootstrap` create the raw template, like `a.hp`
 - [ ] `generate x` generate a case
@@ -136,7 +138,6 @@ High:
 - [ ] multiple cases in one file, like ginkgo?
 - [ ] how to: long-live / file download / static file
 - [ ] support retry
-- [ ] support latency assertion, less than/greater than, or between
 - [ ] support repeat, like run 5 times
 - [ ] support assert redirect
 - [ ] how to share the cookie between cases? claim? or default same dir

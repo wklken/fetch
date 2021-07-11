@@ -16,21 +16,17 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"httptest/pkg/assert"
+	"httptest/pkg/client"
 	"httptest/pkg/config"
 	"httptest/pkg/util"
 	"io"
-	"log"
 	"net/http"
-	"net/http/httputil"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 
-	"github.com/gin-gonic/gin/binding"
 	"github.com/spf13/cobra"
 )
 
@@ -92,96 +88,28 @@ func run(path string) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	fmt.Println("allKeys", allKeys)
+	//fmt.Println("allKeys", allKeys)
+	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
-	Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-	fmt.Printf("the case and data: %s, %+v\n", path, c)
-
-	var req *http.Request
-	//var resp *http.Response
-	var err1 error
-	switch strings.ToUpper(c.Request.Method) {
-	case http.MethodGet, http.MethodHead, http.MethodOptions:
-		req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, nil)
-	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
-		if allKeys.Has("request.body") {
-			body := bytes.NewBufferString(c.Request.Body)
-			req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, body)
-		} else {
-			req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, nil)
-		}
-	}
-	//if c.Request.Method == "get" {
-	//	req, err1 = http.NewRequest("GET", c.Request.URL, nil)
-	//	//resp, err1 = http.Get(c.Request.URL)
-	//} else if c.Request.Method == "post" {
-	//	req, err1 = http.NewRequest("POST", c.Request.URL, bytes.NewBufferString(c.Request.Body))
-	//} else if c.Request.Method == "put" {
-	//	req, err1 = http.NewRequest("PUT", c.Request.URL, bytes.NewBufferString(c.Request.Body))
-	//} else if c.Request.Method == "patch" {
-	//	req, err1 = http.NewRequest("PATCH", c.Request.URL, bytes.NewBufferString(c.Request.Body))
-	//}
-	if err1 != nil {
-		fmt.Println("error: make request fail ", err1)
-		return
-	}
-
-	// set header
-	if len(c.Request.Header) > 0 {
-		for k, v := range c.Request.Header {
-			req.Header.Set(k, v)
-		}
-	}
-
-	// dump request, for debug
-	dump, err := httputil.DumpRequestOut(req, true)
+	resp, latency, err := client.Send(
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, false)
 	if err != nil {
-		log.Fatal(err)
+		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+		fmt.Println(err)
 	}
-	//fmt.Printf("DEBUG request: \n%q\n", dump)
-	fmt.Printf("DEBUG request: \n%s\n", dump)
 
-	//fmt.Printf("DEBUG request: \n%s\n", strings.ReplaceAll(string(dump), "\n", ">\r\n"))
+	Tip("Run Case: %s | %s | [%s %s] | %dms\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
 
-	start := time.Now()
-	client := &http.Client{}
-	resp, err2 := client.Do(req)
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-	//assert.NoError(err2)
+	doAssertions(allKeys, resp, c, latency)
+}
 
-	latency := time.Since(start).Milliseconds()
-	//fmt.Println("cost:", time.Since(start))
-
-	// dump response, for debug
-	dump, err = httputil.DumpResponse(resp, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Printf("DEBUG response: %q\n", dump)
-	fmt.Printf("DEBUG response: \n%s\n", dump)
-
-	// TODO: post / head / put / delete / Patch
-	//else if c.Request.Method == "post" {
-	//	resp, err1 = http.Post(c.Request.URL)
-	//}
-
+func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, latency int64) {
 	body, err := io.ReadAll(resp.Body)
+	// TODO: handle err
 	assert.NoError(err)
 
-	// TODO:
-	//   1. POST/PUT/PATCH with body
-	//   2. DELETE
-
-	// TODO:
-	//   3. json response assert
-	//   6. `-e env.toml` support envs => can render
-	//   5. set timeout=x, each case?
-
 	bodyStr := string(body)
-
-	contentType := GetContentType(resp.Header)
+	contentType := client.GetContentType(resp.Header)
 
 	type Ctx struct {
 		f        assert.AssertFunc
@@ -318,6 +246,10 @@ func run(path string) {
 			ctx.f(ctx.element1, ctx.element2)
 		}
 	}
+	// TODO:
+	//   3. json response assert
+	//   6. `-e env.toml` support envs => can render
+	//   5. set timeout=x, each case?
 
 	// TODO: =============================================
 
@@ -373,44 +305,3 @@ func run(path string) {
 	//< x-rio-seq: kqqskkfq-147822534
 
 }
-
-func Default(method, contentType string) binding.BindingBody {
-	//if method == http.MethodGet {
-	//	return binding.Form
-	//}
-
-	switch contentType {
-	case binding.MIMEJSON:
-		return binding.JSON
-	case binding.MIMEXML, binding.MIMEXML2:
-		return binding.XML
-	case binding.MIMEPROTOBUF:
-		return binding.ProtoBuf
-	case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
-		return binding.MsgPack
-	case binding.MIMEYAML:
-		return binding.YAML
-		//case binding.MIMEMultipartPOSTForm:
-		//	return binding.FormMultipart
-		//default: // case MIMEPOSTForm:
-		//	return binding.Form
-	}
-	return nil
-}
-
-// from gin
-func filterFlags(content string) string {
-	for i, char := range content {
-		if char == ' ' || char == ';' {
-			return content[:i]
-		}
-	}
-	return content
-}
-
-// ContentType returns the Content-Type header of the request.
-func GetContentType(header http.Header) string {
-	return filterFlags(header.Get("Content-Type"))
-}
-
-//https://golang.org/src/net/http/status.go
