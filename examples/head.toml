@@ -1,0 +1,13 @@
+title = "http method head"
+description = "http method head"
+
+[request]
+method = "head"
+url = "http://httpbin.org/get"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"

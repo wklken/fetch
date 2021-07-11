@@ -1,0 +1,10 @@
+title = "simple"
+description = "a simple example"
+
+[request]
+method = "get"
+url = "http://httpbin.org/get"
+
+[assert]
+status = "OK"
+statusCode = 200

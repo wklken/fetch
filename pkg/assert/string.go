@@ -26,6 +26,7 @@ func test(s, i interface{}, testFunc stringTestFunc) bool {
 
 func StartsWith(s, prefix interface{}) bool {
 	if test(s, prefix, strings.HasPrefix) {
+		OK()
 		return true
 	}
 
@@ -35,6 +36,7 @@ func StartsWith(s, prefix interface{}) bool {
 
 func EndsWith(s, suffix interface{}) bool {
 	if test(s, suffix, strings.HasPrefix) {
+		OK()
 		return true
 	}
 

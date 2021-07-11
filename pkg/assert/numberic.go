@@ -24,6 +24,7 @@ func Greater(e1 interface{}, e2 interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 
@@ -46,6 +47,7 @@ func GreaterOrEqual(e1 interface{}, e2 interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 
@@ -68,6 +70,7 @@ func Less(e1 interface{}, e2 interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 
@@ -90,6 +93,7 @@ func LessOrEqual(e1 interface{}, e2 interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 

@@ -3,6 +3,7 @@ package config
 type Request struct {
 	Method string
 	URL    string
+	Body   string
 
 	Header map[string]string
 }

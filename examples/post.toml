@@ -1,0 +1,20 @@
+title = "http method post"
+description = "http method post"
+
+[request]
+method = "post"
+url = "http://httpbin.org/post"
+body = """
+{
+    "hello": "world"
+}
+"""
+[request.header]
+Content-Type = "application/json"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"

@@ -1,0 +1,21 @@
+title = "http method delete"
+description = "http method delete"
+
+[request]
+method = "delete"
+url = "http://httpbin.org/delete"
+body = """
+{
+   "hello": "world"
+}
+"""
+[request.header]
+Content-Type = "application/json"
+Accept = "application/json"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"

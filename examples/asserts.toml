@@ -1,12 +1,11 @@
-title = "case 04"
-description = "the description of case 04"
+title = "asserts"
+description = "all supported assertions"
 
 [request]
 method = "get"
-url = "http://httpbin.org/response-headers?freeform="
+url = "http://httpbin.org/get"
 [request.header]
-a = "a123"
-b = "b456"
+hello = "world"
 
 
 [assert]
@@ -32,4 +31,3 @@ latency_lt = 0
 latency_lte = 0
 latency_gt = 100
 latency_gte = 100
-

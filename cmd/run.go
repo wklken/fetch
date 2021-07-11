@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"httptest/pkg/assert"
 	"httptest/pkg/config"
@@ -54,7 +55,7 @@ to quickly create a Cobra application.`,
 			run(path)
 		}
 
-		fmt.Print("done")
+		fmt.Println("done")
 	},
 }
 
@@ -91,7 +92,7 @@ func run(path string) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	//fmt.Println("allKeys", allKeys)
+	fmt.Println("allKeys", allKeys)
 
 	Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 	fmt.Printf("the case and data: %s, %+v\n", path, c)
@@ -99,10 +100,27 @@ func run(path string) {
 	var req *http.Request
 	//var resp *http.Response
 	var err1 error
-	if c.Request.Method == "get" {
-		req, err1 = http.NewRequest("GET", c.Request.URL, nil)
-		//resp, err1 = http.Get(c.Request.URL)
+	switch strings.ToUpper(c.Request.Method) {
+	case http.MethodGet, http.MethodHead, http.MethodOptions:
+		req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, nil)
+	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+		if allKeys.Has("request.body") {
+			body := bytes.NewBufferString(c.Request.Body)
+			req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, body)
+		} else {
+			req, err1 = http.NewRequest(strings.ToUpper(c.Request.Method), c.Request.URL, nil)
+		}
 	}
+	//if c.Request.Method == "get" {
+	//	req, err1 = http.NewRequest("GET", c.Request.URL, nil)
+	//	//resp, err1 = http.Get(c.Request.URL)
+	//} else if c.Request.Method == "post" {
+	//	req, err1 = http.NewRequest("POST", c.Request.URL, bytes.NewBufferString(c.Request.Body))
+	//} else if c.Request.Method == "put" {
+	//	req, err1 = http.NewRequest("PUT", c.Request.URL, bytes.NewBufferString(c.Request.Body))
+	//} else if c.Request.Method == "patch" {
+	//	req, err1 = http.NewRequest("PATCH", c.Request.URL, bytes.NewBufferString(c.Request.Body))
+	//}
 	if err1 != nil {
 		fmt.Println("error: make request fail ", err1)
 		return
@@ -128,7 +146,10 @@ func run(path string) {
 	start := time.Now()
 	client := &http.Client{}
 	resp, err2 := client.Do(req)
-	assert.NoError(err2)
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	//assert.NoError(err2)
 
 	latency := time.Since(start).Milliseconds()
 	//fmt.Println("cost:", time.Since(start))
@@ -150,12 +171,13 @@ func run(path string) {
 	assert.NoError(err)
 
 	// TODO:
-	//   1. POST
-	//   2. json response assert
-	//   3. content-type assert
-	//   4. latency assert
-	//   5. set timeout=x, each case?
+	//   1. POST/PUT/PATCH with body
+	//   2. DELETE
+
+	// TODO:
+	//   3. json response assert
 	//   6. `-e env.toml` support envs => can render
+	//   5. set timeout=x, each case?
 
 	bodyStr := string(body)
 
@@ -303,14 +325,14 @@ func run(path string) {
 	//fmt.Println("the response content type", resp.Header.Get("Content-Type"))
 	// content-type: text/html; charset=utf-8
 	// TODO: 如果是application/json, 直接转成json path? assert?
-	b := Default("post", GetContentType(resp.Header))
-	if b != nil {
-		var i map[string]interface{}
-		err = b.BindBody(body, &i)
-		assert.NoError(err)
-
-		//fmt.Println("the json body", i)
-	}
+	//b := Default("post", GetContentType(resp.Header))
+	//if b != nil {
+	//	var i map[string]interface{}
+	//	err = b.BindBody(body, &i)
+	//	assert.NoError(err)
+	//
+	//	//fmt.Println("the json body", i)
+	//}
 
 	// headers
 	//resp.Proto

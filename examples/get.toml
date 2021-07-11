@@ -1,0 +1,13 @@
+title = "http method get"
+description = "http method get"
+
+[request]
+method = "get"
+url = "http://httpbin.org/get?a=1&b=2"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"

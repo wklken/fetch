@@ -18,6 +18,7 @@ func Contains(s, contains interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 
@@ -32,6 +33,7 @@ func NotContains(s, contains interface{}) bool {
 		return false
 	}
 
+	OK()
 	return true
 }
 

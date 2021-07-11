@@ -15,7 +15,7 @@ A command line http test tool. Maintain the cases via git and pure text
 ```
 [request]
 method = "get"
-url = "http://httpbin.org"
+url = "http://httpbin.org/get"
 
 [assert]
 status = "OK"
@@ -25,7 +25,7 @@ statusCode = 200
 ```toml
 [request]
 method = "get"
-url = "http://httpbin.org/response-headers?freeform="
+url = "http://httpbin.org/get"
 [request.header]
 hello = "world"
 
