@@ -48,7 +48,18 @@ func Send(
 		if err != nil {
 			fmt.Printf("DEBUG request: dump err %s\n", err)
 		} else {
-			fmt.Printf("DEBUG request: \n%s\n", dump)
+			//s := string(dump)
+			//
+			//parts := strings.Split(s, "\n")
+			//newLines := make([]string, 0, len(parts))
+			//for _, p := range parts {
+			//	newLines = append(newLines, fmt.Sprintf("> %s", p))
+			//}
+			//
+			////fmt.Printf("DEBUG request: \n%s\n", dump)
+			//fmt.Printf("DEBUG request: \n%s\n", strings.Join(newLines, "\n"))
+
+			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "> "))
 		}
 	}
 	//fmt.Printf("DEBUG request: \n%s\n", strings.ReplaceAll(string(dump), "\n", ">\r\n"))
@@ -70,7 +81,8 @@ func Send(
 		if err != nil {
 			fmt.Printf("DEBUG response: dump err %s\n", err)
 		} else {
-			fmt.Printf("DEBUG response: \n%s\n", dump)
+			//fmt.Printf("DEBUG response: \n%s\n", dump)
+			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "< "))
 		}
 	}
 

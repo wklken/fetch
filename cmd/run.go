@@ -92,7 +92,7 @@ func run(path string) {
 	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, false)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, true)
 	if err != nil {
 		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 		fmt.Println(err)
@@ -246,12 +246,12 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 			ctx.f(ctx.element1, ctx.element2)
 		}
 	}
-	// TODO:
-	//   3. json response assert
-	//   6. `-e env.toml` support envs => can render
-	//   5. set timeout=x, each case?
 
 	// TODO: =============================================
+	//  1. response header assertions
+	//  2. json response assert
+	//  3. -e env.toml, support env vars and do render
+	//  4. set timeout=x, default or each case, fail if timeout
 
 	// parse
 	//fmt.Println("the response content type", resp.Header.Get("Content-Type"))
@@ -303,5 +303,4 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	//< ETag: "608535e5-1e98"
 	//< Accept-Ranges: bytes
 	//< x-rio-seq: kqqskkfq-147822534
-
 }
