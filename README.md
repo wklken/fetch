@@ -2,17 +2,30 @@
 
 A command line http test tool. Maintain the cases via git and pure text
 
+After create the data in backend, we want to test the api via http request and assert the response, the postman & newman is easy for do this.
 
+But when you get more than maybe 50+ cases, the exported json share in your teams, is huge, maybe more than 10000 lines, it's hard to maintain in the future.
 
-## target
+So, why not make this simpler?
 
 - all in text(.toml/.yaml/.json)
 - easy to create/modify/copy and delete
 - maintained by git
 - run fast
 
-## features
+**note: not ready for production**
 
+(BTW: I have a 10-month-old baby to take care of, so, only a few hours a week on this project)
+
+## screenshots
+
+
+![](./examples/screenshots/run.jpg)
+
+![](./examples/screenshots/run_with_debug.jpg)
+
+
+## features
 
 - define the case via [toml](https://toml.io/en/), yaml/json also supported
 - support http methods: get/post/put/delete/patch/head/options
@@ -21,12 +34,6 @@ A command line http test tool. Maintain the cases via git and pure text
 - assert numberic support `_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
-
-## TODO
-
-- [ ] support string `_not_startswith/_not_endswith`
-- [ ] env vars and render
-
 
 ## examples
 
@@ -158,74 +165,33 @@ body_endswith = "a"
 - [examples send request to httpbin](http://httpbin.org/)
 - [json assertions via jmespath](https://jmespath.org/tutorial.html)
 
+## TODO
+
+- [ ] support string `_not_startswith/_not_endswith`
+- [ ] supoort status_in/contentType_in
+- [ ] `-e env.toml`, env vars and render everywhere
+- [ ] set timeout each case or in global
+- [ ] support trigger: stop run the case if fail, or continue
+- [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
+- [ ] support `-h`
+- [ ] support request body type, json/form/msgpack/zip.....
+- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
+- [ ] sub-command: `generate x` generate a case, from tpl
+- [ ] how to run in order
+- [ ] how to run in parallel
+- [ ] multiple cases in one file, like ginkgo?
+- [ ] how to test: long-live / file download / static file / websocket / keep-alive
+- [ ] feature: retry
+- [ ] feature: repeat
+- [ ] assert redirect
+- [ ] work with cookies, how to share between cases?
+- [ ] display: show stats
+- [ ] error: dns / connection reset/timeout and so on
+- [ ] feature: ssl / https
+- [ ] display: file / line number to show which case fail
+- [ ] feature: data share between cases
 
 ## inspired by
 
 - testify/assert https://github.com/stretchr/testify/tree/master/assert (use this module, and copied some un-exported codes from it, follow the license)
 - postman & newman https://www.npmjs.com/package/newman
-
-----------------------------------------
-
-## packages
-
-- http client: https://golang.org/src/net/http/request.go
-- config file and cases: toml? https://github.com/pelletier/go-toml
-- assert: use testify data compare? https://github.com/stretchr/testify/blob/master/assert/assertions.go
-
-- config file and cases: toml? https://github.com/pelletier/go-toml => use viper to support most config file types
-
-## how it works
-
-
-## TODO
-
-High: DO POST, the parse the json, do assert
-- https://github.com/tidwall/gjson
-- https://github.com/oliveagle/jsonpath
-High:
-- timeout: 5
-
-- [ ] `-h/--help`
-- [ ] `-v` verbose, simple => debug the request and response
-- [ ] `-vv` verbose, detail. file/case? title/description/assert lint/why fail
-- [ ] assert json
-- [ ] invalid assert or not used assert
-- [ ] should support all request body, json/form/msgpack/zip.....
-- [ ] `bootstrap` create the raw template, like `a.hp`
-- [ ] `generate x` generate a case
-- [ ] `run` run all cases
-- [ ] `run` specific file / dir
-- [ ] support config file, like `prod.yaml`/`test.yaml`/`dev.yaml`, `-e prod.yaml`
-- [ ] support environment vars, like `host/basic auth`,
-- [ ] render environment vars in everywhere, like `path/request section/assert section`? which template to use?
-- [ ] how to control the execute order?
-- [ ] multiple cases in one file, like ginkgo?
-- [ ] how to: long-live / file download / static file
-- [ ] support retry
-- [ ] support repeat, like run 5 times
-- [ ] support assert redirect
-- [ ] how to share the cookie between cases? claim? or default same dir
-- [ ] run in parallel
-- [ ] output stats
-- [ ] dns / connection reset/timeout and so on
-- [ ] case set some data, next case read it
-- [ ] support ssl
-- [ ] case with line number
-- [ ] keep alive
-- [ ] websocket
-
-
-## go mod
-
-command line:
-- github.com/spf13/cobra
-- github.com/spf13/viper
-- github.com/fatih/color
-
-unittest:
-- github.com/onsi/ginkgo
-- github.com/onsi/gomega
-- github.com/stretchr/testify
-
-- gin? https://github.com/gin-gonic/gin/blob/master/context.go
-

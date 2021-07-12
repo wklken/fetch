@@ -18,3 +18,4 @@ vendor/
 .idea/
 httptest
 .coverage.cov
+.DS_Store
