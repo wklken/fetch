@@ -17,17 +17,23 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"reflect"
+	"strings"
+
+	"github.com/jmespath/go-jmespath"
+
+	"github.com/gin-gonic/gin/binding"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
+
 	"httptest/pkg/assert"
 	"httptest/pkg/client"
 	"httptest/pkg/config"
 	"httptest/pkg/util"
-	"io"
-	"net/http"
-	"strings"
-
-	"github.com/fatih/color"
-
-	"github.com/spf13/cobra"
 )
 
 // runCmd represents the run command
@@ -51,7 +57,7 @@ to quickly create a Cobra application.`,
 			run(path)
 		}
 
-		fmt.Println("done")
+		//fmt.Println("done")
 	},
 }
 
@@ -74,7 +80,14 @@ var (
 	Tip  = color.New(color.FgYellow).PrintfFunc()
 )
 
+const (
+	DebugEnvName = "HTTPTEST_DEBUG"
+)
+
 func run(path string) {
+
+	//fmt.Println(os.Getenv(DebugEnvName), strings.ToUpper(os.Getenv(DebugEnvName)))
+	debug := strings.ToLower(os.Getenv(DebugEnvName)) == "true"
 
 	v, err := config.ReadFromFile(path)
 	if err != nil {
@@ -92,7 +105,7 @@ func run(path string) {
 	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, true)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, debug)
 	if err != nil {
 		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 		fmt.Println(err)
@@ -243,64 +256,61 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	for key, ctx := range keyAssertFuncs {
 		if allKeys.Has(key) {
 			Info("%s: ", key)
+			// TODO: break or not?
 			ctx.f(ctx.element1, ctx.element2)
 		}
 	}
 
+	var jsonData interface{}
+	if contentType == binding.MIMEJSON {
+		err = binding.JSON.BindBody(body, &jsonData)
+		if err != nil {
+			// TODO
+			fmt.Println("binding.json fail", err)
+			// ?
+			return
+		}
+	}
+
+	if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
+		doJsonAssertions(jsonData, c.Assert.Json)
+	}
+
+	//   6. `-e env.toml` support envs => can render
+	//   5. set timeout=x, each case?
+
 	// TODO: =============================================
-	//  1. response header assertions
-	//  2. json response assert
-	//  3. -e env.toml, support env vars and do render
-	//  4. set timeout=x, default or each case, fail if timeout
+}
 
-	// parse
-	//fmt.Println("the response content type", resp.Header.Get("Content-Type"))
-	// content-type: text/html; charset=utf-8
-	// TODO: 如果是application/json, 直接转成json path? assert?
-	//b := Default("post", GetContentType(resp.Header))
-	//if b != nil {
-	//	var i map[string]interface{}
-	//	err = b.BindBody(body, &i)
-	//	assert.NoError(err)
-	//
-	//	//fmt.Println("the json body", i)
-	//}
+func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) {
+	for _, dj := range jsons {
+		path := dj.Path
+		expectedValue := dj.Value
+		Info("assert.json.%s: ", path)
 
-	// headers
-	//resp.Proto
-	//resp.ProtoMajor
-	//resp.ProtoMinor
+		if jsonData == nil {
+			assert.Equal(nil, expectedValue)
+			continue
+		}
 
-	//contentType := resp.Header.Get("Content-type")
-	//dump, err := httputil.DumpResponse(resp, true)
-	// HTTP/1.1 200 OK
-	//\r\nContent-Length: 76
-	//\r\nContent-Type: text/plain; charset=utf-8
-	//\r\nDate: Wed, 19 Jul 1972 19:00:00 GMT
-	//\r\n\r\nGo is a general-purpose language designed with systems programming in mind."
+		actualValue, err := jmespath.Search(path, jsonData)
+		if err != nil {
+			assert.Fail("search json data fail, path=%s, expected=%s\n", err, path, expectedValue)
+		} else {
 
-	//fmt.Println("all headers:", resp.Header)
-	//all headers: map[
-	//Access-Control-Allow-Credentials:[true]
-	//Access-Control-Allow-Origin:[*]
-	//Content-Length:[18]
-	//Content-Type:[text/html; charset=utf-8]
-	//Date:[Mon, 05 Jul 2021 15:48:57 GMT] Server:[gunicorn/19.9.0]]
+			//fmt.Printf("%T, %T", actualValue, expectedValue)
+			// make float64 compare with int64
+			if reflect.TypeOf(actualValue).Kind() == reflect.Float64 && reflect.TypeOf(expectedValue).Kind() == reflect.Int64 {
+				actualValue = int64(actualValue.(float64))
+			}
 
-	//< Content-Type: text/css
-	//< Content-Length: 7832
+			// not working there
+			//#[[assert.json]]
+			//#path = 'json.array[0:3]'
+			//#value =  [1, 2, 3]
 
-	//< x-proxy-by: SmartGate-IDC
-	//< set-cookie: x-client-ssid=17a7755884a-545e86e6b94f752cc79eafa76f816a8c6886e4b0; path=/; domain=.oa.com; HttpOnly
-	//< set-cookie: x-host-key-front=17a77558864-76daf86f1e36a8d8f09e66fe6873bd540953e430; path=/; domain=.oa.com; HttpOnly
-	//< set-cookie: x_host_key=17a7755885f-b5ac4643c31f9b89e5d10625aee04b93bdebc0df; path=/; domain=.oa.com; HttpOnly
-	//< set-cookie: x-host-key-ngn=17a7755884a-5ad277cc537abfe3a26b8ec683f670c8fa9ff0a0; path=/; domain=.oa.com; HttpOnly
-	//< x-forwarded-for: 9.146.99.128,9.19.161.39,10.14.87.133,9.218.225.9
-	//< Date: Mon, 05 Jul 2021 15:42:12 GMT
-	//< Connection: keep-alive
-	//< Vary: Accept-Encoding
-	//< Last-Modified: Sun, 25 Apr 2021 09:27:01 GMT
-	//< ETag: "608535e5-1e98"
-	//< Accept-Ranges: bytes
-	//< x-rio-seq: kqqskkfq-147822534
+			assert.Equal(actualValue, expectedValue)
+		}
+	}
+
 }

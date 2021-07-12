@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -20,12 +19,18 @@ func Send(
 
 	var req *http.Request
 
+	// TODO: get params => from url + params(append)
+	//params := make(url.Values)
+	//params.Add("key1", "value1")
+	//params.Add("key2", "value2")
+	//req.URL.RawQuery = params.Encode()
+
 	switch httpMethod {
 	case http.MethodGet, http.MethodHead, http.MethodOptions:
 		req, err = http.NewRequest(httpMethod, url, nil)
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		if hasBody {
-			req, err = http.NewRequest(httpMethod, url, bytes.NewBufferString(body))
+			req, err = http.NewRequest(httpMethod, url, strings.NewReader(body))
 		} else {
 			req, err = http.NewRequest(httpMethod, url, nil)
 		}
@@ -48,17 +53,6 @@ func Send(
 		if err != nil {
 			fmt.Printf("DEBUG request: dump err %s\n", err)
 		} else {
-			//s := string(dump)
-			//
-			//parts := strings.Split(s, "\n")
-			//newLines := make([]string, 0, len(parts))
-			//for _, p := range parts {
-			//	newLines = append(newLines, fmt.Sprintf("> %s", p))
-			//}
-			//
-			////fmt.Printf("DEBUG request: \n%s\n", dump)
-			//fmt.Printf("DEBUG request: \n%s\n", strings.Join(newLines, "\n"))
-
 			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "> "))
 		}
 	}
@@ -81,7 +75,6 @@ func Send(
 		if err != nil {
 			fmt.Printf("DEBUG response: dump err %s\n", err)
 		} else {
-			//fmt.Printf("DEBUG response: \n%s\n", dump)
 			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "< "))
 		}
 	}

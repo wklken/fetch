@@ -42,6 +42,8 @@ type Assert struct {
 	BodyStartsWith  string `mapstructure:"body_startswith"`
 	BodyEndsWith    string `mapstructure:"body_endswith"`
 
+	//Json []map[string]interface{} `mapstructure:"json"`
+	Json []AssertJson `mapstructure:"json"`
 	// TODO: json body assert?
 }
 
@@ -51,4 +53,9 @@ type Case struct {
 
 	Request Request
 	Assert  Assert
+}
+
+type AssertJson struct {
+	Path  string
+	Value interface{}
 }

@@ -2,15 +2,15 @@ package config
 
 import (
 	"errors"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/viper"
 	//"path/filepath"
 )
 
-func getFileExt(path string)  string{
+func getFileExt(path string) string {
 	ext := filepath.Ext(path)
 	if len(ext) > 1 {
 		return ext[1:]
@@ -37,14 +37,12 @@ func getConfigType(path string) (string, error) {
 //}
 //viper.SetConfigType(fileType)
 
-
 func ReadFromFile(path string) (v *viper.Viper, err error) {
 	var reader *os.File
 	reader, err = os.Open(path)
 	if err != nil {
 		return
 	}
-
 
 	//fmt.Println("path:", path)
 	//

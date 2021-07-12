@@ -3,6 +3,7 @@
 A command line http test tool. Maintain the cases via git and pure text
 
 
+
 ## target
 
 - all in text(.toml/.yaml/.json)
@@ -12,11 +13,14 @@ A command line http test tool. Maintain the cases via git and pure text
 
 ## features
 
+
+- define the case via [toml](https://toml.io/en/), yaml/json also supported
 - support http methods: get/post/put/delete/patch/head/options
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
 - assert numberic support `_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
+- assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
 
 ## TODO
 
@@ -25,6 +29,8 @@ A command line http test tool. Maintain the cases via git and pure text
 
 
 ## examples
+
+simplest
 
 ```
 [request]
@@ -35,6 +41,8 @@ url = "http://httpbin.org/get"
 status = "OK"
 statusCode = 200
 ```
+
+full normal assertions
 
 ```toml
 [request]
@@ -68,6 +76,55 @@ latency_gt = 100
 latency_gte = 100
 ```
 
+json assertions
+
+```toml
+[request]
+method = "post"
+url = "http://httpbin.org/post"
+body = """
+{
+    "hello": "world",
+    "array": [1, 2, 3, 4]
+}
+"""
+[request.header]
+Content-Type = "application/json"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"
+
+[[assert.json]]
+path = "headers.Host"
+value =  "httpbin.org"
+
+[[assert.json]]
+# path = "headers.\"Accept-Encoding\""
+path = 'headers."Accept-Encoding"'
+value =  "gzip"
+
+[[assert.json]]
+path = 'json.array[0]'
+value =  1
+
+[[assert.json]]
+path = 'json.hello'
+value =  "world"
+
+[[assert.json]]
+path = '*.hello'
+value =  ["world"]
+
+[[assert.json]]
+path = "length(json.array)"
+value = 4
+```
+
+
 ## assertions
 
 ```toml
@@ -94,6 +151,13 @@ body_not_contains = "awesome"
 body_startswith = "A"
 body_endswith = "a"
 ```
+
+## dependency
+
+- [default config file: toml](https://toml.io/en/)
+- [examples send request to httpbin](http://httpbin.org/)
+- [json assertions via jmespath](https://jmespath.org/tutorial.html)
+
 
 ## inspired by
 
