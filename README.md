@@ -40,7 +40,7 @@ So, why not make this simpler?
 
 simplest
 
-```
+```toml
 [request]
 method = "get"
 url = "http://httpbin.org/get"
