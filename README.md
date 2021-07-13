@@ -157,6 +157,7 @@ value = 4
 - [ ] support request body type, json/form/msgpack/zip.....
 - [ ] supoort status_in/contentType_in
 - [ ] feature: ssl / https
+- [ ] json file as body, like `curl @a.json`
 - [ ] work with cookies, how to share between cases?
 - [ ] display: file / line number to show which case fail
 - [ ] error: dns / connection reset/timeout and so on
