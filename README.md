@@ -60,6 +60,7 @@ url = "http://httpbin.org/get"
 hello = "world"
 
 [assert]
+# status
 status = "ok"
 statusCode = 200
 statusCode_in = [400, 500]
@@ -67,17 +68,27 @@ statusCode_lt = 100
 statusCode_lte = 100
 statusCode_gt = 500
 statusCode_gte = 500
+
+# content-length
 contentLength = 18
 contentLength_lt = 1
 contentLength_lte = 1
 contentLength_gt = 180
 contentLength_gte = 180
+
+# content-type
+contentType = "abc"
+
+# body
 body = "HTTPBIN is awesome"
 body_contains = "awesome2"
 body_not_contains = "awesome"
 body_startswith = "A"
 body_endswith = "a"
-contentType = "abc"
+body_not_startswith = "{"
+body_not_endswith = "}"
+
+# latency
 latency_lt = 0
 latency_lte = 0
 latency_gt = 100
@@ -132,34 +143,6 @@ path = "length(json.array)"
 value = 4
 ```
 
-
-## assertions
-
-```toml
-# status
-status = "ok"
-statusCode = 200
-statusCode_in = [400, 500]
-statusCode_lt = 100
-statusCode_lte = 100
-statusCode_gt = 500
-statusCode_gte = 500
-
-# content-length
-contentLength = 18
-contentLength_lt = 1
-contentLength_lte = 1
-contentLength_gt = 180
-contentLength_gte = 180
-
-# body
-body = "HTTPBIN is awesome"
-body_contains = "awesome2"
-body_not_contains = "awesome"
-body_startswith = "A"
-body_endswith = "a"
-```
-
 ## dependency
 
 - [default config file: toml](https://toml.io/en/)
@@ -168,28 +151,27 @@ body_endswith = "a"
 
 ## TODO
 
-- [ ] support string `_not_startswith/_not_endswith`
-- [ ] supoort status_in/contentType_in
 - [ ] `-e env.toml`, env vars and render everywhere
-- [ ] set timeout each case or in global
-- [ ] support trigger: stop run the case if fail, or continue
 - [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
-- [ ] support `-h`
+- [ ] support trigger: stop run the case if fail, or continue
 - [ ] support request body type, json/form/msgpack/zip.....
-- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
-- [ ] sub-command: `generate x` generate a case, from tpl
+- [ ] supoort status_in/contentType_in
+- [ ] feature: ssl / https
+- [ ] work with cookies, how to share between cases?
+- [ ] display: file / line number to show which case fail
+- [ ] error: dns / connection reset/timeout and so on
+- [ ] feature: data share between cases
 - [ ] how to run in order
 - [ ] how to run in parallel
+- [ ] set timeout each case or in global
+- [ ] support `-h`
+- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
+- [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] multiple cases in one file, like ginkgo?
-- [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] feature: retry
 - [ ] feature: repeat
 - [ ] assert redirect
-- [ ] work with cookies, how to share between cases?
-- [ ] error: dns / connection reset/timeout and so on
-- [ ] feature: ssl / https
-- [ ] display: file / line number to show which case fail
-- [ ] feature: data share between cases
+- [ ] how to test: long-live / file download / static file / websocket / keep-alive
 
 ## inspired by
 

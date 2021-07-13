@@ -9,6 +9,7 @@ hello = "world"
 
 
 [assert]
+# status
 status = "ok"
 statusCode = 200
 statusCode_in = [400, 500]
@@ -16,17 +17,27 @@ statusCode_lt = 100
 statusCode_lte = 100
 statusCode_gt = 500
 statusCode_gte = 500
+
+# content-length
 contentLength = 18
 contentLength_lt = 1
 contentLength_lte = 1
 contentLength_gt = 180
 contentLength_gte = 180
+
+# content-type
+contentType = "abc"
+
+# body
 body = "HTTPBIN is awesome"
 body_contains = "awesome2"
 body_not_contains = "awesome"
 body_startswith = "A"
 body_endswith = "a"
-contentType = "abc"
+body_not_startswith = "{"
+body_not_endswith = "}"
+
+# latency
 latency_lt = 0
 latency_lte = 0
 latency_gt = 100

@@ -17,7 +17,7 @@ func test(s, i interface{}, testFunc stringTestFunc) bool {
 		return false
 	}
 
-	if sType.Kind() == reflect.String || iType.Kind() == reflect.String {
+	if sType.Kind() != reflect.String || iType.Kind() != reflect.String {
 		return false
 	}
 
@@ -35,11 +35,31 @@ func StartsWith(s, prefix interface{}) bool {
 }
 
 func EndsWith(s, suffix interface{}) bool {
-	if test(s, suffix, strings.HasPrefix) {
+	if test(s, suffix, strings.HasSuffix) {
 		OK()
 		return true
 	}
 
 	Fail("FAIL: endswith, string=%v, suffix=%v\n", s, suffix)
 	return false
+}
+
+func NotStartsWith(s, prefix interface{}) bool {
+	if test(s, prefix, strings.HasPrefix) {
+		Fail("FAIL: not_startswith, string=%v, prefix=%v\n", s, prefix)
+		return false
+	}
+
+	OK()
+	return true
+}
+
+func NotEndsWith(s, suffix interface{}) bool {
+	if test(s, suffix, strings.HasSuffix) {
+		Fail("FAIL: not_endswith, string=%v, suffix=%v\n", s, suffix)
+		return false
+	}
+
+	OK()
+	return true
 }

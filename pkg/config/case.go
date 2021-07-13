@@ -11,8 +11,6 @@ type Request struct {
 type Assert struct {
 	Status string
 
-	StatusIn []string `mapstructure:"status_in"`
-
 	StatusCode    int
 	StatusCodeIn  []int `mapstructure:"statusCode_in"`
 	StatusCodeLt  int   `mapstructure:"statusCode_lt"`
@@ -26,8 +24,11 @@ type Assert struct {
 	ContentLengthGt  int64 `mapstructure:"contentLength_gt"`
 	ContentLengthGte int64 `mapstructure:"contentLength_gte"`
 
-	// TODO: header
 	ContentType string
+
+	// TODO
+	StatusIn      []string `mapstructure:"status_in"`
+	ContentTypeIn []string `mapstructure:"contentType_in"`
 
 	// latency
 	LatencyLt  int64 `mapstructure:"latency_lt"`
@@ -37,14 +38,14 @@ type Assert struct {
 
 	Body string
 
-	BodyContains    string `mapstructure:"body_contains"`
-	BodyNotContains string `mapstructure:"body_not_contains"`
-	BodyStartsWith  string `mapstructure:"body_startswith"`
-	BodyEndsWith    string `mapstructure:"body_endswith"`
+	BodyContains      string `mapstructure:"body_contains"`
+	BodyNotContains   string `mapstructure:"body_not_contains"`
+	BodyStartsWith    string `mapstructure:"body_startswith"`
+	BodyEndsWith      string `mapstructure:"body_endswith"`
+	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
+	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
-	//Json []map[string]interface{} `mapstructure:"json"`
 	Json []AssertJson `mapstructure:"json"`
-	// TODO: json body assert?
 }
 
 type Case struct {

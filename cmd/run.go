@@ -164,7 +164,7 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	// TODO: handle err
 	assert.NoError(err)
 
-	bodyStr := string(body)
+	bodyStr := strings.TrimSuffix(string(body), "\n")
 	contentType := client.GetContentType(resp.Header)
 
 	type Ctx struct {
@@ -293,6 +293,16 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 			f:        assert.EndsWith,
 			element1: bodyStr,
 			element2: c.Assert.BodyEndsWith,
+		},
+		"assert.body_not_startswith": {
+			f:        assert.NotStartsWith,
+			element1: bodyStr,
+			element2: c.Assert.BodyNotStartsWith,
+		},
+		"assert.body_not_endswith": {
+			f:        assert.NotEndsWith,
+			element1: bodyStr,
+			element2: c.Assert.BodyNotEndsWith,
 		},
 	}
 
