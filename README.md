@@ -2,9 +2,9 @@
 
 A command line http test tool. Maintain the cases via git and pure text
 
-After create the data in backend, we want to test the api via http request and assert the response, the postman & newman is easy for do this.
+After create the data in backend, we want to test the api via http request and assert the response, the postman & newman is easy for this.
 
-But when you get more than maybe 50+ cases, the exported json share in your teams, is huge, maybe more than 10000 lines, it's hard to maintain in the future.
+But when you get more than maybe 50+ cases, the exported json shared in your teams is huge, maybe more than 10000 lines, it's hard to maintain in the future.
 
 So, why not make this simpler?
 
@@ -15,7 +15,6 @@ So, why not make this simpler?
 
 **note: not ready for production**
 
-(BTW: I have a 10-month-old baby to take care of, so, only a few hours a week on this project)
 
 ## screenshots
 
