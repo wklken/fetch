@@ -34,6 +34,8 @@ So, why not make this simpler?
 - assert numberic support `_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
+- show run result with stats
+- exit code != 0 if got any fail assertions
 
 ## examples
 
@@ -185,7 +187,6 @@ body_endswith = "a"
 - [ ] feature: repeat
 - [ ] assert redirect
 - [ ] work with cookies, how to share between cases?
-- [ ] display: show stats
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] feature: ssl / https
 - [ ] display: file / line number to show which case fail

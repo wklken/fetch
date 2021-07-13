@@ -22,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/jmespath/go-jmespath"
 
@@ -52,13 +53,54 @@ to quickly create a Cobra application.`,
 			return
 		}
 		//path := args[0]
+
+		totalStats := Stats{}
+
+		start := time.Now()
 		for _, path := range args {
+			s := run(path)
+			totalStats.Add(s)
 
-			run(path)
+			// if got fail assert, the case is fail
+			if s.failAssertCount > 0 {
+				totalStats.failCaseCount += 1
+			} else {
+				totalStats.okCaseCount += 1
+			}
 		}
+		latency := time.Since(start).Milliseconds()
 
-		//fmt.Println("done")
+		tableTPL := `
+┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│                         │           total │              ok │            fail │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│                   cases │          %6d │          %6d │          %6d │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│              assertions │          %6d │          %6d │          %6d │
+├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
+│ total run duration: %6d ms                                                 │
+└───────────────────────────────────────────────────────────────────────────────┘
+`
+		fmt.Printf(tableTPL,
+			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
+			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
+			latency)
+		if totalStats.failCaseCount > 0 {
+			os.Exit(1)
+		}
 	},
+}
+
+type Stats struct {
+	okCaseCount     int64
+	failCaseCount   int64
+	okAssertCount   int64
+	failAssertCount int64
+}
+
+func (s *Stats) Add(s1 Stats) {
+	s.okAssertCount += s1.okAssertCount
+	s.failAssertCount += s1.failAssertCount
 }
 
 func init() {
@@ -84,7 +126,7 @@ const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
 
-func run(path string) {
+func run(path string) (stats Stats) {
 
 	//fmt.Println(os.Getenv(DebugEnvName), strings.ToUpper(os.Getenv(DebugEnvName)))
 	debug := strings.ToLower(os.Getenv(DebugEnvName)) == "true"
@@ -113,10 +155,11 @@ func run(path string) {
 
 	Tip("Run Case: %s | %s | [%s %s] | %dms\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
 
-	doAssertions(allKeys, resp, c, latency)
+	stats = doAssertions(allKeys, resp, c, latency)
+	return
 }
 
-func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, latency int64) {
+func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, latency int64) (stats Stats) {
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
@@ -257,7 +300,12 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 		if allKeys.Has(key) {
 			Info("%s: ", key)
 			// TODO: break or not?
-			ctx.f(ctx.element1, ctx.element2)
+			ok := ctx.f(ctx.element1, ctx.element2)
+			if ok {
+				stats.okAssertCount += 1
+			} else {
+				stats.failAssertCount += 1
+			}
 		}
 	}
 
@@ -273,29 +321,36 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	}
 
 	if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
-		doJsonAssertions(jsonData, c.Assert.Json)
+		s1 := doJsonAssertions(jsonData, c.Assert.Json)
+		stats.Add(s1)
 	}
 
 	//   6. `-e env.toml` support envs => can render
 	//   5. set timeout=x, each case?
 
 	// TODO: =============================================
+	return
 }
 
-func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) {
+func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
-		Info("assert.json.%s: ", path)
+		Info("assert.json.%stats: ", path)
 
 		if jsonData == nil {
-			assert.Equal(nil, expectedValue)
+			ok := assert.Equal(nil, expectedValue)
+			if ok {
+				stats.okAssertCount += 1
+			} else {
+				stats.failAssertCount += 1
+			}
 			continue
 		}
 
 		actualValue, err := jmespath.Search(path, jsonData)
 		if err != nil {
-			assert.Fail("search json data fail, path=%s, expected=%s\n", err, path, expectedValue)
+			assert.Fail("search json data fail, path=%stats, expected=%stats\n", err, path, expectedValue)
 		} else {
 
 			//fmt.Printf("%T, %T", actualValue, expectedValue)
@@ -309,8 +364,14 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) {
 			//#path = 'json.array[0:3]'
 			//#value =  [1, 2, 3]
 
-			assert.Equal(actualValue, expectedValue)
+			ok := assert.Equal(actualValue, expectedValue)
+			if ok {
+				stats.okAssertCount += 1
+			} else {
+				stats.failAssertCount += 1
+			}
 		}
 	}
 
+	return
 }
