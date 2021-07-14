@@ -1,12 +1,13 @@
 # httptest
 
-A command line http test tool. Maintain the cases via git and pure text
+> A command line http test tool
+> Maintain the cases via git and pure text
 
-After creating the data in backend, we want to test the apis via http request and assert the response, the postman & newman are easy for this.
+We want to test the APIs via http requests and assert the responses, postman & newman are easy for this.
 
 But when you get more than maybe 50+ cases, the exported json file shared with your teams is huge, maybe more than 10000 lines, it's hard to maintain in the future.
 
-So, why not make this simpler?
+So, here is the httptest
 
 - all in text(.toml/.yaml/.json)
 - easy to create/modify/copy and delete
@@ -14,7 +15,6 @@ So, why not make this simpler?
 - run fast
 
 **note: not ready for production**
-
 
 ## screenshots
 
@@ -30,7 +30,7 @@ So, why not make this simpler?
 - support http methods: get/post/put/delete/patch/head/options
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
-- assert numberic support `_in/_lt/_lte/_gt/_gte`
+- assert numberic support `_in/_not_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
 - show run result with stats
@@ -152,15 +152,15 @@ value = 4
 
 ## TODO
 
-- [ ] truncate the huge string, keep the begin and end
+- [ ] json file as body, like `curl @a.json`
+- [ ] work with cookies, how to share between cases?
 - [ ] `-e env.toml`, env vars and render everywhere
 - [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
 - [ ] support trigger: stop run the case if fail, or continue
 - [ ] support request body type, json/form/msgpack/zip.....
 - [ ] supoort status_in/contentType_in
+- [ ] truncate the huge string, keep the begin and end
 - [ ] feature: ssl / https
-- [ ] json file as body, like `curl @a.json`
-- [ ] work with cookies, how to share between cases?
 - [ ] display: file / line number to show which case fail
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] feature: data share between cases
