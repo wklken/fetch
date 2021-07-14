@@ -46,7 +46,7 @@ func Greater(e1 interface{}, e2 interface{}) bool {
 	}
 
 	if res != -1 {
-		Fail("FAIL: greater, \"%v\" is not greater than \"%v\"\n", e1, e2)
+		Fail("FAIL: greater, `%v` is not greater than `%v`\n", e1, e2)
 		return false
 	}
 
@@ -69,7 +69,7 @@ func GreaterOrEqual(e1 interface{}, e2 interface{}) bool {
 	}
 
 	if res != -1 && res != 0 {
-		Fail("FAIL: greater or equal, \"%v\" is not greater than or equal to \"%v\"\n", e1, e2)
+		Fail("FAIL: greater or equal, `%v` is not greater than or equal to `%v`\n", e1, e2)
 		return false
 	}
 
@@ -92,7 +92,7 @@ func Less(e1 interface{}, e2 interface{}) bool {
 	}
 
 	if res != 1 {
-		Fail("FAIL: less, \"%v\" is not less than \"%v\"\n", e1, e2)
+		Fail("FAIL: less, `%v` is not less than `%v`\n", e1, e2)
 		return false
 	}
 
@@ -115,7 +115,7 @@ func LessOrEqual(e1 interface{}, e2 interface{}) bool {
 	}
 
 	if res != 1 && res != 0 {
-		Fail("FAIL: less or equal, \"%v\" is not less than or equal to \"%v\"\n", e1, e2)
+		Fail("FAIL: less or equal, `%v` is not less than or equal to `%v`\n", e1, e2)
 		return false
 	}
 

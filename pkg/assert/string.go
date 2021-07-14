@@ -30,7 +30,7 @@ func StartsWith(s, prefix interface{}) bool {
 		return true
 	}
 
-	Fail("FAIL: startswith, string=%v, prefix=%v\n", s, prefix)
+	Fail("FAIL: startswith, string=`%v`, prefix=`%v`\n", prettyLine(s), prefix)
 	return false
 }
 
@@ -40,13 +40,13 @@ func EndsWith(s, suffix interface{}) bool {
 		return true
 	}
 
-	Fail("FAIL: endswith, string=%v, suffix=%v\n", s, suffix)
+	Fail("FAIL: endswith, string=`%v`, suffix=`%v`\n", prettyLine(s), suffix)
 	return false
 }
 
 func NotStartsWith(s, prefix interface{}) bool {
 	if test(s, prefix, strings.HasPrefix) {
-		Fail("FAIL: not_startswith, string=%v, prefix=%v\n", s, prefix)
+		Fail("FAIL: not_startswith, string=`%v`, prefix=`%v`\n", prettyLine(s), prefix)
 		return false
 	}
 
@@ -56,7 +56,7 @@ func NotStartsWith(s, prefix interface{}) bool {
 
 func NotEndsWith(s, suffix interface{}) bool {
 	if test(s, suffix, strings.HasSuffix) {
-		Fail("FAIL: not_endswith, string=%v, suffix=%v\n", s, suffix)
+		Fail("FAIL: not_endswith, string=`%v`, suffix=`%v`\n", prettyLine(s), suffix)
 		return false
 	}
 

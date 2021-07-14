@@ -86,7 +86,10 @@ to quickly create a Cobra application.`,
 			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
 			latency)
 		if totalStats.failCaseCount > 0 {
+			fmt.Println("the execute result: 1")
 			os.Exit(1)
+		} else {
+			fmt.Println("the execute result: 0")
 		}
 	},
 }

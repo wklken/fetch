@@ -40,7 +40,7 @@ func Contains(s, contains interface{}) bool {
 		return false
 	}
 	if !found {
-		Fail("FAIL: contains, list=%v, contains=%v\n", s, contains)
+		Fail("FAIL: contains, sequence=`%v`, contains=`%v`\n", prettyLine(s), contains)
 		return false
 	}
 
@@ -55,7 +55,7 @@ func NotContains(s, contains interface{}) bool {
 		return false
 	}
 	if found {
-		Fail("FAIL: not contains, list=%v, not_contains=%v\n", s, contains)
+		Fail("FAIL: not contains, sequence=`%v`, not_contains=`%v`\n", prettyLine(s), contains)
 		return false
 	}
 

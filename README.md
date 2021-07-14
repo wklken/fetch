@@ -151,6 +151,9 @@ value = 4
 
 ## TODO
 
+- [ ] in/not_in
+- [ ] truncate the huge string, keep the begin and end
+- [ ] example in json/yaml
 - [ ] `-e env.toml`, env vars and render everywhere
 - [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
 - [ ] support trigger: stop run the case if fail, or continue
