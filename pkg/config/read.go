@@ -26,6 +26,11 @@ func getConfigType(path string) (string, error) {
 		return "json", nil
 	case "toml":
 		return "toml", nil
+
+		//SupportedExts = []string{"json", "toml", "yaml", "yml", "properties", "props", "prop", "hcl", "dotenv", "env", "ini"}
+		// 会少几个case, 确定后再开启
+	//case "ini":
+	//	return "ini", nil
 	default:
 		return "", errors.New("not support yet")
 	}

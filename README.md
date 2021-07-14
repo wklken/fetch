@@ -26,7 +26,7 @@ So, why not make this simpler?
 
 ## features
 
-- define the case via [toml](https://toml.io/en/), yaml/json also supported
+- define the case via [toml](https://toml.io/en/) / yaml / json
 - support http methods: get/post/put/delete/patch/head/options
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
@@ -50,7 +50,7 @@ status = "OK"
 statusCode = 200
 ```
 
-full normal assertions
+full normal assertions: [asserts.toml](./examples/asserts.toml) / [asserts.json](./examples/asserts.json) / [asserts.yaml](./examples/asserts.yaml)
 
 ```toml
 [request]
@@ -153,7 +153,6 @@ value = 4
 ## TODO
 
 - [ ] truncate the huge string, keep the begin and end
-- [ ] example in json/yaml
 - [ ] `-e env.toml`, env vars and render everywhere
 - [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
 - [ ] support trigger: stop run the case if fail, or continue
