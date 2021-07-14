@@ -34,18 +34,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Equal(actual interface{}, expected interface{}) bool {
+func Equal(actual interface{}, expected interface{}) (bool, string) {
 	equal := assert.ObjectsAreEqual(actual, expected)
 	if !equal {
 		// TODO: truncate the middle, keep the begin and end
 		actualStr := util.TruncateString(fmt.Sprintf("%v", actual), 100)
 
-		//Fail("FAIL: not equal, expected=`%v`, actual=`%v`\n", expected, actualStr)
-		Fail("FAIL: not equal, expected=`%v`, actual=`%v`\n", expected, prettyLine(actualStr))
-		return false
+		return false, fmt.Sprintf("not equal, expected=`%v`, actual=`%v`", expected, prettyLine(actualStr))
 	} else {
-		OK()
-		return true
+		return true, "OK"
 	}
 
 }

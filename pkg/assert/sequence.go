@@ -27,48 +27,53 @@
 package assert
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func Contains(s, contains interface{}) bool {
+func Contains(s, contains interface{}) (bool, string) {
 	ok, found := includeElement(s, contains)
 	if !ok {
-		Fail("FAIL: contains error")
-		return false
+		return false, "contains error"
 	}
 	if !found {
-		Fail("FAIL: contains, sequence=`%v`, contains=`%v`\n", prettyLine(s), contains)
-		return false
+		return false, fmt.Sprintf("contains, sequence=`%v`, contains=`%v`", prettyLine(s), contains)
 	}
 
-	OK()
-	return true
+	return true, "OK"
 }
 
-func NotContains(s, contains interface{}) bool {
+func NotContains(s, contains interface{}) (bool, string) {
 	ok, found := includeElement(s, contains)
 	if !ok {
-		Fail("FAIL: not contains error")
-		return false
+		return false, "not contains error"
 	}
 	if found {
-		Fail("FAIL: not contains, sequence=`%v`, not_contains=`%v`\n", prettyLine(s), contains)
-		return false
+		return false, fmt.Sprintf("not contains, sequence=`%v`, not_contains=`%v`", prettyLine(s), contains)
 	}
 
-	OK()
-	return true
+	return true, "OK"
 }
 
-func In(element, s interface{}) bool {
-	return Contains(s, element)
+func In(element, s interface{}) (bool, string) {
+	ok, _ := Contains(s, element)
+	if !ok {
+		return false, fmt.Sprintf("in, element=`%v`, sequence=`%v`", element, prettyLine(s))
+	}
+
+	return true, "OK"
 }
 
-func NotIn(element, s interface{}) bool {
-	return !Contains(s, element)
+func NotIn(element, s interface{}) (bool, string) {
+	ok, _ := NotContains(s, element)
+	if !ok {
+		return false, fmt.Sprintf("not_in, element=`%v`, sequence=`%v`", element, prettyLine(s))
+	}
+
+	return true, "OK"
 }
 
 // NOTE: from testify

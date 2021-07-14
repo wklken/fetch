@@ -129,6 +129,16 @@ const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
 
+func OK() {
+	color.New(color.FgGreen).PrintfFunc()("OK\n")
+}
+
+var Error = color.New(color.FgHiRed).PrintfFunc()
+
+func Fail(message string) {
+	color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
+}
+
 func run(path string) (stats Stats) {
 
 	//fmt.Println(os.Getenv(DebugEnvName), strings.ToUpper(os.Getenv(DebugEnvName)))
@@ -153,7 +163,9 @@ func run(path string) (stats Stats) {
 		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, debug)
 	if err != nil {
 		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-		fmt.Println(err)
+		Error("%w\n", err)
+		stats.failCaseCount += 1
+		return
 	}
 
 	Tip("Run Case: %s | %s | [%s %s] | %dms\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
@@ -163,6 +175,7 @@ func run(path string) (stats Stats) {
 }
 
 func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, latency int64) (stats Stats) {
+
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
@@ -208,6 +221,11 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 			f:        assert.In,
 			element1: resp.StatusCode,
 			element2: c.Assert.StatusCodeIn,
+		},
+		"assert.statuscode_not_in": {
+			f:        assert.NotIn,
+			element1: resp.StatusCode,
+			element2: c.Assert.StatusCodeNotIn,
 		},
 		// status
 		"assert.status": {
@@ -313,10 +331,12 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 		if allKeys.Has(key) {
 			Info("%s: ", key)
 			// TODO: break or not?
-			ok := ctx.f(ctx.element1, ctx.element2)
+			ok, message := ctx.f(ctx.element1, ctx.element2)
 			if ok {
+				OK()
 				stats.okAssertCount += 1
 			} else {
+				Fail(message)
 				stats.failAssertCount += 1
 			}
 		}
@@ -352,10 +372,11 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 		Info("assert.json.%stats: ", path)
 
 		if jsonData == nil {
-			ok := assert.Equal(nil, expectedValue)
+			ok, message := assert.Equal(nil, expectedValue)
 			if ok {
 				stats.okAssertCount += 1
 			} else {
+				Fail(message)
 				stats.failAssertCount += 1
 			}
 			continue
@@ -363,7 +384,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 
 		actualValue, err := jmespath.Search(path, jsonData)
 		if err != nil {
-			assert.Fail("search json data fail, path=%stats, expected=%stats\n", err, path, expectedValue)
+			Fail(fmt.Sprintf("search json data fail, err=%s, path=%s, expected=%s\n", err, path, expectedValue))
 		} else {
 
 			//fmt.Printf("%T, %T", actualValue, expectedValue)
@@ -377,10 +398,12 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 			//#path = 'json.array[0:3]'
 			//#value =  [1, 2, 3]
 
-			ok := assert.Equal(actualValue, expectedValue)
+			ok, message := assert.Equal(actualValue, expectedValue)
 			if ok {
+				OK()
 				stats.okAssertCount += 1
 			} else {
+				Fail(message)
 				stats.failAssertCount += 1
 			}
 		}

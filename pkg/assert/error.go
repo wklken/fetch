@@ -1,10 +1,10 @@
 package assert
 
-func NoError(err error) bool {
+import "fmt"
+
+func NoError(err error) (bool, string) {
 	if err != nil {
-		Fail("FAIL: got an error", err)
-		return false
+		return false, fmt.Sprintf("got an error, err=`%s`", err)
 	}
-	//OK()
-	return true
+	return true, ""
 }

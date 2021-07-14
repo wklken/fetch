@@ -64,6 +64,7 @@ hello = "world"
 status = "ok"
 statusCode = 200
 statusCode_in = [400, 500]
+statusCode_not_in = [200, 400]
 statusCode_lt = 100
 statusCode_lte = 100
 statusCode_gt = 500
@@ -151,7 +152,6 @@ value = 4
 
 ## TODO
 
-- [ ] in/not_in
 - [ ] truncate the huge string, keep the begin and end
 - [ ] example in json/yaml
 - [ ] `-e env.toml`, env vars and render everywhere

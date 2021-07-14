@@ -1,6 +1,7 @@
 package assert
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -24,42 +25,34 @@ func test(s, i interface{}, testFunc stringTestFunc) bool {
 	return testFunc(s.(string), i.(string))
 }
 
-func StartsWith(s, prefix interface{}) bool {
+func StartsWith(s, prefix interface{}) (bool, string) {
 	if test(s, prefix, strings.HasPrefix) {
-		OK()
-		return true
+		return true, "OK"
 	}
 
-	Fail("FAIL: startswith, string=`%v`, prefix=`%v`\n", prettyLine(s), prefix)
-	return false
+	return false, fmt.Sprintf("startswith, string=`%v`, prefix=`%v`", prettyLine(s), prefix)
 }
 
-func EndsWith(s, suffix interface{}) bool {
+func EndsWith(s, suffix interface{}) (bool, string) {
 	if test(s, suffix, strings.HasSuffix) {
-		OK()
-		return true
+		return true, "OK"
 	}
 
-	Fail("FAIL: endswith, string=`%v`, suffix=`%v`\n", prettyLine(s), suffix)
-	return false
+	return false, fmt.Sprintf("endswith, string=`%v`, suffix=`%v`", prettyLine(s), suffix)
 }
 
-func NotStartsWith(s, prefix interface{}) bool {
+func NotStartsWith(s, prefix interface{}) (bool, string) {
 	if test(s, prefix, strings.HasPrefix) {
-		Fail("FAIL: not_startswith, string=`%v`, prefix=`%v`\n", prettyLine(s), prefix)
-		return false
+		return false, fmt.Sprintf("not_startswith, string=`%v`, prefix=`%v`", prettyLine(s), prefix)
 	}
 
-	OK()
-	return true
+	return true, "OK"
 }
 
-func NotEndsWith(s, suffix interface{}) bool {
+func NotEndsWith(s, suffix interface{}) (bool, string) {
 	if test(s, suffix, strings.HasSuffix) {
-		Fail("FAIL: not_endswith, string=`%v`, suffix=`%v`\n", prettyLine(s), suffix)
-		return false
+		return false, fmt.Sprintf("not_endswith, string=`%v`, suffix=`%v`", prettyLine(s), suffix)
 	}
 
-	OK()
-	return true
+	return true, "OK"
 }

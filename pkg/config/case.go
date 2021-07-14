@@ -11,12 +11,13 @@ type Request struct {
 type Assert struct {
 	Status string
 
-	StatusCode    int
-	StatusCodeIn  []int `mapstructure:"statusCode_in"`
-	StatusCodeLt  int   `mapstructure:"statusCode_lt"`
-	StatusCodeLte int   `mapstructure:"statusCode_lte"`
-	StatusCodeGt  int   `mapstructure:"statusCode_gt"`
-	StatusCodeGte int   `mapstructure:"statusCode_gte"`
+	StatusCode      int
+	StatusCodeIn    []int `mapstructure:"statusCode_in"`
+	StatusCodeNotIn []int `mapstructure:"statusCode_not_in"`
+	StatusCodeLt    int   `mapstructure:"statusCode_lt"`
+	StatusCodeLte   int   `mapstructure:"statusCode_lte"`
+	StatusCodeGt    int   `mapstructure:"statusCode_gt"`
+	StatusCodeGte   int   `mapstructure:"statusCode_gte"`
 
 	ContentLength    int64
 	ContentLengthLt  int64 `mapstructure:"contentLength_lt"`
@@ -27,8 +28,10 @@ type Assert struct {
 	ContentType string
 
 	// TODO
-	StatusIn      []string `mapstructure:"status_in"`
-	ContentTypeIn []string `mapstructure:"contentType_in"`
+	StatusIn         []string `mapstructure:"status_in"`
+	StatusNotIn      []string `mapstructure:"status_not_in"`
+	ContentTypeIn    []string `mapstructure:"contentType_in"`
+	ContentTypeNotIn []string `mapstructure:"contentType_not_in"`
 
 	// latency
 	LatencyLt  int64 `mapstructure:"latency_lt"`
