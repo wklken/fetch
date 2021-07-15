@@ -18,8 +18,10 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -170,6 +172,30 @@ func Fail(message string) {
 	color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
 }
 
+func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err error) {
+	content = body
+	if body != "" && strings.HasPrefix(body, "@") {
+		bodyFilePath := strings.TrimPrefix(body, "@")
+
+		// NOTE: should be relative path to the `path`
+		realBodyFilePath := filepath.Join(filepath.Dir(caseFilePath), bodyFilePath)
+
+		if _, err = os.Stat(realBodyFilePath); os.IsNotExist(err) {
+			return
+		}
+
+		var dat []byte
+		dat, err = ioutil.ReadFile(realBodyFilePath)
+		if err != nil {
+			return
+		}
+
+		content = string(dat)
+	}
+
+	return content, nil
+}
+
 func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
@@ -187,8 +213,18 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
 	debug := verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug
+
+	// NOTE: if c.Request.Body begin with `@`, means it's a file
+	body, err := parseBodyIfGotAFile(path, c.Request.Body)
+	if err != nil {
+		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+		Error("Read body file content fail: body=@%s err=%s\n", c.Request.Body, err)
+		stats.failCaseCount += 1
+		return
+	}
+
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, debug)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, debug)
 	if err != nil {
 		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 		Error("Send HTTP Request fail: %s\n", err)

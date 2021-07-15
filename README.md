@@ -37,6 +37,7 @@ So, here is the httptest
 - exit code != 0 if got any fail assertions
 - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
 - configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
+- sent request body via external file `body = "@./post_body_file"`
   
 ## examples
 
@@ -154,12 +155,12 @@ value = 4
 
 ## TODO
 
-- [ ] json file as body, like `curl @a.json`
+- [ ] support request body type, json/form/msgpack/zip.....
+- [ ] supoort status_in/contentType_in
+- [ ] --quiet, all output to /dev/null
 - [ ] work with cookies, how to share between cases?
 - [ ] `-c dev.toml`, env vars and render everywhere
 - [ ] support trigger: stop run the case if fail, or continue
-- [ ] support request body type, json/form/msgpack/zip.....
-- [ ] supoort status_in/contentType_in
 - [ ] truncate the huge string, keep the begin and end
 - [ ] feature: ssl / https
 - [ ] display: file / line number to show which case fail
