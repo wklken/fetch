@@ -49,6 +49,7 @@ const tableTPL = `
 
 var (
 	verbose bool = false
+	cfgFile string
 )
 
 // runCmd represents the run command
@@ -64,15 +65,37 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("args required")
+			os.Exit(1)
 			return
 		}
 		//path := args[0]
+		var runConfig config.RunConfig
+		if cfgFile != "" {
+			if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+				fmt.Println("config file not exists:", err)
+				os.Exit(1)
+				return
+			}
+			cv, err := config.ReadFromFile(cfgFile)
+			if err != nil {
+				fmt.Println("err:", err)
+				return
+			}
+			err = cv.Unmarshal(&runConfig)
+			if err != nil {
+				fmt.Println("err:", err)
+				return
+			}
+
+			fmt.Println("runConfig: ", runConfig)
+
+		}
 
 		totalStats := Stats{}
 
 		start := time.Now()
 		for _, path := range args {
-			s := run(path)
+			s := run(path, &runConfig)
 			totalStats.Add(s)
 
 			// if got fail assert, the case is fail
@@ -97,6 +120,24 @@ to quickly create a Cobra application.`,
 	},
 }
 
+func init() {
+	rootCmd.AddCommand(runCmd)
+
+	// -v
+	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
+
+	// -e dev.toml
+	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	//runCmd.PersistentFlags().String("verbose", "", "verbose mode")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
 type Stats struct {
 	okCaseCount     int64
 	failCaseCount   int64
@@ -109,21 +150,7 @@ func (s *Stats) Add(s1 Stats) {
 	s.failAssertCount += s1.failAssertCount
 }
 
-func init() {
-	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	//runCmd.PersistentFlags().String("verbose", "", "verbose mode")
-	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
+// TODO: move to output module?
 var (
 	Info = color.New(color.FgWhite).PrintfFunc()
 	Tip  = color.New(color.FgYellow).PrintfFunc()
@@ -143,11 +170,7 @@ func Fail(message string) {
 	color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
 }
 
-func run(path string) (stats Stats) {
-
-	//fmt.Println(os.Getenv(DebugEnvName), strings.ToUpper(os.Getenv(DebugEnvName)))
-	debug := verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true"
-
+func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
 		fmt.Println("err:", err)
@@ -163,11 +186,12 @@ func run(path string) (stats Stats) {
 	//fmt.Println("allKeys", allKeys)
 	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
+	debug := verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug
 	resp, latency, err := client.Send(
 		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, debug)
 	if err != nil {
 		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-		Error("%w\n", err)
+		Error("Send HTTP Request fail: %s\n", err)
 		stats.failCaseCount += 1
 		return
 	}
@@ -362,7 +386,6 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 		stats.Add(s1)
 	}
 
-	//   6. `-e env.toml` support envs => can render
 	//   5. set timeout=x, each case?
 
 	// TODO: =============================================

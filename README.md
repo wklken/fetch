@@ -36,6 +36,7 @@ So, here is the httptest
 - show run result with stats
 - exit code != 0 if got any fail assertions
 - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+- configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
   
 ## examples
 
@@ -155,7 +156,7 @@ value = 4
 
 - [ ] json file as body, like `curl @a.json`
 - [ ] work with cookies, how to share between cases?
-- [ ] `-e env.toml`, env vars and render everywhere
+- [ ] `-c dev.toml`, env vars and render everywhere
 - [ ] support trigger: stop run the case if fail, or continue
 - [ ] support request body type, json/form/msgpack/zip.....
 - [ ] supoort status_in/contentType_in
