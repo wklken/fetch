@@ -24,17 +24,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jmespath/go-jmespath"
-
-	"github.com/gin-gonic/gin/binding"
-
 	"github.com/fatih/color"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cobra"
 
 	"httptest/pkg/assert"
 	"httptest/pkg/client"
 	"httptest/pkg/config"
 	"httptest/pkg/util"
+)
+
+const tableTPL = `
+┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│                         │           total │              ok │            fail │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│                   cases │          %6d │          %6d │          %6d │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│              assertions │          %6d │          %6d │          %6d │
+├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
+│ total run duration: %6d ms                                                 │
+└───────────────────────────────────────────────────────────────────────────────┘
+`
+
+var (
+	verbose bool = false
 )
 
 // runCmd represents the run command
@@ -70,17 +84,6 @@ to quickly create a Cobra application.`,
 		}
 		latency := time.Since(start).Milliseconds()
 
-		tableTPL := `
-┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│                         │           total │              ok │            fail │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│                   cases │          %6d │          %6d │          %6d │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│              assertions │          %6d │          %6d │          %6d │
-├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
-│ total run duration: %6d ms                                                 │
-└───────────────────────────────────────────────────────────────────────────────┘
-`
 		fmt.Printf(tableTPL,
 			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
 			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
@@ -113,7 +116,8 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
+	//runCmd.PersistentFlags().String("verbose", "", "verbose mode")
+	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
@@ -142,7 +146,7 @@ func Fail(message string) {
 func run(path string) (stats Stats) {
 
 	//fmt.Println(os.Getenv(DebugEnvName), strings.ToUpper(os.Getenv(DebugEnvName)))
-	debug := strings.ToLower(os.Getenv(DebugEnvName)) == "true"
+	debug := verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true"
 
 	v, err := config.ReadFromFile(path)
 	if err != nil {

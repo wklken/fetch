@@ -5,7 +5,7 @@
 
 We want to test the APIs via http requests and assert the responses, postman & newman are easy for this.
 
-But when you get more than maybe 50+ cases, the exported json file shared with your teams is huge, maybe more than 10000 lines, it's hard to maintain in the future.
+But when you got more than maybe 50+ cases, the exported json file shared with your team is huge, maybe more than 10000 lines, it's hard to maintain in the future.
 
 So, here is the httptest
 
@@ -35,7 +35,8 @@ So, here is the httptest
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
 - show run result with stats
 - exit code != 0 if got any fail assertions
-
+- verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+  
 ## examples
 
 simplest
@@ -155,7 +156,6 @@ value = 4
 - [ ] json file as body, like `curl @a.json`
 - [ ] work with cookies, how to share between cases?
 - [ ] `-e env.toml`, env vars and render everywhere
-- [ ] HTTPTEST_DEBUG, via env, or env.toml; or `-v` verbose
 - [ ] support trigger: stop run the case if fail, or continue
 - [ ] support request body type, json/form/msgpack/zip.....
 - [ ] supoort status_in/contentType_in
