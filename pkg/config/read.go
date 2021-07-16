@@ -31,8 +31,8 @@ func getConfigType(path string) (string, error) {
 	//	return "hcl", nil
 	case "properties", "props", "prop":
 		return "prop", nil
-	//case "ini":
-	//	return "ini", nil
+	case "ini":
+		return "ini", nil
 	default:
 		return "", fmt.Errorf("filt type `%s` not support yet", ext)
 	}
@@ -56,8 +56,6 @@ func ReadFromFile(path string) (v *viper.Viper, err error) {
 	if err != nil {
 		return
 	}
-
-	fmt.Println("v", v.AllKeys())
 
 	return v, nil
 }
