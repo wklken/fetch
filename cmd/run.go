@@ -51,6 +51,7 @@ const tableTPL = `
 
 var (
 	verbose bool = false
+	quiet   bool = false
 	cfgFile string
 )
 
@@ -109,24 +110,28 @@ to quickly create a Cobra application.`,
 		}
 		latency := time.Since(start).Milliseconds()
 
-		fmt.Printf(tableTPL,
+		Info(tableTPL,
 			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
 			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
 			latency)
 		if totalStats.failCaseCount > 0 {
-			fmt.Println("the execute result: 1")
+			Info("the execute result: 1")
 			os.Exit(1)
 		} else {
-			fmt.Println("the execute result: 0")
+			Info("the execute result: 0")
 		}
 	},
 }
 
+// TODO: --quiet with all the error handler => fmt.Println
+
 func init() {
 	rootCmd.AddCommand(runCmd)
 
-	// -v
+	// -v verbose
 	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
+	// -q quiet
+	runCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "be quiet")
 
 	// -e dev.toml
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
@@ -153,23 +158,39 @@ func (s *Stats) Add(s1 Stats) {
 }
 
 // TODO: move to output module?
-var (
-	Info = color.New(color.FgWhite).PrintfFunc()
-	Tip  = color.New(color.FgYellow).PrintfFunc()
-)
 
 const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
 
-func OK() {
-	color.New(color.FgGreen).PrintfFunc()("OK\n")
+func Tip(format string, a ...interface{}) {
+	if !quiet {
+		color.New(color.FgYellow).PrintfFunc()(format, a...)
+	}
 }
 
-var Error = color.New(color.FgHiRed).PrintfFunc()
+func Info(format string, a ...interface{}) {
+	if !quiet {
+		color.New(color.FgWhite).PrintfFunc()(format, a...)
+	}
+}
+
+func OK() {
+	if !quiet {
+		color.New(color.FgGreen).PrintfFunc()("OK\n")
+	}
+}
+
+func Error(format string, a ...interface{}) {
+	if !quiet {
+		color.New(color.FgHiRed).PrintfFunc()(format, a...)
+	}
+}
 
 func Fail(message string) {
-	color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
+	if !quiet {
+		color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
+	}
 }
 
 func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err error) {
@@ -199,12 +220,14 @@ func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err 
 func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
+		// TODO
 		fmt.Println("err:", err)
 		return
 	}
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
+		// TODO
 		fmt.Println("err:", err)
 		return
 	}
@@ -212,7 +235,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	//fmt.Println("allKeys", allKeys)
 	//fmt.Printf("the case and data: %s, %+v\n", path, c)
 
-	debug := verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug
+	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	body, err := parseBodyIfGotAFile(path, c.Request.Body)
