@@ -27,7 +27,7 @@ So, here is the httptest
 
 ## features
 
-- define the case via [toml](https://toml.io/en/) / yaml / json
+- define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
 - support http methods: get/post/put/delete/patch/head/options
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
