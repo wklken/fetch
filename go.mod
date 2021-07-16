@@ -1,4 +1,4 @@
-module httptest
+module github.com/wklken/httptest
 
 go 1.16
 

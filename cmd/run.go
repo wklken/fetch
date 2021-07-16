@@ -30,11 +30,11 @@ import (
 	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cobra"
 
-	"httptest/pkg/assert"
-	"httptest/pkg/client"
-	"httptest/pkg/config"
-	"httptest/pkg/log"
-	"httptest/pkg/util"
+	"github.com/wklken/httptest/pkg/assert"
+	"github.com/wklken/httptest/pkg/client"
+	"github.com/wklken/httptest/pkg/config"
+	"github.com/wklken/httptest/pkg/log"
+	"github.com/wklken/httptest/pkg/util"
 )
 
 const tableTPL = `
@@ -68,27 +68,26 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 			return
 		}
-		//path := args[0]
+
 		var runConfig config.RunConfig
 		if cfgFile != "" {
 			if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
-				fmt.Println("config file not exists:", err)
+				log.Error("config file not exists: %s", err)
 				os.Exit(1)
 				return
 			}
 			cv, err := config.ReadFromFile(cfgFile)
 			if err != nil {
-				fmt.Println("err:", err)
+				log.Error("read config file fail: path=%s, err=%s", cfgFile, err)
 				return
 			}
 			err = cv.Unmarshal(&runConfig)
 			if err != nil {
-				fmt.Println("err:", err)
+				log.Error("parse config file fail: path=%s, err=%s", cfgFile, err)
 				return
 			}
 
-			fmt.Println("runConfig: ", runConfig)
-
+			log.Info("runConfig: %v", runConfig)
 		}
 
 		totalStats := Stats{}
@@ -180,21 +179,21 @@ func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}
 func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
-		log.Tip("Run Case: %s\n", path)
-		log.Error("read fail", err)
+		log.Tip("Run Case: %s", path)
+		log.Error("read fail: %s", err)
 		stats.failCaseCount += 1
 		return
 	}
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
-		log.Tip("Run Case: %s\n", path)
-		log.Error("parse fail", err)
+		log.Tip("Run Case: %s", path)
+		log.Error("parse fail: %s", err)
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
 	//fmt.Println("allKeys", allKeys)
-	//fmt.Printf("the case and data: %s, %+v\n", path, c)
+	//fmt.Printf("the case and data: %s, %+v", path, c)
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 
@@ -429,7 +428,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 
 		actualValue, err := jmespath.Search(path, jsonData)
 		if err != nil {
-			log.Fail(fmt.Sprintf("search json data fail, err=%s, path=%s, expected=%s\n", err, path, expectedValue))
+			log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
 		} else {
 
 			//fmt.Printf("%T, %T", actualValue, expectedValue)

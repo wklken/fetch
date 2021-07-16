@@ -1,7 +1,7 @@
 package main
 
 import (
-	"httptest/cmd"
+	"github.com/wklken/httptest/cmd"
 )
 
 func main() {

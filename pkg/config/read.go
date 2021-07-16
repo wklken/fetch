@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,28 +19,24 @@ func getFileExt(path string) string {
 }
 
 func getConfigType(path string) (string, error) {
-	switch strings.ToLower(getFileExt(path)) {
+	ext := strings.ToLower(getFileExt(path))
+	switch ext {
 	case "yaml", "yml":
 		return "yaml", nil
 	case "json":
 		return "json", nil
 	case "toml":
 		return "toml", nil
-
-		//SupportedExts = []string{"json", "toml", "yaml", "yml", "properties", "props", "prop", "hcl", "dotenv", "env", "ini"}
-		// 会少几个case, 确定后再开启
+	//case "hcl":
+	//	return "hcl", nil
+	case "properties", "props", "prop":
+		return "prop", nil
 	//case "ini":
 	//	return "ini", nil
 	default:
-		return "", errors.New("not support yet")
+		return "", fmt.Errorf("filt type `%s` not support yet", ext)
 	}
 }
-
-//fileType, err := getFileType(path)
-//if err != nil {
-//	return
-//}
-//viper.SetConfigType(fileType)
 
 func ReadFromFile(path string) (v *viper.Viper, err error) {
 	var reader *os.File
@@ -49,11 +45,6 @@ func ReadFromFile(path string) (v *viper.Viper, err error) {
 		return
 	}
 
-	//fmt.Println("path:", path)
-	//
-	//b1 := make([]byte, 200)
-	//n1, err := reader.Read(b1)
-	//fmt.Println(n1, err, string(b1))
 	configType, err := getConfigType(path)
 	if err != nil {
 		return
@@ -65,7 +56,8 @@ func ReadFromFile(path string) (v *viper.Viper, err error) {
 	if err != nil {
 		return
 	}
-	//fmt.Println("v.AllKeys", v.AllKeys())
+
+	fmt.Println("v", v.AllKeys())
 
 	return v, nil
 }

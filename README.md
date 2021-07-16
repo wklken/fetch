@@ -56,7 +56,7 @@ status = "OK"
 statusCode = 200
 ```
 
-full normal assertions: [asserts.toml](./examples/asserts.toml) / [asserts.json](./examples/asserts.json) / [asserts.yaml](./examples/asserts.yaml)
+full normal assertions: [asserts.toml](./examples/asserts.toml) / [asserts.json](./examples/asserts.json) / [asserts.yaml](./examples/asserts.yaml) | [assert.prop](./examples/asserts.prop)
 
 ```toml
 [request]
@@ -171,7 +171,6 @@ value = 4
 - [ ] how to run in order
 - [ ] how to run in parallel
 - [ ] set timeout each case or in global
-- [ ] support `-h`
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] multiple cases in one file, like ginkgo?

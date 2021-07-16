@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/stretchr/testify/assert"
 
-	"httptest/pkg/util"
+	"github.com/wklken/httptest/pkg/util"
 )
 
 var _ = Describe("Set", func() {

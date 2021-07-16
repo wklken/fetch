@@ -29,7 +29,7 @@ package assert
 import (
 	"fmt"
 
-	"httptest/pkg/util"
+	"github.com/wklken/httptest/pkg/util"
 
 	"github.com/stretchr/testify/assert"
 )

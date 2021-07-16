@@ -1,11 +1,13 @@
 package client
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
+
+	"github.com/wklken/httptest/pkg/log"
 )
 
 func Send(
@@ -19,12 +21,6 @@ func Send(
 
 	var req *http.Request
 
-	// TODO: get params => from url + params(append)
-	//params := make(url.Values)
-	//params.Add("key1", "value1")
-	//params.Add("key2", "value2")
-	//req.URL.RawQuery = params.Encode()
-
 	switch httpMethod {
 	case http.MethodGet, http.MethodHead, http.MethodOptions:
 		req, err = http.NewRequest(httpMethod, url, nil)
@@ -34,9 +30,11 @@ func Send(
 		} else {
 			req, err = http.NewRequest(httpMethod, url, nil)
 		}
+	default:
+		err = errors.New("http method not supported yet")
+		return
 	}
 	if err != nil {
-		fmt.Println("error: make request fail ", err)
 		return
 	}
 
@@ -51,19 +49,17 @@ func Send(
 	if debug {
 		dump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
-			fmt.Printf("DEBUG request: dump err %s\n", err)
+			log.Info("DEBUG request: dump err %s", err)
 		} else {
-			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "> "))
+			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "> "))
 		}
 	}
-	//fmt.Printf("DEBUG request: \n%s\n", strings.ReplaceAll(string(dump), "\n", ">\r\n"))
 
 	// do send
 	start := time.Now()
 	client := &http.Client{}
 	resp, err = client.Do(req)
 	if err != nil {
-		fmt.Println("error: do request fail ", err)
 		return
 	}
 
@@ -73,9 +69,9 @@ func Send(
 	if debug {
 		dump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
-			fmt.Printf("DEBUG response: dump err %s\n", err)
+			log.Info("DEBUG response: dump err %s", err)
 		} else {
-			fmt.Printf("DEBUG request: \n%s\n", prettyFormatDump(dump, "< "))
+			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "< "))
 		}
 	}
 

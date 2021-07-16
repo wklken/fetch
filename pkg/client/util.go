@@ -16,7 +16,7 @@ func filterFlags(content string) string {
 	return content
 }
 
-// ContentType returns the Content-Type header of the request.
+// GetContentType returns the Content-Type header of the request.
 func GetContentType(header http.Header) string {
 	return filterFlags(header.Get("Content-Type"))
 }
@@ -30,7 +30,5 @@ func prettyFormatDump(dump []byte, linePrefix string) string {
 		newLines = append(newLines, fmt.Sprintf("%s%s", linePrefix, p))
 	}
 
-	//fmt.Printf("DEBUG request: \n%s\n", dump)
-	//fmt.Printf("DEBUG request: \n%s", strings.Join(newLines, "\n"))
 	return strings.Join(newLines, "\n")
 }
