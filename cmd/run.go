@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cobra"
@@ -34,6 +33,7 @@ import (
 	"httptest/pkg/assert"
 	"httptest/pkg/client"
 	"httptest/pkg/config"
+	"httptest/pkg/log"
 	"httptest/pkg/util"
 )
 
@@ -46,25 +46,22 @@ const tableTPL = `
 │              assertions │          %6d │          %6d │          %6d │
 ├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
 │ total run duration: %6d ms                                                 │
-└───────────────────────────────────────────────────────────────────────────────┘
-`
+└───────────────────────────────────────────────────────────────────────────────┘`
+const (
+	DebugEnvName = "HTTPTEST_DEBUG"
+)
 
 var (
-	verbose bool = false
-	quiet   bool = false
+	verbose = false
+	quiet   = false
 	cfgFile string
 )
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "run cases",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("args required")
@@ -96,6 +93,8 @@ to quickly create a Cobra application.`,
 
 		totalStats := Stats{}
 
+		log.BeQuiet(quiet)
+
 		start := time.Now()
 		for _, path := range args {
 			s := run(path, &runConfig)
@@ -110,15 +109,15 @@ to quickly create a Cobra application.`,
 		}
 		latency := time.Since(start).Milliseconds()
 
-		Info(tableTPL,
+		log.Info(tableTPL,
 			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
 			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
 			latency)
 		if totalStats.failCaseCount > 0 {
-			Info("the execute result: 1")
+			log.Info("the execute result: 1")
 			os.Exit(1)
 		} else {
-			Info("the execute result: 0")
+			log.Info("the execute result: 0")
 		}
 	},
 }
@@ -135,14 +134,6 @@ func init() {
 
 	// -e dev.toml
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	//runCmd.PersistentFlags().String("verbose", "", "verbose mode")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 type Stats struct {
@@ -155,42 +146,6 @@ type Stats struct {
 func (s *Stats) Add(s1 Stats) {
 	s.okAssertCount += s1.okAssertCount
 	s.failAssertCount += s1.failAssertCount
-}
-
-// TODO: move to output module?
-
-const (
-	DebugEnvName = "HTTPTEST_DEBUG"
-)
-
-func Tip(format string, a ...interface{}) {
-	if !quiet {
-		color.New(color.FgYellow).PrintfFunc()(format, a...)
-	}
-}
-
-func Info(format string, a ...interface{}) {
-	if !quiet {
-		color.New(color.FgWhite).PrintfFunc()(format, a...)
-	}
-}
-
-func OK() {
-	if !quiet {
-		color.New(color.FgGreen).PrintfFunc()("OK\n")
-	}
-}
-
-func Error(format string, a ...interface{}) {
-	if !quiet {
-		color.New(color.FgHiRed).PrintfFunc()(format, a...)
-	}
-}
-
-func Fail(message string) {
-	if !quiet {
-		color.New(color.FgRed).PrintfFunc()("FAIL: %s\n", message)
-	}
 }
 
 func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err error) {
@@ -217,18 +172,24 @@ func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err 
 	return content, nil
 }
 
+func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
+	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+	log.Error(format, a...)
+}
+
 func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
-		// TODO
-		fmt.Println("err:", err)
+		log.Tip("Run Case: %s\n", path)
+		log.Error("read fail", err)
+		stats.failCaseCount += 1
 		return
 	}
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
-		// TODO
-		fmt.Println("err:", err)
+		log.Tip("Run Case: %s\n", path)
+		log.Error("parse fail", err)
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
@@ -240,8 +201,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	body, err := parseBodyIfGotAFile(path, c.Request.Body)
 	if err != nil {
-		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-		Error("Read body file content fail: body=@%s err=%s\n", c.Request.Body, err)
+		logRunCaseFail(path, &c, "Read body file content fail: body=@%s err=%s", c.Request.Body, err)
 		stats.failCaseCount += 1
 		return
 	}
@@ -249,13 +209,12 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	resp, latency, err := client.Send(
 		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, debug)
 	if err != nil {
-		Tip("Run Case: %s | %s | [%s %s]\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-		Error("Send HTTP Request fail: %s\n", err)
+		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
 		return
 	}
 
-	Tip("Run Case: %s | %s | [%s %s] | %dms\n", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
+	log.Tip("Run Case: %s | %s | [%s %s] | %dms", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
 
 	stats = doAssertions(allKeys, resp, c, latency)
 	return
@@ -416,14 +375,14 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 
 	for key, ctx := range keyAssertFuncs {
 		if allKeys.Has(key) {
-			Info("%s: ", key)
+			log.Infof("%s: ", key)
 			// TODO: break or not?
 			ok, message := ctx.f(ctx.element1, ctx.element2)
 			if ok {
-				OK()
+				log.OK()
 				stats.okAssertCount += 1
 			} else {
-				Fail(message)
+				log.Fail(message)
 				stats.failAssertCount += 1
 			}
 		}
@@ -455,14 +414,14 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
-		Info("assert.json.%stats: ", path)
+		log.Info("assert.json.%stats: ", path)
 
 		if jsonData == nil {
 			ok, message := assert.Equal(nil, expectedValue)
 			if ok {
 				stats.okAssertCount += 1
 			} else {
-				Fail(message)
+				log.Fail(message)
 				stats.failAssertCount += 1
 			}
 			continue
@@ -470,7 +429,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 
 		actualValue, err := jmespath.Search(path, jsonData)
 		if err != nil {
-			Fail(fmt.Sprintf("search json data fail, err=%s, path=%s, expected=%s\n", err, path, expectedValue))
+			log.Fail(fmt.Sprintf("search json data fail, err=%s, path=%s, expected=%s\n", err, path, expectedValue))
 		} else {
 
 			//fmt.Printf("%T, %T", actualValue, expectedValue)
@@ -486,10 +445,10 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 
 			ok, message := assert.Equal(actualValue, expectedValue)
 			if ok {
-				OK()
+				log.OK()
 				stats.okAssertCount += 1
 			} else {
-				Fail(message)
+				log.Fail(message)
 				stats.failAssertCount += 1
 			}
 		}
