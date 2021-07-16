@@ -38,7 +38,9 @@ So, here is the httptest
 - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
 - configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
 - sent request body via external file `body = "@./post_body_file"`
-  
+- support post form, see [examples/form.toml](./examples/form.toml)
+- support `-q/--quiet` to silent the print, for check `$?` only
+
 ## examples
 
 simplest
@@ -155,9 +157,8 @@ value = 4
 
 ## TODO
 
-- [ ] support request body type, json/form/msgpack/zip.....
+- [ ] support request body type, msgpack/zip.....
 - [ ] supoort status_in/contentType_in
-- [ ] --quiet, all output to /dev/null
 - [ ] work with cookies, how to share between cases?
 - [ ] `-c dev.toml`, env vars and render everywhere
 - [ ] support trigger: stop run the case if fail, or continue
