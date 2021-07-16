@@ -23,6 +23,7 @@ So, here is the httptest
 
 ![](./examples/screenshots/run_with_debug.jpg)
 
+![](./examples/screenshots/run_quiet.jpg)
 
 ## features
 
