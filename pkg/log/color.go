@@ -16,6 +16,12 @@ func Tip(format string, a ...interface{}) {
 	}
 }
 
+func Warning(format string, a ...interface{}) {
+	if !quiet {
+		color.New(color.FgYellow).PrintfFunc()(format+"\n", a...)
+	}
+}
+
 func Infof(format string, a ...interface{}) {
 	if !quiet {
 		color.New(color.FgWhite).PrintfFunc()(format, a...)

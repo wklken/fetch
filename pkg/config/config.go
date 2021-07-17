@@ -1,6 +1,7 @@
 package config
 
 type RunConfig struct {
-	Debug bool
-	Env   map[string]interface{}
+	Debug  bool
+	Render bool
+	Env    map[string]interface{}
 }

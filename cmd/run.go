@@ -195,6 +195,11 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	//fmt.Println("allKeys", allKeys)
 	//fmt.Printf("the case and data: %s, %+v", path, c)
 
+	// do render
+	if runConfig.Render && len(runConfig.Env) > 0 {
+		c.Render(runConfig.Env)
+	}
+
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 
 	// NOTE: if c.Request.Body begin with `@`, means it's a file

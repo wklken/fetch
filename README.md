@@ -27,20 +27,26 @@ So, here is the httptest
 
 ## features
 
+define:
 - define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
 - support http methods: get/post/put/delete/patch/head/options
+- support post form, [examples/form.toml](./examples/form.toml)
+- sent request body via external file `body = "@./post_body_file"`
+- support [go template](https://golang.org/pkg/text/template/) render in all string value, the env in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
+  
+assert:
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
 - assert numberic support `_in/_not_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
-- show run result with stats
-- exit code != 0 if got any fail assertions
+  
+cli:
+- `exit code != 0` if got any fail assertions
 - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+- quiet mode: `-q/--quiet` to silent the print, for check `$?` only
+- show run result with stats
 - configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
-- sent request body via external file `body = "@./post_body_file"`
-- support post form, see [examples/form.toml](./examples/form.toml)
-- support `-q/--quiet` to silent the print, for check `$?` only
 
 ## examples
 
@@ -150,6 +156,33 @@ path = "length(json.array)"
 value = 4
 ```
 
+with template render, `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
+
+```toml
+title = "http method post, use template"
+description = "http method post"
+
+[request]
+method = "post"
+url = "{{.host}}/post"
+body = """
+{
+    "hello": "{{.name}}",
+    "world": {{if .debug}}"in debug mode"{{else}}"not debug mode"{{end}},
+    "array": "{{range $i, $a := .array}} {{$i}}{{$a}} {{end}}"
+}
+"""
+[request.header]
+Content-Type = "{{.content_type}}"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "{{.content_type}}"
+```
+
 ## dependency
 
 - [default config file: toml](https://toml.io/en/)
@@ -158,13 +191,11 @@ value = 4
 
 ## TODO
 
-- [ ] `-c dev.toml`, env vars and render everywhere
 - [ ] work with cookies, how to share between cases?
-
-- [ ] assert redirect
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] support request body type, msgpack/zip.....
+- [ ] assert redirect
 - [ ] supoort status_in/contentType_in
 - [ ] support trigger: stop run the case if fail, or continue
 - [ ] truncate the huge string, keep the begin and end
@@ -179,6 +210,7 @@ value = 4
 - [ ] feature: retry
 - [ ] feature: repeat
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
+- [ ] case scope config, render=true, priority higher than global config
 
 ## inspired by
 
