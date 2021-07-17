@@ -31,16 +31,16 @@ define:
 - define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
 - support http methods: get/post/put/delete/patch/head/options
 - support post form, [examples/form.toml](./examples/form.toml)
-- sent request body via external file `body = "@./post_body_file"`
-- support [go template](https://golang.org/pkg/text/template/) render in all string value, the env in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
-  
+- sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
+- support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
+
 assert:
 - assert status/statusCode/contentLength/contentType/body
 - assert latency
 - assert numberic support `_in/_not_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
-- assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html)
-  
+- assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
+
 cli:
 - `exit code != 0` if got any fail assertions
 - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
