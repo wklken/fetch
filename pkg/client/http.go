@@ -1,64 +1,14 @@
 package client
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
-	"net/http/httputil"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/wklken/httptest/pkg/config"
-
-	"github.com/wklken/httptest/pkg/log"
 )
-
-func parseBodyIfGotAFile(caseDir string, body string) (content string, err error) {
-	content = body
-	if body != "" && strings.HasPrefix(body, "@") {
-		bodyFilePath := strings.TrimPrefix(body, "@")
-
-		// NOTE: should be relative path to the `path`
-		realBodyFilePath := filepath.Join(caseDir, bodyFilePath)
-
-		if _, err = os.Stat(realBodyFilePath); os.IsNotExist(err) {
-			return
-		}
-
-		var dat []byte
-		dat, err = ioutil.ReadFile(realBodyFilePath)
-		if err != nil {
-			return
-		}
-
-		content = string(dat)
-	}
-
-	return content, nil
-}
-
-func parseCookiesIfGotAFile(caseDir string, cookie string) (cookies []*http.Cookie, err error) {
-	cookieFilePath := strings.TrimPrefix(cookie, "@")
-
-	realCookieFilePath := filepath.Join(caseDir, cookieFilePath)
-
-	if _, err = os.Stat(realCookieFilePath); os.IsNotExist(err) {
-		return
-	}
-
-	var dat []byte
-	dat, err = ioutil.ReadFile(realCookieFilePath)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal(dat, &cookies)
-	return
-}
 
 func Send(
 	caseDir string,
@@ -74,15 +24,11 @@ func Send(
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	requestBody, err := parseBodyIfGotAFile(caseDir, body)
 	if err != nil {
-		//logRunCaseFail(path, &c, "Read body file content fail: body=@%s err=%s", c.Request.Body, err)
-		//stats.failCaseCount += 1
 		return
 	}
 
-	httpMethod := strings.ToUpper(method)
-
 	var req *http.Request
-
+	httpMethod := strings.ToUpper(method)
 	switch httpMethod {
 	case http.MethodGet, http.MethodHead, http.MethodOptions:
 		req, err = http.NewRequest(httpMethod, url, nil)
@@ -106,6 +52,13 @@ func Send(
 			req.Header.Set(k, v)
 		}
 	}
+
+	// set header: basic_auth
+	if !auth.Empty() {
+		req.SetBasicAuth(auth.Username, auth.Password)
+	}
+
+	// set cookie
 	if cookie != "" {
 		if !strings.HasPrefix(cookie, "@") {
 			req.Header.Set("Cookie", cookie)
@@ -122,28 +75,10 @@ func Send(
 		}
 	}
 
-	if !auth.Empty() {
-		req.SetBasicAuth(auth.Username, auth.Password)
-	}
-	//req.AddCookie(&http.Cookie{
-	//	Name:  "aaa",
-	//	Value: "123",
-	//})
-	//fmt.Println("see cookies", req.Cookies())
-
-	// dump request, for debug
-	if debug {
-		dump, err := httputil.DumpRequestOut(req, true)
-		if err != nil {
-			log.Info("DEBUG request: dump err %s", err)
-		} else {
-			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "> "))
-		}
-	}
+	dumpRequest(debug, req)
 
 	// do send
 	start := time.Now()
-
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return
@@ -158,37 +93,11 @@ func Send(
 
 	latency = time.Since(start).Milliseconds()
 
-	//fmt.Println("cookie jar:", jar)
-	//fmt.Println("response cookies:", resp.Cookies())
-	//for _, ck := range resp.Cookies() {
-	//	ck.String()
-	//}
-
 	if hook.SaveCookie != "" {
-		cookies := jar.Cookies(resp.Request.URL)
-		//fmt.Println("save cookies:", cookies)
-		bs, err1 := json.Marshal(cookies)
-		if err1 != nil {
-			err = err1
-			return
-		}
-		cookiePath := filepath.Join(caseDir, hook.SaveCookie)
-		//log.Info("saved cookie into %s", cookiePath)
-		err = ioutil.WriteFile(cookiePath, bs, 0644)
-		if err != nil {
-			return
-		}
+		saveCookies(caseDir, hook.SaveCookie, jar, resp)
 	}
 
-	// dump request, for debug
-	if debug {
-		dump, err := httputil.DumpResponse(resp, true)
-		if err != nil {
-			log.Info("DEBUG response: dump err %s", err)
-		} else {
-			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "< "))
-		}
-	}
+	dumpResponse(debug, resp)
 
 	return
 }
