@@ -44,7 +44,7 @@ func Equal(actual interface{}, expected interface{}) (bool, string) {
 
 		// not equal, maybe is the type wrong
 		return false, fmt.Sprintf("not equal, expected=`%v`(%T), actual=`%v`(%T)",
-			expected, expected, actualValue, actualValue)
+			expected, expected, actualValue, actual)
 	} else {
 		return true, "OK"
 	}

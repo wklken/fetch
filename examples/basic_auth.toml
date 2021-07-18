@@ -1,0 +1,27 @@
+title = "http method basic auth"
+description = "http method basic auth"
+
+[request]
+method = "get"
+url = "http://httpbin.org/basic-auth/hello/world"
+[request.header]
+Content-Type = "application/json"
+
+[request.basic_auth]
+username = "hello"
+password = "world"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 0
+contentType = "application/json"
+
+[[assert.json]]
+path = "authenticated"
+value =  true
+
+[[assert.json]]
+path = "user"
+value = "hello" 

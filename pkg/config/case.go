@@ -8,13 +8,23 @@ import (
 
 // TODO: use reflect instead hard code
 
+type BasicAuth struct {
+	Username string
+	Password string
+}
+
+func (b *BasicAuth) Empty() bool {
+	return b.Username == "" && b.Password == ""
+}
+
 type Request struct {
 	Method string
 	URL    string
 	Body   string
-	Cookie string
 
-	Header map[string]string
+	Header    map[string]string
+	Cookie    string
+	BasicAuth BasicAuth `mapstructure:"basic_auth"`
 }
 
 const TplBrace = "{{"

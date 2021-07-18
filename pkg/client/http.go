@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wklken/httptest/pkg/config"
+
 	"github.com/wklken/httptest/pkg/log"
 )
 
@@ -16,6 +18,7 @@ func Send(
 	hasBody bool, body string,
 	headers map[string]string,
 	cookie string,
+	auth config.BasicAuth,
 	debug bool,
 ) (resp *http.Response, latency int64, err error) {
 	httpMethod := strings.ToUpper(method)
@@ -47,6 +50,10 @@ func Send(
 	}
 	if cookie != "" {
 		req.Header.Set("Cookie", cookie)
+	}
+
+	if !auth.Empty() {
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 	//req.AddCookie(&http.Cookie{
 	//	Name:  "aaa",

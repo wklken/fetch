@@ -34,6 +34,7 @@ define:
 - sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
 - support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
 - support send cookie [examples/cookies.toml](./examples/cookies.toml)
+- suuport basic auth [examples/basic_auth.toml](./examples/basic_auth.toml)
 
 assert:
 - assert status/statusCode/contentLength/contentType/body

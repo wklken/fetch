@@ -211,7 +211,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	}
 
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, c.Request.Cookie, debug)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, debug)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
@@ -418,7 +418,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
-		log.Info("assert.json.%stats: ", path)
+		log.Infof("assert.json.%s: ", path)
 
 		if jsonData == nil {
 			ok, message := assert.Equal(nil, expectedValue)
