@@ -12,6 +12,7 @@ type Request struct {
 	Method string
 	URL    string
 	Body   string
+	Cookie string
 
 	Header map[string]string
 }

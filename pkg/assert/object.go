@@ -40,7 +40,11 @@ func Equal(actual interface{}, expected interface{}) (bool, string) {
 		// TODO: truncate the middle, keep the begin and end
 		actualStr := util.TruncateString(fmt.Sprintf("%v", actual), 100)
 
-		return false, fmt.Sprintf("not equal, expected=`%v`, actual=`%v`", expected, prettyLine(actualStr))
+		actualValue := prettyLine(actualStr)
+
+		// not equal, maybe is the type wrong
+		return false, fmt.Sprintf("not equal, expected=`%v`(%T), actual=`%v`(%T)",
+			expected, expected, actualValue, actualValue)
 	} else {
 		return true, "OK"
 	}

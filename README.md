@@ -33,6 +33,7 @@ define:
 - support post form, [examples/form.toml](./examples/form.toml)
 - sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
 - support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
+- support send cookie [examples/cookies.toml](./examples/cookies.toml)
 
 assert:
 - assert status/statusCode/contentLength/contentType/body
@@ -191,7 +192,8 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] work with cookies, how to share between cases?
+- [ ] basic auth
+- [ ] share cookie
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] support request body type, msgpack/zip.....

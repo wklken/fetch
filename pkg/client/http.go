@@ -15,6 +15,7 @@ func Send(
 	url string,
 	hasBody bool, body string,
 	headers map[string]string,
+	cookie string,
 	debug bool,
 ) (resp *http.Response, latency int64, err error) {
 	httpMethod := strings.ToUpper(method)
@@ -44,6 +45,14 @@ func Send(
 			req.Header.Set(k, v)
 		}
 	}
+	if cookie != "" {
+		req.Header.Set("Cookie", cookie)
+	}
+	//req.AddCookie(&http.Cookie{
+	//	Name:  "aaa",
+	//	Value: "123",
+	//})
+	//fmt.Println("see cookies", req.Cookies())
 
 	// dump request, for debug
 	if debug {
@@ -64,6 +73,8 @@ func Send(
 	}
 
 	latency = time.Since(start).Milliseconds()
+
+	//fmt.Println("response cookies:", resp.Cookies())
 
 	// dump request, for debug
 	if debug {

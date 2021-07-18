@@ -211,7 +211,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	}
 
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, debug)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, c.Request.Cookie, debug)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
