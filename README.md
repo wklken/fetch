@@ -35,6 +35,7 @@ define:
 - support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
 - support send cookie [examples/cookies.toml](./examples/cookies.toml)
 - suuport basic auth [examples/basic_auth.toml](./examples/basic_auth.toml)
+- support share cookie [examples/share_cookies_save.toml](./examples/share_cookies_save.toml) and [examples/share_cookies_use.toml](./examples/share_cookies_use.toml)
 
 assert:
 - assert status/statusCode/contentLength/contentType/body
@@ -194,16 +195,14 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] share cookie
-- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
-- [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] support request body type, msgpack/zip.....
 - [ ] assert redirect
 - [ ] supoort status_in/contentType_in
-- [ ] support trigger: stop run the case if fail, or continue
 - [ ] truncate the huge string, keep the begin and end
 - [ ] feature: ssl / https
-- [ ] display: file / line number to show which case fail
+- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
+- [ ] sub-command: `generate x` generate a case, from tpl
+- [ ] support trigger: stop run the case if fail, or continue
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] feature: data share between cases
 - [ ] how to run in order
@@ -214,6 +213,7 @@ contentType = "{{.content_type}}"
 - [ ] feature: repeat
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] case scope config, render=true, priority higher than global config
+- [ ] display: file / line number to show which case fail
 
 ## inspired by
 

@@ -153,12 +153,17 @@ func (a *AssertJson) Render(ctx map[string]interface{}) {
 	}
 }
 
+type Hook struct {
+	SaveCookie string `mapstructure:"save_cookie"`
+}
+
 type Case struct {
 	Title       string
 	Description string
 
 	Request Request
 	Assert  Assert
+	Hook    Hook
 }
 
 func (c *Case) Render(ctx map[string]interface{}) {

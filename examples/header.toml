@@ -3,15 +3,14 @@ description = "http method get headers"
 
 [request]
 method = "get"
-url = "http://httpbin.org/headers"
+url = "http://httpbin.org/response-headers?freeform=hello"
 
 
 [assert]
 status = "ok"
 statusCode = 200
-contentLength_gt = 180
 contentType = "application/json"
 
 [assert.header]
 server = "gunicorn/19.9.0"
-content-length = "190"
+freeform = "hello"

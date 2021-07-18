@@ -18,7 +18,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -147,30 +146,6 @@ func (s *Stats) Add(s1 Stats) {
 	s.failAssertCount += s1.failAssertCount
 }
 
-func parseBodyIfGotAFile(caseFilePath string, body string) (content string, err error) {
-	content = body
-	if body != "" && strings.HasPrefix(body, "@") {
-		bodyFilePath := strings.TrimPrefix(body, "@")
-
-		// NOTE: should be relative path to the `path`
-		realBodyFilePath := filepath.Join(filepath.Dir(caseFilePath), bodyFilePath)
-
-		if _, err = os.Stat(realBodyFilePath); os.IsNotExist(err) {
-			return
-		}
-
-		var dat []byte
-		dat, err = ioutil.ReadFile(realBodyFilePath)
-		if err != nil {
-			return
-		}
-
-		content = string(dat)
-	}
-
-	return content, nil
-}
-
 func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
 	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 	log.Error(format, a...)
@@ -192,7 +167,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	fmt.Println("allKeys", allKeys)
+	//fmt.Println("allKeys", allKeys)
 	//fmt.Printf("the case and data: %s, %+v", path, c)
 
 	// do render
@@ -202,16 +177,9 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 
-	// NOTE: if c.Request.Body begin with `@`, means it's a file
-	body, err := parseBodyIfGotAFile(path, c.Request.Body)
-	if err != nil {
-		logRunCaseFail(path, &c, "Read body file content fail: body=@%s err=%s", c.Request.Body, err)
-		stats.failCaseCount += 1
-		return
-	}
-
 	resp, latency, err := client.Send(
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, debug)
+		filepath.Dir(path),
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, debug)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
@@ -450,6 +418,13 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 		if err != nil {
 			log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
 		} else {
+			// missing
+			if actualValue == nil {
+				_, message := assert.Equal(nil, expectedValue)
+				log.Fail(message)
+				stats.failAssertCount += 1
+				continue
+			}
 
 			//fmt.Printf("%T, %T", actualValue, expectedValue)
 			// make float64 compare with int64

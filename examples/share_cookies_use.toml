@@ -1,10 +1,10 @@
-title = "http method get cookies"
-description = "http method get cookies"
+title = "http method share cookies"
+description = "http method share cookies"
 
 [request]
 method = "get"
 url = "http://httpbin.org/cookies"
-cookie = "uid=123"
+cookie = "@share_cookies.txt"
 [request.header]
 Content-Type = "application/json"
 
@@ -16,5 +16,5 @@ contentLength_gt = 0
 contentType = "application/json"
 
 [[assert.json]]
-path = "cookies.uid"
-value =  "123"
+path = "cookies.name1"
+value =  "value1"

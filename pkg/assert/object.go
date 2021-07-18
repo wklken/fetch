@@ -29,9 +29,8 @@ package assert
 import (
 	"fmt"
 
-	"github.com/wklken/httptest/pkg/util"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/wklken/httptest/pkg/util"
 )
 
 func Equal(actual interface{}, expected interface{}) (bool, string) {
