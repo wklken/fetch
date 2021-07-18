@@ -94,7 +94,10 @@ func Send(
 	latency = time.Since(start).Milliseconds()
 
 	if hook.SaveCookie != "" {
-		saveCookies(caseDir, hook.SaveCookie, jar, resp)
+		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)
+		if err != nil {
+			return
+		}
 	}
 
 	dumpResponse(debug, resp)

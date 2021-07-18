@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -63,7 +62,7 @@ var runCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			fmt.Println("args required")
+			log.Error("args required")
 			os.Exit(1)
 			return
 		}
@@ -119,8 +118,6 @@ var runCmd = &cobra.Command{
 		}
 	},
 }
-
-// TODO: --quiet with all the error handler => fmt.Println
 
 func init() {
 	rootCmd.AddCommand(runCmd)
@@ -348,7 +345,6 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	for key, ctx := range keyAssertFuncs {
 		if allKeys.Has(key) {
 			log.Infof("%s: ", key)
-			// TODO: break or not?
 			ok, message := ctx.f(ctx.element1, ctx.element2)
 			if ok {
 				log.OK()
@@ -379,21 +375,19 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 	if contentType == binding.MIMEJSON {
 		err = binding.JSON.BindBody(body, &jsonData)
 		if err != nil {
-			// TODO
-			fmt.Println("binding.json fail", err)
-			// ?
+			log.Fail("binding.json fail: %s", err)
+			stats.failAssertCount += int64(len(c.Assert.Json))
 			return
 		}
-	}
 
-	if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
-		s1 := doJsonAssertions(jsonData, c.Assert.Json)
-		stats.Add(s1)
+		if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
+			s1 := doJsonAssertions(jsonData, c.Assert.Json)
+			stats.Add(s1)
+		}
 	}
 
 	//   5. set timeout=x, each case?
 
-	// TODO: =============================================
 	return
 }
 
