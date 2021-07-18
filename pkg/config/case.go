@@ -89,7 +89,8 @@ type Assert struct {
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
-	Json []AssertJson `mapstructure:"json"`
+	Json   []AssertJson `mapstructure:"json"`
+	Header map[string]interface{}
 }
 
 func (a *Assert) Render(ctx map[string]interface{}) {

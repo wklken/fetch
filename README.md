@@ -42,6 +42,7 @@ assert:
 - assert numberic support `_in/_not_in/_lt/_lte/_gt/_gte`
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
+- assert response headers [examples/header.toml](./examples/header.toml)
 
 cli:
 - `exit code != 0` if got any fail assertions
@@ -193,7 +194,6 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] basic auth
 - [ ] share cookie
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl

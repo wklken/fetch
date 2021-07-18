@@ -1,0 +1,17 @@
+title = "http method get headers"
+description = "http method get headers"
+
+[request]
+method = "get"
+url = "http://httpbin.org/headers"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/json"
+
+[assert.header]
+server = "gunicorn/19.9.0"
+content-length = "190"

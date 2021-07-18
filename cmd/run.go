@@ -192,7 +192,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	//fmt.Println("allKeys", allKeys)
+	fmt.Println("allKeys", allKeys)
 	//fmt.Printf("the case and data: %s, %+v", path, c)
 
 	// do render
@@ -389,6 +389,21 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 				log.Fail(message)
 				stats.failAssertCount += 1
 			}
+		}
+	}
+
+	if len(c.Assert.Header) > 0 {
+		for key, value := range c.Assert.Header {
+			log.Infof("assert.header.%s: ", key)
+			ok, message := assert.Equal(resp.Header.Get(key), value)
+			if ok {
+				log.OK()
+				stats.okAssertCount += 1
+			} else {
+				log.Fail(message)
+				stats.failAssertCount += 1
+			}
+
 		}
 	}
 
