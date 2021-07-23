@@ -1,5 +1,6 @@
 debug = false
 render = true
+failFast = true
 
 [env]
 debug = true

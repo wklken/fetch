@@ -97,6 +97,11 @@ var runCmd = &cobra.Command{
 			s := run(path, &runConfig)
 			totalStats.Add(s)
 
+			if runConfig.FailFast && s.failAssertCount > 0 {
+				log.Info("failFast=True, quit, the execute result: 1")
+				os.Exit(1)
+			}
+
 			// if got fail assert, the case is fail
 			if s.failAssertCount > 0 {
 				totalStats.failCaseCount += 1
