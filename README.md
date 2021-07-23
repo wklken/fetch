@@ -44,6 +44,7 @@ assert:
 - assert string support `_contains/_not_contains/_startswith/_endswith`
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
 - assert response headers [examples/header.toml](./examples/header.toml)
+- assert response has redirect [examples/redirect.toml](./examples/redirect.toml)
 
 cli:
 - `exit code != 0` if got any fail assertions
@@ -196,9 +197,8 @@ contentType = "{{.content_type}}"
 ## TODO
 
 - [ ] support request body type, msgpack/zip.....
-- [ ] assert redirect
-- [ ] supoort status_in/contentType_in
 - [ ] truncate the huge string, keep the begin and end
+- [ ] supoort status_in/contentType_in
 - [ ] feature: ssl / https
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl

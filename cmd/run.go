@@ -174,7 +174,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 
-	resp, latency, err := client.Send(
+	resp, hasRedirect, latency, err := client.Send(
 		filepath.Dir(path),
 		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, debug)
 	if err != nil {
@@ -185,11 +185,11 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	log.Tip("Run Case: %s | %s | [%s %s] | %dms", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
 
-	stats = doAssertions(allKeys, resp, c, latency)
+	stats = doAssertions(allKeys, resp, c, hasRedirect, latency)
 	return
 }
 
-func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, latency int64) (stats Stats) {
+func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, hasRedirect bool, latency int64) (stats Stats) {
 
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
@@ -339,6 +339,11 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, l
 			f:        assert.NotEndsWith,
 			element1: bodyStr,
 			element2: c.Assert.BodyNotEndsWith,
+		},
+		"assert.hasredirect": {
+			f:        assert.Equal,
+			element1: hasRedirect,
+			element2: c.Assert.HasRedirect,
 		},
 	}
 

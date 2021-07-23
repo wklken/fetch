@@ -1,0 +1,12 @@
+title = "http redirect"
+description = "http redirect"
+
+[request]
+method = "get"
+url = "http://www.qq.com/"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+hasRedirect = false

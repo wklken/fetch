@@ -20,7 +20,7 @@ func Send(
 	auth config.BasicAuth,
 	hook config.Hook,
 	debug bool,
-) (resp *http.Response, latency int64, err error) {
+) (resp *http.Response, hasRedirect bool, latency int64, err error) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	requestBody, err := parseBodyIfGotAFile(caseDir, body)
 	if err != nil {
@@ -34,7 +34,24 @@ func Send(
 		req, err = http.NewRequest(httpMethod, url, nil)
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		if hasBody {
-			req, err = http.NewRequest(httpMethod, url, strings.NewReader(requestBody))
+			//fmt.Printf("has body, the headers: %+v\n", headers)
+
+			bodyReader := strings.NewReader(requestBody)
+
+			// TODO: support msgpack? and the gzip?
+			//if ct, ok := headers["content-type"]; ok {
+			//	switch strings.ToLower(ct) {
+			//	case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+			//		bs, err1 := msgpack.Marshal(requestBody)
+			//		if err1 != nil {
+			//			return fmt.Errorf("do msgpack encode fail")
+			//
+			//		}
+			//
+			//	}
+			//}
+
+			req, err = http.NewRequest(httpMethod, url, bodyReader)
 		} else {
 			req, err = http.NewRequest(httpMethod, url, nil)
 		}
@@ -85,6 +102,10 @@ func Send(
 	}
 	client := &http.Client{
 		Jar: jar,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			hasRedirect = true
+			return nil
+		},
 	}
 	resp, err = client.Do(req)
 	if err != nil {
@@ -92,6 +113,7 @@ func Send(
 	}
 
 	latency = time.Since(start).Milliseconds()
+	//fmt.Println("hasRedirect: ", hasRedirect)
 
 	if hook.SaveCookie != "" {
 		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)

@@ -91,6 +91,8 @@ type Assert struct {
 
 	Json   []AssertJson `mapstructure:"json"`
 	Header map[string]interface{}
+
+	HasRedirect bool
 }
 
 func (a *Assert) Render(ctx map[string]interface{}) {
