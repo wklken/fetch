@@ -200,24 +200,22 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
+- [ ] the in/not_in string array pretty print
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] display: file / line number to show which case fail
 - [ ] set timeout each case or in global
-- [ ] support request body type, msgpack/zip.....
-- [ ] truncate the huge string, keep the begin and end
-- [ ] support status_in/contentType_in
 - [ ] feature: ssl / https
 - [ ] feature: retry
 - [ ] feature: repeat
-- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
-- [ ] sub-command: `generate x` generate a case, from tpl
-- [ ] support trigger: stop run the case if fail, or continue
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] feature: data share between cases
 - [ ] how to run in order
 - [ ] how to run in parallel
 - [ ] multiple cases in one file, like ginkgo?
 - [ ] case scope config, render=true, priority higher than global config
+- [ ] support request body type, msgpack/zip.....
+- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
+- [ ] sub-command: `generate x` generate a case, from tpl
 
 ## inspired by
 

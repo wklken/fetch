@@ -21,3 +21,11 @@ func TruncateString(s string, n int) string {
 	}
 	return s[:n]
 }
+
+func OmitMiddle(s string, head int, tail int) string {
+	if len(s) <= head+tail {
+		return s
+	}
+
+	return s[:head] + "..." + s[len(s)-tail:]
+}
