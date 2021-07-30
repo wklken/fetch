@@ -253,13 +253,31 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
 			element2: strings.ToLower(c.Assert.Status),
 		},
-		// TODO: status_in
+		"assert.status_in": {
+			f:        assert.In,
+			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+			element2: util.ToLower(c.Assert.StatusIn),
+		},
+		"assert.status_not_in": {
+			f:        assert.NotIn,
+			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+			element2: util.ToLower(c.Assert.StatusNotIn),
+		},
 		"assert.contenttype": {
 			f:        assert.Equal,
 			element1: strings.ToLower(contentType),
 			element2: strings.ToLower(c.Assert.ContentType),
 		},
-		// TODO: contentType_in
+		"assert.contenttype_in": {
+			f:        assert.In,
+			element1: strings.ToLower(contentType),
+			element2: util.ToLower(c.Assert.ContentTypeIn),
+		},
+		"assert.contenttype_not_in": {
+			f:        assert.NotIn,
+			element1: strings.ToLower(contentType),
+			element2: util.ToLower(c.Assert.ContentTypeNotIn),
+		},
 
 		// contentlength
 		"assert.contentlength": {

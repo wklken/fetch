@@ -50,7 +50,9 @@ func (r *Request) Render(ctx map[string]interface{}) {
 }
 
 type Assert struct {
-	Status string
+	Status      string
+	StatusIn    []string `mapstructure:"status_in"`
+	StatusNotIn []string `mapstructure:"status_not_in"`
 
 	StatusCode      int
 	StatusCodeIn    []int `mapstructure:"statusCode_in"`
@@ -66,11 +68,7 @@ type Assert struct {
 	ContentLengthGt  int64 `mapstructure:"contentLength_gt"`
 	ContentLengthGte int64 `mapstructure:"contentLength_gte"`
 
-	ContentType string
-
-	// TODO
-	StatusIn         []string `mapstructure:"status_in"`
-	StatusNotIn      []string `mapstructure:"status_not_in"`
+	ContentType      string
 	ContentTypeIn    []string `mapstructure:"contentType_in"`
 	ContentTypeNotIn []string `mapstructure:"contentType_not_in"`
 

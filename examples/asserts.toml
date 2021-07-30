@@ -11,6 +11,9 @@ hello = "world"
 [assert]
 # status
 status = "ok"
+status_in = ["bad request", "geteway timeout"]
+status_not_in = ["ok", "geteway timeout"]
+
 statusCode = 200
 statusCode_in = [400, 500]
 statusCode_not_in = [200, 400]
@@ -28,6 +31,8 @@ contentLength_gte = 180
 
 # content-type
 contentType = "abc"
+contentType_in = ["abc"]
+contentType_not_in = ["abc"]
 
 # body
 body = "HTTPBIN is awesome"

@@ -59,7 +59,7 @@ func dumpResponse(debug bool, resp *http.Response) {
 		if err != nil {
 			log.Info("DEBUG response: dump err %s", err)
 		} else {
-			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "< "))
+			log.Info("DEBUG response: \n%s", prettyFormatDump(dump, "< "))
 		}
 	}
 
