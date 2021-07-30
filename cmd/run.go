@@ -209,171 +209,264 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 		element2 interface{}
 	}
 
-	// TODO: how to keep the order!!!!!!
-	keyAssertFuncs := map[string]Ctx{
+	type keyAssert struct {
+		key string
+		ctx Ctx
+	}
+
+	// NOTE: the order
+	keyAsserts := []keyAssert{
 		// statuscode
-		"assert.statuscode": {
-			f:        assert.Equal,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCode,
+		{
+			key: "assert.statuscode",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCode,
+			},
 		},
-		"assert.statuscode_lt": {
-			f:        assert.Less,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeLt,
+		{
+			key: "assert.statuscode_lt",
+			ctx: Ctx{
+				f:        assert.Less,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeLt,
+			},
 		},
-		"assert.statuscode_lte": {
-			f:        assert.LessOrEqual,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeLte,
+		{
+			key: "assert.statuscode_lte",
+			ctx: Ctx{
+				f:        assert.LessOrEqual,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeLte,
+			},
 		},
-		"assert.statuscode_gt": {
-			f:        assert.Greater,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeGt,
+		{
+			key: "assert.statuscode_gt",
+			ctx: Ctx{
+				f:        assert.Greater,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeGt,
+			},
 		},
-		"assert.statuscode_gte": {
-			f:        assert.GreaterOrEqual,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeGte,
+		{
+			key: "assert.statuscode_gte",
+			ctx: Ctx{
+				f:        assert.GreaterOrEqual,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeGte,
+			},
 		},
-		"assert.statuscode_in": {
-			f:        assert.In,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeIn,
+		{
+			key: "assert.statuscode_in",
+			ctx: Ctx{
+				f:        assert.In,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeIn,
+			},
 		},
-		"assert.statuscode_not_in": {
-			f:        assert.NotIn,
-			element1: resp.StatusCode,
-			element2: c.Assert.StatusCodeNotIn,
+		{
+			key: "assert.statuscode_not_in",
+			ctx: Ctx{
+				f:        assert.NotIn,
+				element1: resp.StatusCode,
+				element2: c.Assert.StatusCodeNotIn,
+			},
 		},
 		// status
-		"assert.status": {
-			f:        assert.Equal,
-			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-			element2: strings.ToLower(c.Assert.Status),
+		{
+			key: "assert.status",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+				element2: strings.ToLower(c.Assert.Status),
+			},
 		},
-		"assert.status_in": {
-			f:        assert.In,
-			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-			element2: util.ToLower(c.Assert.StatusIn),
+		{
+			key: "assert.status_in",
+			ctx: Ctx{
+				f:        assert.In,
+				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+				element2: util.ToLower(c.Assert.StatusIn),
+			},
 		},
-		"assert.status_not_in": {
-			f:        assert.NotIn,
-			element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-			element2: util.ToLower(c.Assert.StatusNotIn),
+		{
+			key: "assert.status_not_in",
+			ctx: Ctx{
+				f:        assert.NotIn,
+				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
+				element2: util.ToLower(c.Assert.StatusNotIn),
+			},
 		},
-		"assert.contenttype": {
-			f:        assert.Equal,
-			element1: strings.ToLower(contentType),
-			element2: strings.ToLower(c.Assert.ContentType),
+		{
+			key: "assert.contenttype",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: strings.ToLower(contentType),
+				element2: strings.ToLower(c.Assert.ContentType),
+			},
 		},
-		"assert.contenttype_in": {
-			f:        assert.In,
-			element1: strings.ToLower(contentType),
-			element2: util.ToLower(c.Assert.ContentTypeIn),
+		{
+			key: "assert.contenttype_in",
+			ctx: Ctx{
+				f:        assert.In,
+				element1: strings.ToLower(contentType),
+				element2: util.ToLower(c.Assert.ContentTypeIn),
+			},
 		},
-		"assert.contenttype_not_in": {
-			f:        assert.NotIn,
-			element1: strings.ToLower(contentType),
-			element2: util.ToLower(c.Assert.ContentTypeNotIn),
+		{
+			key: "assert.contenttype_not_in",
+			ctx: Ctx{
+				f:        assert.NotIn,
+				element1: strings.ToLower(contentType),
+				element2: util.ToLower(c.Assert.ContentTypeNotIn),
+			},
 		},
-
 		// contentlength
-		"assert.contentlength": {
-			f:        assert.Equal,
-			element1: resp.ContentLength,
-			element2: c.Assert.ContentLength,
+		{
+			key: "assert.contentlength",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: resp.ContentLength,
+				element2: c.Assert.ContentLength,
+			},
 		},
-		"assert.contentlength_lt": {
-			f:        assert.Less,
-			element1: resp.ContentLength,
-			element2: c.Assert.ContentLengthLt,
+		{
+			key: "assert.contentlength_lt",
+			ctx: Ctx{
+				f:        assert.Less,
+				element1: resp.ContentLength,
+				element2: c.Assert.ContentLengthLt,
+			},
 		},
-		"assert.contentlength_lte": {
-			f:        assert.LessOrEqual,
-			element1: resp.ContentLength,
-			element2: c.Assert.ContentLengthLte,
+		{
+			key: "assert.contentlength_lte",
+			ctx: Ctx{
+				f:        assert.LessOrEqual,
+				element1: resp.ContentLength,
+				element2: c.Assert.ContentLengthLte,
+			},
 		},
-		"assert.contentlength_gt": {
-			f:        assert.Greater,
-			element1: resp.ContentLength,
-			element2: c.Assert.ContentLengthGt,
+		{
+			key: "assert.contentlength_gt",
+			ctx: Ctx{
+				f:        assert.Greater,
+				element1: resp.ContentLength,
+				element2: c.Assert.ContentLengthGt,
+			},
 		},
-		"assert.contentlength_gte": {
-			f:        assert.GreaterOrEqual,
-			element1: resp.ContentLength,
-			element2: c.Assert.ContentLengthGte,
+		{
+			key: "assert.contentlength_gte",
+			ctx: Ctx{
+				f:        assert.GreaterOrEqual,
+				element1: resp.ContentLength,
+				element2: c.Assert.ContentLengthGte,
+			},
 		},
-
 		// latency
-		"assert.latency_lt": {
-			f:        assert.Less,
-			element1: latency,
-			element2: c.Assert.LatencyLt,
+		{
+			key: "assert.latency_lt",
+			ctx: Ctx{
+				f:        assert.Less,
+				element1: latency,
+				element2: c.Assert.LatencyLt,
+			},
 		},
-		"assert.latency_lte": {
-			f:        assert.LessOrEqual,
-			element1: latency,
-			element2: c.Assert.LatencyLte,
+		{
+			key: "assert.latency_lte",
+			ctx: Ctx{
+				f:        assert.LessOrEqual,
+				element1: latency,
+				element2: c.Assert.LatencyLte,
+			},
 		},
-		"assert.latency_gt": {
-			f:        assert.Greater,
-			element1: latency,
-			element2: c.Assert.LatencyGt,
+		{
+			key: "assert.latency_gt",
+			ctx: Ctx{
+				f:        assert.Greater,
+				element1: latency,
+				element2: c.Assert.LatencyGt,
+			},
 		},
-		"assert.latency_gte": {
-			f:        assert.GreaterOrEqual,
-			element1: latency,
-			element2: c.Assert.LatencyGte,
+		{
+			key: "assert.latency_gte",
+			ctx: Ctx{
+				f:        assert.GreaterOrEqual,
+				element1: latency,
+				element2: c.Assert.LatencyGte,
+			},
 		},
 		// body
-		"assert.body": {
-			f:        assert.Equal,
-			element1: bodyStr,
-			element2: c.Assert.Body,
+		{
+			key: "assert.body",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: bodyStr,
+				element2: c.Assert.Body,
+			},
 		},
-		"assert.body_contains": {
-			f:        assert.Contains,
-			element1: bodyStr,
-			element2: c.Assert.BodyContains,
+		{
+			key: "assert.body_contains",
+			ctx: Ctx{
+				f:        assert.Contains,
+				element1: bodyStr,
+				element2: c.Assert.BodyContains,
+			},
 		},
-		"assert.body_not_contains": {
-			f:        assert.NotContains,
-			element1: bodyStr,
-			element2: c.Assert.BodyNotContains,
+		{
+			key: "assert.body_not_contains",
+			ctx: Ctx{
+				f:        assert.NotContains,
+				element1: bodyStr,
+				element2: c.Assert.BodyNotContains,
+			},
 		},
-		"assert.body_startswith": {
-			f:        assert.StartsWith,
-			element1: bodyStr,
-			element2: c.Assert.BodyStartsWith,
+		{
+			key: "assert.body_startswith",
+			ctx: Ctx{
+				f:        assert.StartsWith,
+				element1: bodyStr,
+				element2: c.Assert.BodyStartsWith,
+			},
 		},
-		"assert.body_endswith": {
-			f:        assert.EndsWith,
-			element1: bodyStr,
-			element2: c.Assert.BodyEndsWith,
+		{
+			key: "assert.body_endswith",
+			ctx: Ctx{
+				f:        assert.EndsWith,
+				element1: bodyStr,
+				element2: c.Assert.BodyEndsWith,
+			},
 		},
-		"assert.body_not_startswith": {
-			f:        assert.NotStartsWith,
-			element1: bodyStr,
-			element2: c.Assert.BodyNotStartsWith,
+		{
+			key: "assert.body_not_startswith",
+			ctx: Ctx{
+				f:        assert.NotStartsWith,
+				element1: bodyStr,
+				element2: c.Assert.BodyNotStartsWith,
+			},
 		},
-		"assert.body_not_endswith": {
-			f:        assert.NotEndsWith,
-			element1: bodyStr,
-			element2: c.Assert.BodyNotEndsWith,
+		{
+			key: "assert.body_not_endswith",
+			ctx: Ctx{
+				f:        assert.NotEndsWith,
+				element1: bodyStr,
+				element2: c.Assert.BodyNotEndsWith,
+			},
 		},
-		"assert.hasredirect": {
-			f:        assert.Equal,
-			element1: hasRedirect,
-			element2: c.Assert.HasRedirect,
+		{
+			key: "assert.hasredirect",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: hasRedirect,
+				element2: c.Assert.HasRedirect,
+			},
 		},
 	}
 
-	for key, ctx := range keyAssertFuncs {
-		if allKeys.Has(key) {
-			log.Infof("%s: ", key)
-			ok, message := ctx.f(ctx.element1, ctx.element2)
+	for _, ka := range keyAsserts {
+		if allKeys.Has(ka.key) {
+			log.Infof("%s: ", ka.key)
+			ok, message := ka.ctx.f(ka.ctx.element1, ka.ctx.element2)
 			if ok {
 				log.OK()
 				stats.okAssertCount += 1
