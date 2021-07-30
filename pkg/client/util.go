@@ -11,7 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/wklken/httptest/pkg/util"
+
 	"github.com/wklken/httptest/pkg/log"
+)
+
+const (
+	maxResponseBodyLength = 1024
 )
 
 // from gin
@@ -52,6 +58,37 @@ func dumpRequest(debug bool, req *http.Request) {
 	}
 }
 
+// from: https://github.com/henvic/httpretty/blob/master/printer.go
+
+var binaryMediatypes = map[string]struct{}{
+	"application/pdf":               struct{}{},
+	"application/postscript":        struct{}{},
+	"image":                         struct{}{}, // for practical reasons, any image (including SVG) is considered binary data
+	"audio":                         struct{}{},
+	"application/ogg":               struct{}{},
+	"video":                         struct{}{},
+	"application/vnd.ms-fontobject": struct{}{},
+	"font":                          struct{}{},
+	"application/x-gzip":            struct{}{},
+	"application/zip":               struct{}{},
+	"application/x-rar-compressed":  struct{}{},
+	"application/wasm":              struct{}{},
+}
+
+func isBinaryMediatype(mediatype string) bool {
+	if _, ok := binaryMediatypes[mediatype]; ok {
+		return true
+	}
+
+	if parts := strings.SplitN(mediatype, "/", 2); len(parts) == 2 {
+		if _, ok := binaryMediatypes[parts[0]]; ok {
+			return true
+		}
+	}
+
+	return false
+}
+
 func dumpResponse(debug bool, resp *http.Response) {
 	// dump request, for debug
 	if debug {
@@ -59,6 +96,26 @@ func dumpResponse(debug bool, resp *http.Response) {
 		if err != nil {
 			log.Info("DEBUG response: dump err %s", err)
 		} else {
+
+			if contentType := resp.Header.Get("Content-Type"); contentType != "" && isBinaryMediatype(contentType) {
+				log.Info("DEBUG response: * body contains binary data")
+				return
+			}
+
+			respLines := prettyFormatDump(dump, "< ")
+
+			//fmt.Println("the contentLength:", resp.ContentLength)
+			if resp.ContentLength > maxResponseBodyLength || len(respLines) > maxResponseBodyLength {
+				actualLength := resp.ContentLength
+				if actualLength == -1 {
+					actualLength = int64(len(respLines))
+				}
+
+				log.Info("DEBUG response* body is too long (%d bytes) to print, skipping  (longer than %d bytes)\n", actualLength, maxResponseBodyLength)
+				log.Info("%s", util.TruncateString(respLines, maxResponseBodyLength))
+				return
+			}
+
 			log.Info("DEBUG response: \n%s", prettyFormatDump(dump, "< "))
 		}
 	}
