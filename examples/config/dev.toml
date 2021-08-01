@@ -1,9 +1,9 @@
 debug = false
 render = true
 failFast = true
+timeout = 100
 
 [env]
-debug = true
 hello = "world"
 name = "tom"
 host = "http://httpbin.org"

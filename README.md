@@ -56,6 +56,7 @@ cli:
 - configfile: `debug=true/false` to trigger debug print
 - configfile: `render=true/false` to use  go_template render the `env`
 - configfile: `failFast=true/false`, will exit if got one fail case while running
+- configfile: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
 
 
 ## examples
@@ -203,7 +204,7 @@ contentType = "{{.content_type}}"
 
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] display: file / line number to show which case fail
-- [ ] set timeout each case or in global
+- [ ] set timeout each case
 - [ ] feature: ssl / https
 - [ ] feature: retry
 - [ ] feature: repeat

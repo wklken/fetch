@@ -19,6 +19,7 @@ func Send(
 	cookie string,
 	auth config.BasicAuth,
 	hook config.Hook,
+	timeout int,
 	debug bool,
 ) (resp *http.Response, hasRedirect bool, latency int64, err error) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
@@ -106,6 +107,7 @@ func Send(
 			hasRedirect = true
 			return nil
 		},
+		Timeout: time.Duration(timeout) * time.Millisecond,
 	}
 	resp, err = client.Do(req)
 	if err != nil {

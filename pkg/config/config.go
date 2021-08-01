@@ -7,4 +7,7 @@ type RunConfig struct {
 
 	// exit 1 if got one assert fail
 	FailFast bool
+
+	// timeout in ms
+	Timeout int
 }

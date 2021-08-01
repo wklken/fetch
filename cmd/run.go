@@ -95,15 +95,15 @@ var runCmd = &cobra.Command{
 		start := time.Now()
 		for _, path := range args {
 			s := run(path, &runConfig)
-			totalStats.Add(s)
+			totalStats.MergeAssertCount(s)
 
-			if runConfig.FailFast && s.failAssertCount > 0 {
+			if runConfig.FailFast && (s.failCaseCount > 0 || s.failAssertCount > 0) {
 				log.Info("failFast=True, quit, the execute result: 1")
 				os.Exit(1)
 			}
 
 			// if got fail assert, the case is fail
-			if s.failAssertCount > 0 {
+			if s.failCaseCount > 0 || s.failAssertCount > 0 {
 				totalStats.failCaseCount += 1
 			} else {
 				totalStats.okCaseCount += 1
@@ -143,7 +143,8 @@ type Stats struct {
 	failAssertCount int64
 }
 
-func (s *Stats) Add(s1 Stats) {
+func (s *Stats) MergeAssertCount(s1 Stats) {
+	// NOTE: here only
 	s.okAssertCount += s1.okAssertCount
 	s.failAssertCount += s1.failAssertCount
 }
@@ -178,10 +179,11 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	}
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
+	timeout := runConfig.Timeout
 
 	resp, hasRedirect, latency, err := client.Send(
 		filepath.Dir(path),
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, debug)
+		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, timeout, debug)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
@@ -527,7 +529,7 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 
 		if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
 			s1 := doJsonAssertions(jsonData, c.Assert.Json)
-			stats.Add(s1)
+			stats.MergeAssertCount(s1)
 		}
 	}
 
