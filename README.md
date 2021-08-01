@@ -201,7 +201,6 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] the in/not_in string array pretty print
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] display: file / line number to show which case fail
 - [ ] set timeout each case or in global

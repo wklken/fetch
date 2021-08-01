@@ -1,6 +1,7 @@
 package assert
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -9,13 +10,13 @@ type AssertFunc func(expected interface{}, actual interface{}) (bool, string)
 
 func prettyLine(s interface{}) interface{} {
 	if reflect.TypeOf(s).Kind() == reflect.Array || reflect.TypeOf(s).Kind() == reflect.Slice {
-		// TODO: pretty print it
+		s := reflect.ValueOf(s)
 
-		//x := make([]string, 0, len(a))
-		//for _, i := range a {
-		//	x = append(x, fmt.Sprintf("%#v", i))
-		//}
-		//fmt.Printf("[%s]\n", strings.Join(x, ", "))
+		x := make([]string, 0, s.Len())
+		for i := 0; i < s.Len(); i++ {
+			x = append(x, fmt.Sprintf("%#v", s.Index(i)))
+		}
+		return fmt.Sprintf("[%s]", strings.Join(x, ", "))
 	}
 
 	if reflect.TypeOf(s).Kind() != reflect.String {

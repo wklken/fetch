@@ -62,8 +62,7 @@ func In(element, s interface{}) (bool, string) {
 	ok, _ := Contains(s, element)
 	if !ok {
 		// if string
-		//return false, fmt.Sprintf("in, element=`%v`, sequence=`%q`", element, prettyLine(s))
-		return false, fmt.Sprintf("in, element=`%v`, sequence=`%q`", element, prettyLine(s))
+		return false, fmt.Sprintf("in, element=`%v`, sequence=`%v`", element, prettyLine(s))
 	}
 
 	return true, "OK"
