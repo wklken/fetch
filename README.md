@@ -45,6 +45,7 @@ assert:
 - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
 - assert response headers [examples/header.toml](./examples/header.toml)
 - assert response has redirected [examples/redirect.toml](./examples/redirect.toml)
+- assert response proto/protoMajor/protoMinor
 
 cli:
 - `exit code != 0` if got any fail assertions

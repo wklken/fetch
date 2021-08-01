@@ -48,3 +48,8 @@ latency_lt = 0
 latency_lte = 0
 latency_gt = 100
 latency_gte = 100
+
+# proto
+proto = "HTTP/2.0"
+protoMajor = 2
+protoMinor = 0

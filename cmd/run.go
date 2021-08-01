@@ -461,6 +461,30 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 				element2: c.Assert.HasRedirect,
 			},
 		},
+		{
+			key: "assert.proto",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: resp.Proto,
+				element2: c.Assert.Proto,
+			},
+		},
+		{
+			key: "assert.protomajor",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: resp.ProtoMajor,
+				element2: c.Assert.ProtoMajor,
+			},
+		},
+		{
+			key: "assert.protominor",
+			ctx: Ctx{
+				f:        assert.Equal,
+				element1: resp.ProtoMinor,
+				element2: c.Assert.ProtoMinor,
+			},
+		},
 	}
 
 	for _, ka := range keyAsserts {

@@ -91,6 +91,11 @@ type Assert struct {
 	Header map[string]interface{}
 
 	HasRedirect bool
+
+	Proto      string // e.g. "HTTP/1.0"
+	ProtoMajor int    // e.g. 1
+	ProtoMinor int    // e.g. 0
+	// TODO: gt/gte/lt/lte
 }
 
 func (a *Assert) Render(ctx map[string]interface{}) {
