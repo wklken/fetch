@@ -1,7 +1,7 @@
 # httptest
 
 > A command line http test tool
-> Maintain the cases via git and pure text
+> Maintain the api test cases via git and pure text
 
 We want to test the APIs via http requests and assert the responses, postman & newman are easy for this.
 
@@ -16,7 +16,7 @@ So, here is the httptest
 
 **note: not ready for production**
 
-## screenshots
+## Screenshots
 
 
 ![](./examples/screenshots/run.jpg)
@@ -25,41 +25,41 @@ So, here is the httptest
 
 ![](./examples/screenshots/run_quiet.jpg)
 
-## features
+## Features
 
-define:
-- define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
-- support http methods: get/post/put/delete/patch/head/options
-- support post form, [examples/form.toml](./examples/form.toml)
-- sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
-- support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
-- support send cookie [examples/cookies.toml](./examples/cookies.toml)
-- support basic auth [examples/basic_auth.toml](./examples/basic_auth.toml)
-- support share cookie [examples/share_cookies_save.toml](./examples/share_cookies_save.toml) and [examples/share_cookies_use.toml](./examples/share_cookies_use.toml)
+- **Define:**
+    - define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
+    - support http methods: get/post/put/delete/patch/head/options
+    - support post form, [examples/form.toml](./examples/form.toml)
+    - sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
+    - support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
+    - support send cookie [examples/cookies.toml](./examples/cookies.toml)
+    - support basic auth [examples/basic_auth.toml](./examples/basic_auth.toml)
+    - support share cookie [examples/share_cookies_save.toml](./examples/share_cookies_save.toml) and [examples/share_cookies_use.toml](./examples/share_cookies_use.toml)
 
-assert:
-- assert status/statusCode/contentLength/contentType/body
-- assert latency
-- assert numeric support `_in/_not_in/_lt/_lte/_gt/_gte`
-- assert string support `_contains/_not_contains/_startswith/_endswith`
-- assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
-- assert response headers [examples/header.toml](./examples/header.toml)
-- assert response has redirected [examples/redirect.toml](./examples/redirect.toml)
-- assert response proto/protoMajor/protoMinor
+- **Assert:**
+    - assert status/statusCode/contentLength/contentType/body
+    - assert latency
+    - assert numeric support `_in/_not_in/_lt/_lte/_gt/_gte`
+    - assert string support `_contains/_not_contains/_startswith/_endswith`
+    - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
+    - assert response headers [examples/header.toml](./examples/header.toml)
+    - assert response has redirected [examples/redirect.toml](./examples/redirect.toml)
+    - assert response proto/protoMajor/protoMinor
 
-cli:
-- `exit code != 0` if got any fail assertions
-- verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
-- quiet mode: `-q/--quiet` to silent the print, for check `$?` only
-- show run result with stats
-- configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
-- configfile: `debug=true/false` to trigger debug print
-- configfile: `render=true/false` to use  go_template render the `env`
-- configfile: `failFast=true/false`, will exit if got one fail case while running
-- configfile: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
+- **Cli and Config:**
+    - `exit code != 0` if got any fail assertions
+    - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+    - quiet mode: `-q/--quiet` to silent the print, for check `$?` only
+    - show run result with stats
+    - configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
+    - configfile: `debug=true/false` to trigger debug print
+    - configfile: `render=true/false` to use  go_template render the `env`
+    - configfile: `failFast=true/false`, will exit if got one fail case while running
+    - configfile: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
 
 
-## examples
+## Examples
 
 simplest
 
@@ -194,11 +194,6 @@ contentLength_gt = 180
 contentType = "{{.content_type}}"
 ```
 
-## dependency
-
-- [default config file: toml](https://toml.io/en/)
-- [examples send request to httpbin](http://httpbin.org/)
-- [json assertions via jmespath](https://jmespath.org/tutorial.html)
 
 ## TODO
 
@@ -218,7 +213,14 @@ contentType = "{{.content_type}}"
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
 
-## inspired by
+## Dependency
+
+- [config file parse: viper](https://github.com/spf13/viper)
+- [default config file: toml](https://toml.io/en/)
+- [examples send request to httpbin](http://httpbin.org/)
+- [json assertions via jmespath](https://jmespath.org/tutorial.html)
+
+## Inspired by
 
 - testify/assert https://github.com/stretchr/testify/tree/master/assert (use this module, and copied some un-exported codes from it, follow the license)
 - postman & newman https://www.npmjs.com/package/newman
