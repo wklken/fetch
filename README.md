@@ -198,21 +198,21 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] how to test: long-live / file download / static file / websocket / keep-alive
-- [ ] display: file / line number to show which case fail
-- [ ] set timeout each case
-- [ ] feature: ssl / https
-- [ ] feature: retry
-- [ ] feature: repeat
 - [ ] error: dns / connection reset/timeout and so on
-- [ ] feature: data share between cases
-- [ ] how to run in parallel
-- [ ] multiple cases in one file, like ginkgo?
-- [ ] case scope config, render=true, priority higher than global config
-- [ ] support request body type, msgpack/zip.....
+- [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] run in order glob, the pattern is based on the binary root dir
+- [ ] support request body type, msgpack/zip.....
+- [ ] display: file / line number to show which case fail
+- [ ] set timeout each case
+- [ ] case scope config, render=true, priority higher than global config
+- [ ] feature: ssl / https
+- [ ] feature: retry
+- [ ] feature: repeat
+- [ ] feature: data share between cases
+- [ ] how to run in parallel
+- [ ] multiple cases in one file, like ginkgo?
 
 ## Dependency
 
