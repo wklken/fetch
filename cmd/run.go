@@ -81,7 +81,7 @@ func getRunningOrderedFiles(pathes []string, orders []config.Order) (files []str
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "run cases",
+	Short: "Run cases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 

@@ -198,7 +198,6 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] sub-comman version
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] display: file / line number to show which case fail
 - [ ] set timeout each case
