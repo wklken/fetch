@@ -55,17 +55,35 @@ var (
 	cfgFile string
 )
 
+func getRunningOrderedFiles(pathes []string, orders []config.Order) (files []string, err error) {
+
+	hits := util.NewStringSet()
+	for _, order := range orders {
+		//pattern := order.Pattern
+		var matches []string
+		matches, err = filepath.Glob(order.Pattern)
+		if err != nil {
+			return
+		}
+		files = append(files, matches...)
+		hits.Append(matches...)
+	}
+
+	for _, p := range pathes {
+		if !hits.Has(p) {
+			files = append(files, p)
+		}
+	}
+
+	return
+}
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run cases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			log.Error("args required")
-			os.Exit(1)
-			return
-		}
 
 		var runConfig config.RunConfig
 		if cfgFile != "" {
@@ -88,12 +106,26 @@ var runCmd = &cobra.Command{
 			log.Info("runConfig: %v", runConfig)
 		}
 
+		if len(args) == 0 && len(runConfig.Order) == 0 {
+			log.Error("args required")
+			os.Exit(1)
+			return
+		}
+
+		// parse files in order to run
+		orderedCases, err := getRunningOrderedFiles(args, runConfig.Order)
+		if err != nil {
+			log.Error("parse config file `Order` fail, err=%s", err)
+			os.Exit(1)
+			return
+		}
+
 		totalStats := Stats{}
 
 		log.BeQuiet(quiet)
 
 		start := time.Now()
-		for _, path := range args {
+		for _, path := range orderedCases {
 			s := run(path, &runConfig)
 			totalStats.MergeAssertCount(s)
 

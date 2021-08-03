@@ -57,6 +57,7 @@ So, here is the httptest
     - configfile: `render=true/false` to use  go_template render the `env`
     - configfile: `failFast=true/false`, will exit if got one fail case while running
     - configfile: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
+    - support run cases in order, `./httptest run -c examples/config/order.toml`
 
 
 ## Examples
@@ -197,6 +198,7 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
+- [ ] sub-comman version
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] display: file / line number to show which case fail
 - [ ] set timeout each case
@@ -205,13 +207,13 @@ contentType = "{{.content_type}}"
 - [ ] feature: repeat
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] feature: data share between cases
-- [ ] how to run in order
 - [ ] how to run in parallel
 - [ ] multiple cases in one file, like ginkgo?
 - [ ] case scope config, render=true, priority higher than global config
 - [ ] support request body type, msgpack/zip.....
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
+- [ ] run in order glob, the pattern is based on the binary root dir
 
 ## Dependency
 

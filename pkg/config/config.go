@@ -10,4 +10,11 @@ type RunConfig struct {
 
 	// timeout in ms
 	Timeout int
+
+	Order []Order
+}
+
+type Order struct {
+	Pattern  string
+	Parallel bool
 }

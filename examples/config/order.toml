@@ -10,3 +10,14 @@ host = "http://httpbin.org"
 content_type = "application/json"
 array = ["a", "b", "c"]
 
+
+[[order]]
+pattern = "examples/post.toml"
+
+[[order]]
+pattern = "examples/get.toml"
+parallel = true
+
+[[order]]
+pattern = "examples/asserts.*"
+parallel = true

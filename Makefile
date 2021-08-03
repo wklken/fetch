@@ -1,4 +1,7 @@
-.PHONY: dep
+.PHONY: dep test build
+
+build:
+	go build .
 
 
 dep:
