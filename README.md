@@ -198,10 +198,10 @@ contentType = "{{.content_type}}"
 
 ## TODO
 
-- [ ] error: dns / connection reset/timeout and so on
-- [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
 - [ ] sub-command: `generate x` generate a case, from tpl
+- [ ] error: dns / connection reset/timeout and so on
+- [ ] how to test: long-live / file download / static file / websocket / keep-alive
 - [ ] run in order glob, the pattern is based on the binary root dir
 - [ ] support request body type, msgpack/zip.....
 - [ ] display: file / line number to show which case fail
