@@ -21,3 +21,4 @@ httptest
 .DS_Store
 examples/share_cookies.txt
 *.pyc
+.vscode
