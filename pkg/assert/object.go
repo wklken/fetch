@@ -46,5 +46,4 @@ func Equal(actual interface{}, expected interface{}) (bool, string) {
 	} else {
 		return true, "OK"
 	}
-
 }

@@ -35,7 +35,7 @@ func Send(
 		req, err = http.NewRequest(httpMethod, url, nil)
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		if hasBody {
-			//fmt.Printf("has body, the headers: %+v\n", headers)
+			// fmt.Printf("has body, the headers: %+v\n", headers)
 
 			bodyReader := strings.NewReader(requestBody)
 
@@ -115,7 +115,7 @@ func Send(
 	}
 
 	latency = time.Since(start).Milliseconds()
-	//fmt.Println("hasRedirect: ", hasRedirect)
+	// fmt.Println("hasRedirect: ", hasRedirect)
 
 	if hook.SaveCookie != "" {
 		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)

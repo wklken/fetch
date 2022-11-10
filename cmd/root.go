@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Long:  `A command lin http test tool. Complete documentation is available at https://github.com/wklken/httptest`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
-		//fmt.Println("hello there")
+		// fmt.Println("hello there")
 		cmd.Help()
 	},
 }

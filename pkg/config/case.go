@@ -144,7 +144,6 @@ func (a *Assert) Render(ctx map[string]interface{}) {
 	for _, j := range a.Json {
 		j.Render(ctx)
 	}
-
 }
 
 type AssertJson struct {
@@ -177,7 +176,6 @@ func (c *Case) Render(ctx map[string]interface{}) {
 	}
 	if strings.Contains(c.Description, TplBrace) {
 		c.Description = tpl.Render(c.Description, ctx)
-
 	}
 
 	c.Request.Render(ctx)

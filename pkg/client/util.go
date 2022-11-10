@@ -46,6 +46,7 @@ func prettyFormatDump(dump []byte, linePrefix string) string {
 
 	return strings.Join(newLines, "\n")
 }
+
 func dumpRequest(debug bool, req *http.Request) {
 	// dump request, for debug
 	if debug {
@@ -61,18 +62,18 @@ func dumpRequest(debug bool, req *http.Request) {
 // from: https://github.com/henvic/httpretty/blob/master/printer.go
 
 var binaryMediatypes = map[string]struct{}{
-	"application/pdf":               struct{}{},
-	"application/postscript":        struct{}{},
-	"image":                         struct{}{}, // for practical reasons, any image (including SVG) is considered binary data
-	"audio":                         struct{}{},
-	"application/ogg":               struct{}{},
-	"video":                         struct{}{},
-	"application/vnd.ms-fontobject": struct{}{},
-	"font":                          struct{}{},
-	"application/x-gzip":            struct{}{},
-	"application/zip":               struct{}{},
-	"application/x-rar-compressed":  struct{}{},
-	"application/wasm":              struct{}{},
+	"application/pdf":               {},
+	"application/postscript":        {},
+	"image":                         {}, // for practical reasons, any image (including SVG) is considered binary data
+	"audio":                         {},
+	"application/ogg":               {},
+	"video":                         {},
+	"application/vnd.ms-fontobject": {},
+	"font":                          {},
+	"application/x-gzip":            {},
+	"application/zip":               {},
+	"application/x-rar-compressed":  {},
+	"application/wasm":              {},
 }
 
 func isBinaryMediatype(mediatype string) bool {
@@ -104,7 +105,7 @@ func dumpResponse(debug bool, resp *http.Response) {
 
 			respLines := prettyFormatDump(dump, "< ")
 
-			//fmt.Println("the contentLength:", resp.ContentLength)
+			// fmt.Println("the contentLength:", resp.ContentLength)
 			if resp.ContentLength > maxResponseBodyLength || len(respLines) > maxResponseBodyLength {
 				actualLength := resp.ContentLength
 				if actualLength == -1 {
@@ -119,7 +120,6 @@ func dumpResponse(debug bool, resp *http.Response) {
 			log.Info("DEBUG response: \n%s", prettyFormatDump(dump, "< "))
 		}
 	}
-
 }
 
 func parseBodyIfGotAFile(caseDir string, body string) (content string, err error) {
@@ -173,8 +173,8 @@ func saveCookies(caseDir string, savedPath string, jar *cookiejar.Jar, resp *htt
 		return
 	}
 	cookiePath := filepath.Join(caseDir, savedPath)
-	//log.Info("saved cookie into %s", cookiePath)
-	err = ioutil.WriteFile(cookiePath, bs, 0644)
+	// log.Info("saved cookie into %s", cookiePath)
+	err = ioutil.WriteFile(cookiePath, bs, 0o644)
 	if err != nil {
 		return
 	}

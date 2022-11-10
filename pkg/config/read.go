@@ -27,7 +27,7 @@ func getConfigType(path string) (string, error) {
 		return "json", nil
 	case "toml":
 		return "toml", nil
-	//case "hcl":
+	// case "hcl":
 	//	return "hcl", nil
 	case "properties", "props", "prop":
 		return "prop", nil

@@ -34,9 +34,9 @@ func Info(format string, a ...interface{}) {
 	}
 }
 
-func OK() {
+func Pass() {
 	if !quiet {
-		color.New(color.FgGreen).PrintfFunc()("OK\n")
+		color.New(color.FgGreen).PrintfFunc()("Pass\n")
 	}
 }
 

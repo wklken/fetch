@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,14 +37,15 @@ import (
 
 const tableTPL = `
 ┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│                         │           total │              ok │            fail │
+│                         │           total │          passed │          failed │
 ├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
 │                   cases │          %6d │          %6d │          %6d │
 ├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
 │              assertions │          %6d │          %6d │          %6d │
 ├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
-│ total run duration: %6d ms                                                 │
+│                    Time : %6d ms                                           │
 └───────────────────────────────────────────────────────────────────────────────┘`
+
 const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
@@ -56,10 +57,9 @@ var (
 )
 
 func getRunningOrderedFiles(pathes []string, orders []config.Order) (files []string, err error) {
-
 	hits := util.NewStringSet()
 	for _, order := range orders {
-		//pattern := order.Pattern
+		// pattern := order.Pattern
 		var matches []string
 		matches, err = filepath.Glob(order.Pattern)
 		if err != nil {
@@ -84,7 +84,6 @@ var runCmd = &cobra.Command{
 	Short: "Run cases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		var runConfig config.RunConfig
 		if cfgFile != "" {
 			if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
@@ -202,8 +201,8 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 		return
 	}
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	//fmt.Println("allKeys", allKeys)
-	//fmt.Printf("the case and data: %s, %+v", path, c)
+	// fmt.Println("allKeys", allKeys)
+	// fmt.Printf("the case and data: %s, %+v", path, c)
 
 	// do render
 	if runConfig.Render && len(runConfig.Env) > 0 {
@@ -215,21 +214,43 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	resp, hasRedirect, latency, err := client.Send(
 		filepath.Dir(path),
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, timeout, debug)
+		c.Request.Method,
+		c.Request.URL,
+		allKeys.Has("request.body"),
+		c.Request.Body,
+		c.Request.Header,
+		c.Request.Cookie,
+		c.Request.BasicAuth,
+		c.Hook,
+		timeout,
+		debug,
+	)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
 		stats.failCaseCount += 1
 		return
 	}
 
-	log.Tip("Run Case: %s | %s | [%s %s] | %dms", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
+	log.Tip(
+		"Run Case: %s | %s | [%s %s] | %dms",
+		path,
+		c.Title,
+		strings.ToUpper(c.Request.Method),
+		c.Request.URL,
+		latency,
+	)
 
 	stats = doAssertions(allKeys, resp, c, hasRedirect, latency)
 	return
 }
 
-func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, hasRedirect bool, latency int64) (stats Stats) {
-
+func doAssertions(
+	allKeys *util.StringSet,
+	resp *http.Response,
+	c config.Case,
+	hasRedirect bool,
+	latency int64,
+) (stats Stats) {
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
@@ -526,7 +547,7 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 			log.Infof("%s: ", ka.key)
 			ok, message := ka.ctx.f(ka.ctx.element1, ka.ctx.element2)
 			if ok {
-				log.OK()
+				log.Pass()
 				stats.okAssertCount += 1
 			} else {
 				log.Fail(message)
@@ -540,7 +561,7 @@ func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, h
 			log.Infof("assert.header.%s: ", key)
 			ok, message := assert.Equal(resp.Header.Get(key), value)
 			if ok {
-				log.OK()
+				log.Pass()
 				stats.okAssertCount += 1
 			} else {
 				log.Fail(message)
@@ -599,7 +620,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 				continue
 			}
 
-			//fmt.Printf("%T, %T", actualValue, expectedValue)
+			// fmt.Printf("%T, %T", actualValue, expectedValue)
 			// make float64 compare with int64
 			if reflect.TypeOf(actualValue).Kind() == reflect.Float64 && reflect.TypeOf(expectedValue).Kind() == reflect.Int64 {
 				actualValue = int64(actualValue.(float64))
@@ -612,7 +633,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 
 			ok, message := assert.Equal(actualValue, expectedValue)
 			if ok {
-				log.OK()
+				log.Pass()
 				stats.okAssertCount += 1
 			} else {
 				log.Fail(message)

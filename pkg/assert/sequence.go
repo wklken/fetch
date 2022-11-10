@@ -83,7 +83,6 @@ func NotIn(element, s interface{}) (bool, string) {
 // return (true, false) if element was not found.
 // return (true, true) if element was found.
 func includeElement(list interface{}, element interface{}) (ok, found bool) {
-
 	listValue := reflect.ValueOf(list)
 	elementValue := reflect.ValueOf(element)
 	defer func() {
@@ -113,5 +112,4 @@ func includeElement(list interface{}, element interface{}) (ok, found bool) {
 		}
 	}
 	return true, false
-
 }
