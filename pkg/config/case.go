@@ -161,9 +161,18 @@ type Hook struct {
 	SaveCookie string `mapstructure:"save_cookie"`
 }
 
+type CaseConfig struct {
+	// timeout in ms
+	Timeout int
+
+	// TODO: retry
+	// TODO: repeat
+}
+
 type Case struct {
 	Title       string
 	Description string
+	Config      CaseConfig `mapstructure:"config"`
 
 	Request Request
 	Assert  Assert

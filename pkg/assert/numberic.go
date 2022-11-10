@@ -45,7 +45,7 @@ func Greater(e1 interface{}, e2 interface{}) (bool, string) {
 	}
 
 	if res != -1 {
-		return false, fmt.Sprintf("greater, `%v` is not greater than `%v`", e1, e2)
+		return false, fmt.Sprintf("greater | `%v` is not greater than `%v`", e1, e2)
 	}
 
 	return true, "OK"
@@ -64,7 +64,7 @@ func GreaterOrEqual(e1 interface{}, e2 interface{}) (bool, string) {
 	}
 
 	if res != -1 && res != 0 {
-		return false, fmt.Sprintf("greater or equal, `%v` is not greater than or equal to `%v`", e1, e2)
+		return false, fmt.Sprintf("greater or equal | `%v` is not greater than or equal to `%v`", e1, e2)
 	}
 
 	return true, "OK"
@@ -83,7 +83,7 @@ func Less(e1 interface{}, e2 interface{}) (bool, string) {
 	}
 
 	if res != 1 {
-		return false, fmt.Sprintf("less, `%v` is not less than `%v`", e1, e2)
+		return false, fmt.Sprintf("less | `%v` is not less than `%v`", e1, e2)
 	}
 
 	return true, "OK"
@@ -102,7 +102,7 @@ func LessOrEqual(e1 interface{}, e2 interface{}) (bool, string) {
 	}
 
 	if res != 1 && res != 0 {
-		return false, fmt.Sprintf("less or equal, `%v` is not less than or equal to `%v`", e1, e2)
+		return false, fmt.Sprintf("less or equal | `%v` is not less than or equal to `%v`", e1, e2)
 	}
 
 	return true, "OK"

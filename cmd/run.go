@@ -211,6 +211,9 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 	timeout := runConfig.Timeout
+	if c.Config.Timeout > 0 {
+		timeout = c.Config.Timeout
+	}
 
 	resp, hasRedirect, latency, err := client.Send(
 		filepath.Dir(path),
