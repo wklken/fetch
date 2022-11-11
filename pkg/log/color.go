@@ -48,6 +48,6 @@ func Error(format string, a ...interface{}) {
 
 func Fail(format string, a ...interface{}) {
 	if !quiet {
-		color.New(color.FgRed).PrintfFunc()("Fail: "+format+"\n", a...)
+		color.New(color.FgRed).PrintfFunc()("Fail | "+format+"\n", a...)
 	}
 }

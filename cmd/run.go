@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -193,6 +194,15 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 		stats.failCaseCount += 1
 		return
 	}
+	// read lines, for display the failed asset line number
+	fileLines, err := config.ReadLines(path)
+	if err != nil {
+		log.Tip("Run Case: %s", path)
+		log.Error("read fail: %s", err)
+		stats.failCaseCount += 1
+		return
+	}
+
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
@@ -200,6 +210,9 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 		log.Error("parse fail: %s", err)
 		return
 	}
+	// set the content
+	c.FileLines = fileLines
+
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
 	// fmt.Println("allKeys", allKeys)
 	// fmt.Printf("the case and data: %s, %+v", path, c)
@@ -553,6 +566,12 @@ func doAssertions(
 				log.Pass()
 				stats.okAssertCount += 1
 			} else {
+				// the ka.key is like assert.latency_lt
+				lineNumber := c.GuessAssertLineNumber(ka.key)
+				if lineNumber > 0 {
+					message = fmt.Sprintf("lineno:%d | %s", lineNumber, message)
+				}
+				// fmt.Printf("the assert key: %s", ka.key)
 				log.Fail(message)
 				stats.failAssertCount += 1
 			}
@@ -567,6 +586,11 @@ func doAssertions(
 				log.Pass()
 				stats.okAssertCount += 1
 			} else {
+				// the ka.key is like assert.latency_lt
+				lineNumber := c.GuessAssertLineNumber(key)
+				if lineNumber > 0 {
+					message = fmt.Sprintf("lineno:%d | %s", lineNumber, message)
+				}
 				log.Fail(message)
 				stats.failAssertCount += 1
 			}

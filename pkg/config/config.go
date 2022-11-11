@@ -15,6 +15,15 @@ type RunConfig struct {
 }
 
 type Order struct {
-	Pattern  string
+	Pattern string
+	// TODO: not supported yet
 	Parallel bool
+}
+
+type CaseConfig struct {
+	// timeout in ms
+	Timeout int
+
+	// TODO: retry
+	// TODO: repeat
 }
