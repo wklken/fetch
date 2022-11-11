@@ -15,7 +15,9 @@ type Hook struct {
 type Case struct {
 	Title       string
 	Description string
-	Config      CaseConfig `mapstructure:"config"`
+
+	Config CaseConfig `mapstructure:"config"`
+	Env    map[string]interface{}
 
 	Request Request
 	Assert  Assert

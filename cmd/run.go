@@ -219,6 +219,13 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 
 	// do render
 	if runConfig.Render && len(runConfig.Env) > 0 {
+		finalEnv := runConfig.Env
+		// the priority of env in case is higher than env in config
+		if len(c.Env) > 0 {
+			for k, v := range c.Env {
+				finalEnv[k] = v
+			}
+		}
 		c.Render(runConfig.Env)
 	}
 
