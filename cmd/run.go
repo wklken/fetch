@@ -576,7 +576,7 @@ func doAssertions(
 				// the ka.key is like assert.latency_lt
 				lineNumber := c.GuessAssertLineNumber(ka.key)
 				if lineNumber > 0 {
-					message = fmt.Sprintf("lineno:%d | %s", lineNumber, message)
+					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
 				// fmt.Printf("the assert key: %s", ka.key)
 				log.Fail(message)
@@ -596,7 +596,7 @@ func doAssertions(
 				// the ka.key is like assert.latency_lt
 				lineNumber := c.GuessAssertLineNumber(key)
 				if lineNumber > 0 {
-					message = fmt.Sprintf("lineno:%d | %s", lineNumber, message)
+					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
 				log.Fail(message)
 				stats.failAssertCount += 1

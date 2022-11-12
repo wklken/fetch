@@ -41,7 +41,7 @@ func Equal(actual interface{}, expected interface{}) (bool, string) {
 		actualValue := prettyLine(actualStr)
 
 		// not equal, maybe is the type wrong
-		return false, fmt.Sprintf("equal | expected=`%v`(%T) is not equal to actual=`%v`(%T)",
+		return false, fmt.Sprintf("equal | expected=`%v`(%T), actual=`%v`(%T)",
 			expected, expected, actualValue, actual)
 	} else {
 		return true, "OK"
