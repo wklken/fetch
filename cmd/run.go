@@ -36,17 +36,6 @@ import (
 	"github.com/wklken/httptest/pkg/util"
 )
 
-const tableTPL = `
-┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│                         │           total │          passed │          failed │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│                   cases │          %6d │          %6d │          %6d │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│              assertions │          %6d │          %6d │          %6d │
-├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
-│                    Time : %6d ms                                           │
-└───────────────────────────────────────────────────────────────────────────────┘`
-
 const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
@@ -56,28 +45,6 @@ var (
 	quiet   = false
 	cfgFile string
 )
-
-func getRunningOrderedFiles(pathes []string, orders []config.Order) (files []string, err error) {
-	hits := util.NewStringSet()
-	for _, order := range orders {
-		// pattern := order.Pattern
-		var matches []string
-		matches, err = filepath.Glob(order.Pattern)
-		if err != nil {
-			return
-		}
-		files = append(files, matches...)
-		hits.Append(matches...)
-	}
-
-	for _, p := range pathes {
-		if !hits.Has(p) {
-			files = append(files, p)
-		}
-	}
-
-	return
-}
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -113,45 +80,36 @@ var runCmd = &cobra.Command{
 		}
 
 		// parse files in order to run
-		orderedCases, err := getRunningOrderedFiles(args, runConfig.Order)
+		orderedCases, err := util.GetRunningOrderedFiles(args, runConfig.Order)
 		if err != nil {
 			log.Error("parse config file `Order` fail, err=%s", err)
 			os.Exit(1)
 			return
 		}
 
-		totalStats := Stats{}
-
+		totalStats := util.Stats{}
 		log.BeQuiet(quiet)
 
 		start := time.Now()
 		for _, path := range orderedCases {
+			// TODO: -p 10 to run in parallel with 10 goroutines
+
 			s := run(path, &runConfig)
 			totalStats.MergeAssertCount(s)
 
-			if runConfig.FailFast && (s.failCaseCount > 0 || s.failAssertCount > 0) {
+			if runConfig.FailFast && !(s.AllPassed()) {
 				log.Info("failFast=True, quit, the execute result: 1")
 				os.Exit(1)
 			}
-
-			// if got fail assert, the case is fail
-			if s.failCaseCount > 0 || s.failAssertCount > 0 {
-				totalStats.failCaseCount += 1
-			} else {
-				totalStats.okCaseCount += 1
-			}
 		}
-		latency := time.Since(start).Milliseconds()
 
-		log.Info(tableTPL,
-			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
-			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
-			latency)
-		if totalStats.failCaseCount > 0 {
+		latency := time.Since(start).Milliseconds()
+		totalStats.Report(len(args), latency)
+		if totalStats.AllPassed() {
+			log.Info("the execute result: 0")
+		} else {
 			log.Info("the execute result: 1")
 			os.Exit(1)
-		} else {
-			log.Info("the execute result: 0")
 		}
 	},
 }
@@ -168,30 +126,17 @@ func init() {
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
 }
 
-type Stats struct {
-	okCaseCount     int64
-	failCaseCount   int64
-	okAssertCount   int64
-	failAssertCount int64
-}
-
-func (s *Stats) MergeAssertCount(s1 Stats) {
-	// NOTE: here only
-	s.okAssertCount += s1.okAssertCount
-	s.failAssertCount += s1.failAssertCount
-}
-
 func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
 	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
 	log.Error(format, a...)
 }
 
-func run(path string, runConfig *config.RunConfig) (stats Stats) {
+func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	v, err := config.ReadFromFile(path)
 	if err != nil {
 		log.Tip("Run Case: %s", path)
 		log.Error("read fail: %s", err)
-		stats.failCaseCount += 1
+		stats.IncrFailCaseCount()
 		return
 	}
 	// read lines, for display the failed asset line number
@@ -199,7 +144,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	if err != nil {
 		log.Tip("Run Case: %s", path)
 		log.Error("read fail: %s", err)
-		stats.failCaseCount += 1
+		stats.IncrFailCaseCount()
 		return
 	}
 
@@ -250,7 +195,7 @@ func run(path string, runConfig *config.RunConfig) (stats Stats) {
 	)
 	if err != nil {
 		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
-		stats.failCaseCount += 1
+		stats.IncrFailCaseCount()
 		return
 	}
 
@@ -273,7 +218,7 @@ func doAssertions(
 	c config.Case,
 	hasRedirect bool,
 	latency int64,
-) (stats Stats) {
+) (stats util.Stats) {
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
@@ -571,7 +516,7 @@ func doAssertions(
 			ok, message := ka.ctx.f(ka.ctx.element1, ka.ctx.element2)
 			if ok {
 				log.Pass()
-				stats.okAssertCount += 1
+				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
 				lineNumber := c.GuessAssertLineNumber(ka.key)
@@ -580,7 +525,7 @@ func doAssertions(
 				}
 				// fmt.Printf("the assert key: %s", ka.key)
 				log.Fail(message)
-				stats.failAssertCount += 1
+				stats.IncrFailAssertCount()
 			}
 		}
 	}
@@ -591,7 +536,7 @@ func doAssertions(
 			ok, message := assert.Equal(resp.Header.Get(key), value)
 			if ok {
 				log.Pass()
-				stats.okAssertCount += 1
+				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
 				lineNumber := c.GuessAssertLineNumber(key)
@@ -599,7 +544,7 @@ func doAssertions(
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
 				log.Fail(message)
-				stats.failAssertCount += 1
+				stats.IncrFailAssertCount()
 			}
 
 		}
@@ -610,7 +555,7 @@ func doAssertions(
 		err = binding.JSON.BindBody(body, &jsonData)
 		if err != nil {
 			log.Fail("binding.json fail: %s", err)
-			stats.failAssertCount += int64(len(c.Assert.Json))
+			stats.IncrFailAssertCountByN(int64(len(c.Assert.Json)))
 			return
 		}
 
@@ -620,12 +565,10 @@ func doAssertions(
 		}
 	}
 
-	//   5. set timeout=x, each case?
-
 	return
 }
 
-func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats Stats) {
+func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
@@ -634,10 +577,10 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 		if jsonData == nil {
 			ok, message := assert.Equal(nil, expectedValue)
 			if ok {
-				stats.okAssertCount += 1
+				stats.IncrOkAssertCount()
 			} else {
 				log.Fail(message)
-				stats.failAssertCount += 1
+				stats.IncrFailAssertCount()
 			}
 			continue
 		}
@@ -650,7 +593,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 			if actualValue == nil {
 				_, message := assert.Equal(nil, expectedValue)
 				log.Fail(message)
-				stats.failAssertCount += 1
+				stats.IncrFailAssertCount()
 				continue
 			}
 
@@ -668,10 +611,10 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats St
 			ok, message := assert.Equal(actualValue, expectedValue)
 			if ok {
 				log.Pass()
-				stats.okAssertCount += 1
+				stats.IncrOkAssertCount()
 			} else {
 				log.Fail(message)
-				stats.failAssertCount += 1
+				stats.IncrFailAssertCount()
 			}
 		}
 	}
