@@ -27,9 +27,17 @@ func (s *Stats) MergeAssertCount(s1 Stats) {
 
 	// if got fail assert, the case is fail
 	if s1.AllPassed() {
-		s.okCaseCount++
+		if s1.GetOkCaseCount() > 0 {
+			s.okCaseCount += s1.GetOkCaseCount()
+		} else {
+			s.okCaseCount++
+		}
 	} else {
-		s.failCaseCount++
+		if s1.GetFailCaseCount() > 0 {
+			s.failCaseCount += s1.GetFailCaseCount()
+		} else {
+			s.failCaseCount++
+		}
 	}
 }
 
@@ -51,6 +59,14 @@ func (s *Stats) IncrFailAssertCount() {
 
 func (s *Stats) IncrFailAssertCountByN(n int64) {
 	s.failAssertCount += n
+}
+
+func (s *Stats) GetOkCaseCount() int64 {
+	return s.okCaseCount
+}
+
+func (s *Stats) GetFailCaseCount() int64 {
+	return s.failCaseCount
 }
 
 func (s *Stats) AllPassed() bool {
