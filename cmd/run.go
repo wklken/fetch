@@ -107,7 +107,7 @@ var runCmd = &cobra.Command{
 		}
 
 		latency := time.Since(start).Milliseconds()
-		totalStats.Report(len(args), latency)
+		totalStats.Report(latency)
 		if totalStats.AllPassed() {
 			log.Info("the execute result: 0")
 		} else {
@@ -129,10 +129,10 @@ func init() {
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
 }
 
-func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
-	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-	log.Error(format, a...)
-}
+// func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
+// 	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+// 	log.Error(format, a...)
+// }
 
 func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	v, err := config.ReadFromFile(path)
@@ -183,54 +183,76 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		timeout = c.Config.Timeout
 	}
 
-	var (
-		resp        *http.Response
-		hasRedirect bool
-		latency     int64
-		err2        error
-		count       int
-	)
-	for {
-		resp, hasRedirect, latency, err2 = client.Send(
-			filepath.Dir(path),
-			c.Request.Method,
-			c.Request.URL,
-			allKeys.Has("request.body"),
-			c.Request.Body,
-			c.Request.Header,
-			c.Request.Cookie,
-			c.Request.BasicAuth,
-			c.Hook,
-			timeout,
-			debug,
-		)
+	// support repeat, if got repeat, on case will be repeat N times, as N cases
+	repeat := 1
+	if c.Config.Repeat > 0 {
+		repeat = c.Config.Repeat
+	}
 
-		if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
-			(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
-			time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
-			count++
-			continue
-		} else {
-			break
+	for i := 0; i < repeat; i++ {
+		var (
+			resp        *http.Response
+			hasRedirect bool
+			latency     int64
+			err2        error
+			count       int
+		)
+		for {
+			resp, hasRedirect, latency, err2 = client.Send(
+				filepath.Dir(path),
+				c.Request.Method,
+				c.Request.URL,
+				allKeys.Has("request.body"),
+				c.Request.Body,
+				c.Request.Header,
+				c.Request.Cookie,
+				c.Request.BasicAuth,
+				c.Hook,
+				timeout,
+				debug,
+			)
+
+			if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
+				(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
+				time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
+				count++
+				continue
+			} else {
+				break
+			}
+
+		}
+		title := c.Title
+		if repeat > 1 {
+			title = fmt.Sprintf("%s (%d/%d)", c.Title, i+1, repeat)
 		}
 
-	}
-	if err2 != nil {
-		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err2)
-		stats.IncrFailCaseCount()
-		return
+		if err2 != nil {
+			// logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err2)
+			log.Tip("Run Case: %s | %s | [%s %s]", path, title, strings.ToUpper(c.Request.Method), c.Request.URL)
+			log.Error("Send HTTP Request fail: %s", err2)
+
+			stats.IncrFailCaseCount()
+
+			if repeat > 1 && i < repeat-1 {
+				continue
+			}
+			return
+		}
+
+		log.Tip(
+			"Run Case: %s | %s | [%s %s] | %dms",
+			path,
+			title,
+			strings.ToUpper(c.Request.Method),
+			c.Request.URL,
+			latency,
+		)
+
+		s := doAssertions(allKeys, resp, c, hasRedirect, latency)
+		stats.MergeAssertCount(s)
 	}
 
-	log.Tip(
-		"Run Case: %s | %s | [%s %s] | %dms",
-		path,
-		c.Title,
-		strings.ToUpper(c.Request.Method),
-		c.Request.URL,
-		latency,
-	)
-
-	stats = doAssertions(allKeys, resp, c, hasRedirect, latency)
 	return
 }
 

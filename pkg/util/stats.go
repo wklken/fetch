@@ -73,9 +73,9 @@ func (s *Stats) AllPassed() bool {
 	return s.failCaseCount == 0 && s.failAssertCount == 0
 }
 
-func (s *Stats) Report(totalCaseCount int, latency int64) {
+func (s *Stats) Report(latency int64) {
 	log.Info(tableTPL,
-		totalCaseCount, s.okCaseCount, s.failCaseCount,
+		s.okCaseCount+s.failCaseCount, s.okCaseCount, s.failCaseCount,
 		s.okAssertCount+s.failAssertCount, s.okAssertCount, s.failAssertCount,
 		latency)
 }

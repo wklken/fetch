@@ -35,5 +35,6 @@ type CaseConfig struct {
 	Timeout int
 
 	Retry Retry
-	// TODO: repeat
+
+	Repeat int
 }
