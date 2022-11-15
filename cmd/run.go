@@ -94,7 +94,10 @@ var runCmd = &cobra.Command{
 		for _, path := range orderedCases {
 			// TODO: -p 10 to run in parallel with 10 goroutines
 
+			// 1. run in goroutines
 			s := run(path, &runConfig)
+
+			// 2. collect the result
 			totalStats.MergeAssertCount(s)
 
 			if runConfig.FailFast && !(s.AllPassed()) {
@@ -180,21 +183,40 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		timeout = c.Config.Timeout
 	}
 
-	resp, hasRedirect, latency, err := client.Send(
-		filepath.Dir(path),
-		c.Request.Method,
-		c.Request.URL,
-		allKeys.Has("request.body"),
-		c.Request.Body,
-		c.Request.Header,
-		c.Request.Cookie,
-		c.Request.BasicAuth,
-		c.Hook,
-		timeout,
-		debug,
+	var (
+		resp        *http.Response
+		hasRedirect bool
+		latency     int64
+		err2        error
+		count       int
 	)
-	if err != nil {
-		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
+	for {
+		resp, hasRedirect, latency, err2 = client.Send(
+			filepath.Dir(path),
+			c.Request.Method,
+			c.Request.URL,
+			allKeys.Has("request.body"),
+			c.Request.Body,
+			c.Request.Header,
+			c.Request.Cookie,
+			c.Request.BasicAuth,
+			c.Hook,
+			timeout,
+			debug,
+		)
+
+		if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
+			(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
+			time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
+			count++
+			continue
+		} else {
+			break
+		}
+
+	}
+	if err2 != nil {
+		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err2)
 		stats.IncrFailCaseCount()
 		return
 	}
