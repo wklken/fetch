@@ -23,10 +23,12 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jmespath/go-jmespath"
+	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/wklken/httptest/pkg/assert"
@@ -41,10 +43,16 @@ const (
 )
 
 var (
-	verbose = false
-	quiet   = false
-	cfgFile string
+	verbose   = false
+	quiet     = false
+	cfgFile   string
+	parallels = 1
 )
+
+type RunInParallelArgs struct {
+	Path      string
+	RunConfig *config.RunConfig
+}
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -91,19 +99,49 @@ var runCmd = &cobra.Command{
 		log.BeQuiet(quiet)
 
 		start := time.Now()
-		for _, path := range orderedCases {
-			// TODO: -p 10 to run in parallel with 10 goroutines
 
-			// 1. run in goroutines
-			s := run(path, &runConfig)
+		if parallels <= 1 {
+			for _, path := range orderedCases {
+				s := run(path, &runConfig)
 
-			// 2. collect the result
-			totalStats.MergeAssertCount(s)
+				// 2. collect the result
+				totalStats.MergeAssertCount(s)
 
-			if runConfig.FailFast && !(s.AllPassed()) {
-				log.Info("failFast=True, quit, the execute result: 1")
-				os.Exit(1)
+				if runConfig.FailFast && !(s.AllPassed()) {
+					log.Info("failFast=True, quit, the execute result: 1")
+					os.Exit(1)
+				}
 			}
+		} else {
+			var wg sync.WaitGroup
+			sc := util.StatsCollection{}
+			p, _ := ants.NewPoolWithFunc(parallels, func(i interface{}) {
+				defer wg.Done()
+				args := i.(RunInParallelArgs)
+
+				s := run(args.Path, args.RunConfig)
+				if runConfig.FailFast && !(s.AllPassed()) {
+					log.Info("failFast=True, quit, the execute result: 1")
+					// FIXME: should stop all, not only the goroutine
+					os.Exit(1)
+				}
+
+				sc.Add(s)
+			})
+			defer p.Release()
+
+			for _, path := range orderedCases {
+				// TODO: -p 10 to run in parallel with 10 goroutines
+				wg.Add(1)
+
+				args := RunInParallelArgs{
+					Path:      path,
+					RunConfig: &runConfig,
+				}
+				p.Invoke(args)
+			}
+			wg.Wait()
+			totalStats = sc.GetStats()
 		}
 
 		latency := time.Since(start).Milliseconds()
@@ -124,6 +162,8 @@ func init() {
 	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
 	// -q quiet
 	runCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "be quiet")
+	// -p parallel
+	runCmd.PersistentFlags().IntVarP(&parallels, "parallel", "p", 1, "run in parallel")
 
 	// -e dev.toml
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
@@ -135,6 +175,7 @@ func init() {
 // }
 
 func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
+	// FIXME: should collect the log instead of print it(in parallel will be a problem)
 	v, err := config.ReadFromFile(path)
 	if err != nil {
 		log.Tip("Run Case: %s", path)

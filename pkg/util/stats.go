@@ -1,6 +1,10 @@
 package util
 
-import "github.com/wklken/httptest/pkg/log"
+import (
+	"sync"
+
+	"github.com/wklken/httptest/pkg/log"
+)
 
 const tableTPL = `
 ┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
@@ -78,4 +82,23 @@ func (s *Stats) Report(latency int64) {
 		s.okCaseCount+s.failCaseCount, s.okCaseCount, s.failCaseCount,
 		s.okAssertCount+s.failAssertCount, s.okAssertCount, s.failAssertCount,
 		latency)
+}
+
+type StatsCollection struct {
+	stats Stats
+	mu    sync.Mutex
+}
+
+func (sc *StatsCollection) Add(s Stats) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	sc.stats.MergeAssertCount(s)
+}
+
+func (sc *StatsCollection) GetStats() Stats {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	return sc.stats
 }
