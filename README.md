@@ -202,16 +202,16 @@ contentType = "{{.content_type}}"
 - [ ] sub-command: `generate x` generate a case, from tpl
 - [ ] error: dns / connection reset/timeout and so on
 - [ ] how to test: long-live / file download / static file / websocket / keep-alive
-- [ ] run in order glob, the pattern is based on the binary root dir
+- [x] run in order glob, the pattern is based on the binary root dir
 - [ ] support request body type, msgpack/zip.....
-- [ ] display: file / line number to show which case fail
-- [ ] set timeout each case
+- [x] display: file / line number to show which case fail
+- [x] set timeout each case
 - [ ] case scope config, render=true, priority higher than global config
 - [ ] feature: ssl / https
-- [ ] feature: retry
-- [ ] feature: repeat
+- [x] feature: retry
+- [x] feature: repeat
 - [ ] feature: data share between cases
-- [ ] how to run in parallel
+- [x] how to run in parallel
 - [ ] multiple cases in one file, like ginkgo?
 
 ## Dependency
