@@ -107,6 +107,8 @@ var runCmd = &cobra.Command{
 				// 2. collect the result
 				totalStats.MergeAssertCount(s)
 
+				// FIXME: log one by one, not at the last
+
 				if runConfig.FailFast && !(s.AllPassed()) {
 					log.Info("failFast=True, quit, the execute result: 1")
 					os.Exit(1)
@@ -127,6 +129,7 @@ var runCmd = &cobra.Command{
 				}
 
 				sc.Add(s)
+				// FIXME: log one by one, not at the last
 			})
 			defer p.Release()
 
@@ -143,6 +146,8 @@ var runCmd = &cobra.Command{
 			wg.Wait()
 			totalStats = sc.GetStats()
 		}
+
+		totalStats.PrintMessages()
 
 		latency := time.Since(start).Milliseconds()
 		totalStats.Report(latency)
@@ -178,16 +183,16 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	// FIXME: should collect the log instead of print it(in parallel will be a problem)
 	v, err := config.ReadFromFile(path)
 	if err != nil {
-		log.Tip("Run Case: %s", path)
-		log.Error("read fail: %s", err)
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("read fail: %s", err)
 		stats.IncrFailCaseCount()
 		return
 	}
 	// read lines, for display the failed asset line number
 	fileLines, err := config.ReadLines(path)
 	if err != nil {
-		log.Tip("Run Case: %s", path)
-		log.Error("read fail: %s", err)
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("read fail: %s", err)
 		stats.IncrFailCaseCount()
 		return
 	}
@@ -195,8 +200,8 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
-		log.Tip("Run Case: %s", path)
-		log.Error("parse fail: %s", err)
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("parse fail: %s", err)
 		return
 	}
 	// set the content
@@ -269,10 +274,14 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		}
 
 		if err2 != nil {
-			// logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err2)
-			log.Tip("Run Case: %s | %s | [%s %s]", path, title, strings.ToUpper(c.Request.Method), c.Request.URL)
-			log.Error("Send HTTP Request fail: %s", err2)
-
+			stats.AddTipMessage(
+				"Run Case: %s | %s | [%s %s]",
+				path,
+				title,
+				strings.ToUpper(c.Request.Method),
+				c.Request.URL,
+			)
+			stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
 			stats.IncrFailCaseCount()
 
 			if repeat > 1 && i < repeat-1 {
@@ -281,7 +290,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			return
 		}
 
-		log.Tip(
+		stats.AddTipMessage(
 			"Run Case: %s | %s | [%s %s] | %dms",
 			path,
 			title,
@@ -597,10 +606,10 @@ func doAssertions(
 
 	for _, ka := range keyAsserts {
 		if allKeys.Has(ka.key) {
-			log.Infof("%s: ", ka.key)
+			stats.AddInfofMessage("%s: ", ka.key)
 			ok, message := ka.ctx.f(ka.ctx.element1, ka.ctx.element2)
 			if ok {
-				log.Pass()
+				stats.AddPassMessage()
 				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
@@ -608,8 +617,7 @@ func doAssertions(
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				// fmt.Printf("the assert key: %s", ka.key)
-				log.Fail(message)
+				stats.AddFailMessage(message)
 				stats.IncrFailAssertCount()
 			}
 		}
@@ -617,10 +625,10 @@ func doAssertions(
 
 	if len(c.Assert.Header) > 0 {
 		for key, value := range c.Assert.Header {
-			log.Infof("assert.header.%s: ", key)
+			stats.AddInfoMessage("assert.header.%s: ", key)
 			ok, message := assert.Equal(resp.Header.Get(key), value)
 			if ok {
-				log.Pass()
+				stats.AddPassMessage()
 				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
@@ -628,7 +636,7 @@ func doAssertions(
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				log.Fail(message)
+				stats.AddFailMessage(message)
 				stats.IncrFailAssertCount()
 			}
 
@@ -639,7 +647,7 @@ func doAssertions(
 	if contentType == binding.MIMEJSON {
 		err = binding.JSON.BindBody(body, &jsonData)
 		if err != nil {
-			log.Fail("binding.json fail: %s", err)
+			stats.AddFailMessage("binding.json fail: %s", err)
 			stats.IncrFailAssertCountByN(int64(len(c.Assert.Json)))
 			return
 		}

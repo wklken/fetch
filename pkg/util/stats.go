@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/wklken/httptest/pkg/log"
@@ -17,11 +18,17 @@ const tableTPL = `
 │                    Time : %6d ms                                           │
 └───────────────────────────────────────────────────────────────────────────────┘`
 
+type Message struct {
+	Type string
+	Text string
+}
+
 type Stats struct {
 	okCaseCount     int64
 	failCaseCount   int64
 	okAssertCount   int64
 	failAssertCount int64
+	messages        []Message
 }
 
 func (s *Stats) MergeAssertCount(s1 Stats) {
@@ -42,6 +49,11 @@ func (s *Stats) MergeAssertCount(s1 Stats) {
 		} else {
 			s.failCaseCount++
 		}
+	}
+
+	messages := s1.GetMessages()
+	if len(messages) > 0 {
+		s.messages = append(s.messages, messages...)
 	}
 }
 
@@ -82,6 +94,76 @@ func (s *Stats) Report(latency int64) {
 		s.okCaseCount+s.failCaseCount, s.okCaseCount, s.failCaseCount,
 		s.okAssertCount+s.failAssertCount, s.okAssertCount, s.failAssertCount,
 		latency)
+}
+
+func (s *Stats) AddMessage(msg Message) {
+	s.messages = append(s.messages, msg)
+}
+
+func (s *Stats) GetMessages() []Message {
+	return s.messages
+}
+
+func (s *Stats) AddTipMessage(format string, args ...interface{}) {
+	s.messages = append(s.messages, Message{
+		Type: "tip",
+		Text: fmt.Sprintf(format, args...),
+	})
+}
+
+func (s *Stats) AddErrorMessage(format string, args ...interface{}) {
+	s.messages = append(s.messages, Message{
+		Type: "error",
+		Text: fmt.Sprintf(format, args...),
+	})
+}
+
+func (s *Stats) AddInfofMessage(format string, args ...interface{}) {
+	s.messages = append(s.messages, Message{
+		Type: "infof",
+		Text: fmt.Sprintf(format, args...),
+	})
+}
+
+func (s *Stats) AddInfoMessage(format string, args ...interface{}) {
+	s.messages = append(s.messages, Message{
+		Type: "info",
+		Text: fmt.Sprintf(format, args...),
+	})
+}
+
+func (s *Stats) AddPassMessage() {
+	s.messages = append(s.messages, Message{
+		Type: "pass",
+	})
+}
+
+func (s *Stats) AddFailMessage(format string, args ...interface{}) {
+	s.messages = append(s.messages, Message{
+		Type: "fail",
+		Text: fmt.Sprintf(format, args...),
+	})
+}
+
+func (s *Stats) PrintMessages() {
+	for _, msg := range s.messages {
+		switch msg.Type {
+		case "tip":
+			log.Tip(msg.Text)
+		case "error":
+			log.Error(msg.Text)
+		case "infof":
+			log.Infof(msg.Text)
+		case "info":
+			log.Info(msg.Text)
+		case "pass":
+			log.Pass()
+		case "fail":
+			log.Fail(msg.Text)
+		default:
+			log.Info(msg.Text)
+		}
+	}
 }
 
 type StatsCollection struct {
