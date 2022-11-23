@@ -47,6 +47,10 @@ type Assert struct {
 	Json   []AssertJson `mapstructure:"json"`
 	Header map[string]interface{}
 
+	// if request fail like dial fail/context deadline exceeded, will do assert error_contains only,
+	// will pass if the error message contains the string
+	ErrorContains string `mapstructure:"error_contains"`
+
 	HasRedirect bool
 
 	Proto      string // e.g. "HTTP/1.0"

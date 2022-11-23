@@ -275,14 +275,22 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 
 		if err2 != nil {
 			stats.AddTipMessage(
-				"Run Case: %s | %s | [%s %s]",
+				"Run Case: %s | %s | [%s %s] | %dms",
 				path,
 				title,
 				strings.ToUpper(c.Request.Method),
 				c.Request.URL,
+				latency,
 			)
-			stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
-			stats.IncrFailCaseCount()
+
+			if !allKeys.Has("assert.error_contains") {
+				stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
+				stats.IncrFailCaseCount()
+			} else {
+				// do assert with error_contains
+				s1 := doErrorAssertions(c, err2)
+				stats.MergeAssertCount(s1)
+			}
 
 			if repeat > 1 && i < repeat-1 {
 				continue
@@ -710,6 +718,25 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats ut
 				stats.IncrFailAssertCount()
 			}
 		}
+	}
+
+	return
+}
+
+func doErrorAssertions(c config.Case, err error) (stats util.Stats) {
+	stats.AddInfofMessage("assert.error_contains: ")
+	ok, message := assert.Contains(err.Error(), c.Assert.ErrorContains)
+	if ok {
+		stats.AddPassMessage()
+		stats.IncrOkAssertCount()
+	} else {
+		// the ka.key is like assert.latency_lt
+		lineNumber := c.GuessAssertLineNumber("assert.error_contains")
+		if lineNumber > 0 {
+			message = fmt.Sprintf("line:%d | %s", lineNumber, message)
+		}
+		stats.AddFailMessage(message)
+		stats.IncrFailAssertCount()
 	}
 
 	return
