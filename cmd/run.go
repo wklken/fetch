@@ -682,19 +682,18 @@ func doAssertions(
 	return
 }
 
-// FIXME: json assertion log.Infof log.Pass log.Error should be fixed
 func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
-		log.Infof("assert.json.%s: ", path)
+		stats.AddInfofMessage("assert.json.%s: ", path)
 
 		if jsonData == nil {
 			ok, message := assert.Equal(nil, expectedValue)
 			if ok {
 				stats.IncrOkAssertCount()
 			} else {
-				log.Fail(message)
+				stats.AddFailMessage(message)
 				stats.IncrFailAssertCount()
 			}
 			continue
@@ -702,12 +701,13 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats ut
 
 		actualValue, err := jmespath.Search(path, jsonData)
 		if err != nil {
-			log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
+			// log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
+			stats.AddFailMessage("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
 		} else {
 			// missing
 			if actualValue == nil {
 				_, message := assert.Equal(nil, expectedValue)
-				log.Fail(message)
+				stats.AddFailMessage(message)
 				stats.IncrFailAssertCount()
 				continue
 			}
@@ -725,10 +725,10 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats ut
 
 			ok, message := assert.Equal(actualValue, expectedValue)
 			if ok {
-				log.Pass()
+				stats.AddPassMessage()
 				stats.IncrOkAssertCount()
 			} else {
-				log.Fail(message)
+				stats.AddFailMessage(message)
 				stats.IncrFailAssertCount()
 			}
 		}
