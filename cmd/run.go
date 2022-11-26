@@ -652,23 +652,37 @@ func doAssertions(
 	}
 
 	var jsonData interface{}
-	if contentType == binding.MIMEJSON {
-		err = binding.JSON.BindBody(body, &jsonData)
-		if err != nil {
-			stats.AddFailMessage("binding.json fail: %s", err)
-			stats.IncrFailAssertCountByN(int64(len(c.Assert.Json)))
-			return
+	if contentType == binding.MIMEJSON || contentType == binding.MIMEMSGPACK || contentType == binding.MIMEMSGPACK2 {
+		var f binding.BindingBody
+		switch contentType {
+		case binding.MIMEJSON:
+			f = binding.JSON
+		case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+			f = binding.MsgPack
+		default:
+			f = nil
 		}
 
-		if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
-			s1 := doJsonAssertions(jsonData, c.Assert.Json)
-			stats.MergeAssertCount(s1)
+		if f != nil {
+			// err = binding.JSON.BindBody(body, &jsonData)
+			err = f.BindBody(body, &jsonData)
+			if err != nil {
+				stats.AddFailMessage("binding.json fail: %s", err)
+				stats.IncrFailAssertCountByN(int64(len(c.Assert.Json)))
+				return
+			}
+
+			if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
+				s1 := doJsonAssertions(jsonData, c.Assert.Json)
+				stats.MergeAssertCount(s1)
+			}
 		}
 	}
 
 	return
 }
 
+// FIXME: json assertion log.Infof log.Pass log.Error should be fixed
 func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
