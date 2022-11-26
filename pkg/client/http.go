@@ -1,12 +1,18 @@
 package client
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/goccy/go-json"
+	"github.com/vmihailenco/msgpack/v5"
 	"github.com/wklken/httptest/pkg/config"
 )
 
@@ -37,20 +43,31 @@ func Send(
 		if hasBody {
 			// fmt.Printf("has body, the headers: %+v\n", headers)
 
-			bodyReader := strings.NewReader(requestBody)
+			var bodyReader io.Reader
 
 			// TODO: support msgpack? and the gzip?
-			//if ct, ok := headers["content-type"]; ok {
-			//	switch strings.ToLower(ct) {
-			//	case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
-			//		bs, err1 := msgpack.Marshal(requestBody)
-			//		if err1 != nil {
-			//			return fmt.Errorf("do msgpack encode fail")
-			//
-			//		}
-			//
-			//	}
-			//}
+			if ct, ok := headers["content-type"]; ok {
+				switch strings.ToLower(ct) {
+				case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+					var obj map[string]interface{}
+					err0 := json.Unmarshal([]byte(requestBody), &obj)
+					if err0 != nil {
+						err = fmt.Errorf("try to validate the request body valid json fail, %w", err0)
+						return
+					}
+
+					bs, err1 := msgpack.Marshal(obj)
+					if err1 != nil {
+						err = fmt.Errorf("do msgpack encode fail, err=%w", err)
+						return
+					}
+					bodyReader = bytes.NewReader(bs)
+				default:
+					bodyReader = strings.NewReader(requestBody)
+				}
+			} else {
+				bodyReader = strings.NewReader(requestBody)
+			}
 
 			req, err = http.NewRequest(httpMethod, url, bodyReader)
 		} else {
