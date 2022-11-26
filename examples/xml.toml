@@ -1,0 +1,22 @@
+title = "json assert"
+description = "json assert"
+
+[request]
+method = "get"
+url = "http://httpbin.org/xml"
+
+
+[assert]
+status = "ok"
+statusCode = 200
+contentLength_gt = 180
+contentType = "application/xml"
+
+[[assert.xml]]
+path = "/slideshow/slide[2]/title"
+value =  "Overview"
+
+[[assert.xml]]
+path = "/slideshow/@author"
+value =  "Overview"
+

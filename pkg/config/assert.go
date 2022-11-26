@@ -44,7 +44,8 @@ type Assert struct {
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
-	Json   []AssertJson `mapstructure:"json"`
+	JSON   []AssertJson `mapstructure:"json"`
+	XML    []AssertXML  `mapstructure:"xml"`
 	Header map[string]interface{}
 
 	// if request fail like dial fail/context deadline exceeded, will do assert error_contains only,
@@ -102,12 +103,17 @@ func (a *Assert) Render(ctx map[string]interface{}) {
 	a.BodyNotStartsWith = tpl.Render(a.BodyNotStartsWith, ctx)
 	a.BodyNotEndsWith = tpl.Render(a.BodyNotEndsWith, ctx)
 
-	for _, j := range a.Json {
+	for _, j := range a.JSON {
 		j.Render(ctx)
 	}
 }
 
 type AssertJson struct {
+	Path  string
+	Value interface{}
+}
+
+type AssertXML struct {
 	Path  string
 	Value interface{}
 }

@@ -16,6 +16,8 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
@@ -29,7 +31,10 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jmespath/go-jmespath"
 	"github.com/panjf2000/ants/v2"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/html/charset"
+	"gopkg.in/xmlpath.v2"
 
 	"github.com/wklken/httptest/pkg/assert"
 	"github.com/wklken/httptest/pkg/client"
@@ -651,6 +656,11 @@ func doAssertions(
 		}
 	}
 
+	if allKeys.Has("assert.xml") && len(c.Assert.XML) > 0 {
+		s1 := doXMLAssertions(body, c.Assert.XML)
+		stats.MergeAssertCount(s1)
+	}
+
 	var jsonData interface{}
 	if contentType == binding.MIMEJSON || contentType == binding.MIMEMSGPACK || contentType == binding.MIMEMSGPACK2 {
 		var f binding.BindingBody
@@ -668,12 +678,12 @@ func doAssertions(
 			err = f.BindBody(body, &jsonData)
 			if err != nil {
 				stats.AddFailMessage("binding.json fail: %s", err)
-				stats.IncrFailAssertCountByN(int64(len(c.Assert.Json)))
+				stats.IncrFailAssertCountByN(int64(len(c.Assert.JSON)))
 				return
 			}
 
-			if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
-				s1 := doJsonAssertions(jsonData, c.Assert.Json)
+			if allKeys.Has("assert.json") && len(c.Assert.JSON) > 0 {
+				s1 := doJSONAssertions(jsonData, c.Assert.JSON)
 				stats.MergeAssertCount(s1)
 			}
 		}
@@ -682,7 +692,50 @@ func doAssertions(
 	return
 }
 
-func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
+func doXMLAssertions(body []byte, xmls []config.AssertXML) (stats util.Stats) {
+	decoder := xml.NewDecoder(bytes.NewReader(body))
+	decoder.CharsetReader = charset.NewReaderLabel
+	root, err := xmlpath.ParseDecoder(decoder)
+	// root, err := xmlpath.Parse(bytes.NewReader(body))
+	if err != nil {
+		stats.AddFailMessage("xml parse fail: %s", err)
+		stats.IncrFailAssertCountByN(int64(len(xmls)))
+		return
+	}
+
+	for _, x := range xmls {
+		path := x.Path
+		expectedValue := x.Value
+		stats.AddInfofMessage("assert.xml.%s: ", path)
+
+		p, err := xmlpath.Compile(path)
+		if err != nil {
+			message := fmt.Sprintf("wrong xml path %s, compile fail %s", path, err.Error())
+			stats.AddFailMessage(message)
+			stats.IncrFailAssertCount()
+			continue
+		}
+		if actualValue, ok := p.String(root); ok {
+			// convert expectedValue to String
+			ev := cast.ToString(expectedValue)
+			ok, message := assert.Equal(actualValue, ev)
+			if ok {
+				stats.AddPassMessage()
+				stats.IncrOkAssertCount()
+			} else {
+				stats.AddFailMessage(message)
+				stats.IncrFailAssertCount()
+			}
+		} else {
+			stats.AddFailMessage("search xml data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
+			stats.IncrFailAssertCount()
+		}
+	}
+
+	return
+}
+
+func doJSONAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value
@@ -703,6 +756,7 @@ func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats ut
 		if err != nil {
 			// log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
 			stats.AddFailMessage("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
+			stats.IncrFailAssertCount()
 		} else {
 			// missing
 			if actualValue == nil {
