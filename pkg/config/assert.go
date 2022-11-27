@@ -44,9 +44,11 @@ type Assert struct {
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
+	Header map[string]interface{}
 	JSON   []AssertJson `mapstructure:"json"`
 	XML    []AssertXML  `mapstructure:"xml"`
-	Header map[string]interface{}
+
+	// FIXME: cookie assert, should set_cookie key exist or key-value
 
 	// if request fail like dial fail/context deadline exceeded, will do assert error_contains only,
 	// will pass if the error message contains the string
