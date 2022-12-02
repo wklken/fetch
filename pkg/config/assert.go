@@ -47,6 +47,7 @@ type Assert struct {
 	Header map[string]interface{}
 	JSON   []AssertJson `mapstructure:"json"`
 	XML    []AssertXML  `mapstructure:"xml"`
+	HTML   []AssertHTML `mapstructure:"html"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 
@@ -116,6 +117,11 @@ type AssertJson struct {
 }
 
 type AssertXML struct {
+	Path  string
+	Value interface{}
+}
+
+type AssertHTML struct {
 	Path  string
 	Value interface{}
 }

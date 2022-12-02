@@ -342,6 +342,12 @@ func doAssertions(
 		stats.MergeAssertCount(s1)
 	}
 
+	// html assert
+	if allKeys.Has("assert.html") && len(c.Assert.HTML) > 0 {
+		s1 := assertion.DoHTMLAssertions(body, c.Assert.HTML)
+		stats.MergeAssertCount(s1)
+	}
+
 	// json/msgpack assert
 	var jsonData interface{}
 	if contentType == binding.MIMEJSON || contentType == binding.MIMEMSGPACK || contentType == binding.MIMEMSGPACK2 {

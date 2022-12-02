@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	maxResponseBodyLength = 1024
+	maxResponseBodyLength = 2048
 )
 
 // from gin
