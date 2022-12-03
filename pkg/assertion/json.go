@@ -9,7 +9,7 @@ import (
 	"github.com/wklken/httptest/pkg/util"
 )
 
-func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJson) (stats util.Stats) {
+func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJSON) (stats util.Stats) {
 	for _, dj := range jsons {
 		path := dj.Path
 		expectedValue := dj.Value

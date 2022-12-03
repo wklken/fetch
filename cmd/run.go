@@ -348,6 +348,18 @@ func doAssertions(
 		stats.MergeAssertCount(s1)
 	}
 
+	// yaml assert
+	if allKeys.Has("assert.yaml") && len(c.Assert.YAML) > 0 {
+		s1 := assertion.DoYAMLAssertions(body, c.Assert.YAML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// toml assert
+	if allKeys.Has("assert.toml") && len(c.Assert.TOML) > 0 {
+		s1 := assertion.DoTOMLAssertions(body, c.Assert.TOML)
+		stats.MergeAssertCount(s1)
+	}
+
 	// json/msgpack assert
 	var jsonData interface{}
 	if contentType == binding.MIMEJSON || contentType == binding.MIMEMSGPACK || contentType == binding.MIMEMSGPACK2 {
@@ -376,9 +388,6 @@ func doAssertions(
 			}
 		}
 	}
-	// FIXME: add assert.toml
-	// FIXME: add assert.yaml
-	// FIXME: add assert.html
 
 	return
 }

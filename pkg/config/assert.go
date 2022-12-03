@@ -45,9 +45,11 @@ type Assert struct {
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
 	Header map[string]interface{}
-	JSON   []AssertJson `mapstructure:"json"`
+	JSON   []AssertJSON `mapstructure:"json"`
 	XML    []AssertXML  `mapstructure:"xml"`
 	HTML   []AssertHTML `mapstructure:"html"`
+	YAML   []AssertYAML `mapstructure:"yaml"`
+	TOML   []AssertTOML `mapstructure:"toml"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 
@@ -111,7 +113,7 @@ func (a *Assert) Render(ctx map[string]interface{}) {
 	}
 }
 
-type AssertJson struct {
+type AssertJSON struct {
 	Path  string
 	Value interface{}
 }
@@ -126,7 +128,17 @@ type AssertHTML struct {
 	Value interface{}
 }
 
-func (a *AssertJson) Render(ctx map[string]interface{}) {
+type AssertYAML struct {
+	Path  string
+	Value interface{}
+}
+
+type AssertTOML struct {
+	Path  string
+	Value interface{}
+}
+
+func (a *AssertJSON) Render(ctx map[string]interface{}) {
 	if strings.Contains(a.Path, TplBrace) {
 		a.Path = tpl.Render(a.Path, ctx)
 	}
