@@ -27,6 +27,7 @@ import (
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/panjf2000/ants/v2"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
 	"github.com/wklken/httptest/pkg/assert"
@@ -95,13 +96,24 @@ var runCmd = &cobra.Command{
 		}
 
 		totalStats := util.Stats{}
+		// the log
 		log.BeQuiet(quiet)
 
-		start := time.Now()
+		// the progress bar
+		totalCases := int64(len(orderedCases))
+		var bar *progressbar.ProgressBar
+		if quiet {
+			bar = progressbar.DefaultSilent(totalCases)
+		} else {
+			bar = progressbar.Default(totalCases)
+		}
 
+		start := time.Now()
 		if parallels <= 1 {
 			for _, path := range orderedCases {
 				s := run(path, &runConfig)
+
+				bar.Add(1)
 
 				// 2. collect the result
 				totalStats.MergeAssertCount(s)
@@ -118,6 +130,7 @@ var runCmd = &cobra.Command{
 			sc := util.StatsCollection{}
 			p, _ := ants.NewPoolWithFunc(parallels, func(i interface{}) {
 				defer wg.Done()
+				defer bar.Add(1)
 				args := i.(RunInParallelArgs)
 
 				s := run(args.Path, args.RunConfig)
