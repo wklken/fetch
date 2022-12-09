@@ -20,9 +20,10 @@ type Request struct {
 	URL    string
 	Body   string
 
-	Header    map[string]string
-	Cookie    string
-	BasicAuth BasicAuth `mapstructure:"basic_auth"`
+	Header          map[string]string
+	Cookie          string
+	BasicAuth       BasicAuth `mapstructure:"basic_auth"`
+	DisableRedirect bool      `mapstructure:"disable_redirect"`
 }
 
 const TplBrace = "{{"

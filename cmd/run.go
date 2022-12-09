@@ -265,6 +265,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				c.Request.Header,
 				c.Request.Cookie,
 				c.Request.BasicAuth,
+				c.Request.DisableRedirect,
 				c.Hook,
 				timeout,
 				debug,
@@ -370,6 +371,12 @@ func doAssertions(
 	// toml assert
 	if allKeys.Has("assert.toml") && len(c.Assert.TOML) > 0 {
 		s1 := assertion.DoTOMLAssertions(body, c.Assert.TOML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// cookie assert
+	if allKeys.Has("assert.cookie") && len(c.Assert.Cookie) > 0 {
+		s1 := assertion.DoCookieAssertions(resp.Cookies(), c.Assert.Cookie)
 		stats.MergeAssertCount(s1)
 	}
 

@@ -45,11 +45,12 @@ type Assert struct {
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
 	Header map[string]interface{}
-	JSON   []AssertJSON `mapstructure:"json"`
-	XML    []AssertXML  `mapstructure:"xml"`
-	HTML   []AssertHTML `mapstructure:"html"`
-	YAML   []AssertYAML `mapstructure:"yaml"`
-	TOML   []AssertTOML `mapstructure:"toml"`
+	JSON   []AssertJSON   `mapstructure:"json"`
+	XML    []AssertXML    `mapstructure:"xml"`
+	HTML   []AssertHTML   `mapstructure:"html"`
+	YAML   []AssertYAML   `mapstructure:"yaml"`
+	TOML   []AssertTOML   `mapstructure:"toml"`
+	Cookie []AssertCookie `mapstructure:"cookie"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 
@@ -136,6 +137,15 @@ type AssertYAML struct {
 type AssertTOML struct {
 	Path  string
 	Value interface{}
+}
+
+type AssertCookie struct {
+	// NOTE: https://go.dev/src/net/http/cookie_test.go
+	// current only support check all equals(Name, Value, Domain, Path)
+	Name   string
+	Value  string
+	Domain string
+	Path   string
 }
 
 func (a *AssertJSON) Render(ctx map[string]interface{}) {

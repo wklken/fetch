@@ -24,6 +24,7 @@ func Send(
 	headers map[string]string,
 	cookie string,
 	auth config.BasicAuth,
+	disableRedirect bool,
 	hook config.Hook,
 	timeout int,
 	debug bool,
@@ -118,13 +119,24 @@ func Send(
 	if err != nil {
 		return
 	}
-	client := &http.Client{
-		Jar: jar,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+
+	var checkRedirect func(req *http.Request, via []*http.Request) error
+	if disableRedirect {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
+			hasRedirect = true
+			return http.ErrUseLastResponse
+		}
+	} else {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
 			hasRedirect = true
 			return nil
-		},
-		Timeout: time.Duration(timeout) * time.Millisecond,
+		}
+	}
+
+	client := &http.Client{
+		Jar:           jar,
+		CheckRedirect: checkRedirect,
+		Timeout:       time.Duration(timeout) * time.Millisecond,
 	}
 	resp, err = client.Do(req)
 	if err != nil {
