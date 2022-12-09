@@ -1,8 +1,5 @@
 # CHANGELOG
 
-## working on
-
-- Add: support run cases in order
 
 ## v1.0.0
 
