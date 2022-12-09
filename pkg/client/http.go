@@ -1,12 +1,18 @@
 package client
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/goccy/go-json"
+	"github.com/vmihailenco/msgpack/v5"
 	"github.com/wklken/httptest/pkg/config"
 )
 
@@ -18,6 +24,7 @@ func Send(
 	headers map[string]string,
 	cookie string,
 	auth config.BasicAuth,
+	disableRedirect bool,
 	hook config.Hook,
 	timeout int,
 	debug bool,
@@ -35,22 +42,33 @@ func Send(
 		req, err = http.NewRequest(httpMethod, url, nil)
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		if hasBody {
-			//fmt.Printf("has body, the headers: %+v\n", headers)
+			// fmt.Printf("has body, the headers: %+v\n", headers)
 
-			bodyReader := strings.NewReader(requestBody)
+			var bodyReader io.Reader
 
 			// TODO: support msgpack? and the gzip?
-			//if ct, ok := headers["content-type"]; ok {
-			//	switch strings.ToLower(ct) {
-			//	case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
-			//		bs, err1 := msgpack.Marshal(requestBody)
-			//		if err1 != nil {
-			//			return fmt.Errorf("do msgpack encode fail")
-			//
-			//		}
-			//
-			//	}
-			//}
+			if ct, ok := headers["content-type"]; ok {
+				switch strings.ToLower(ct) {
+				case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+					var obj map[string]interface{}
+					err0 := json.Unmarshal([]byte(requestBody), &obj)
+					if err0 != nil {
+						err = fmt.Errorf("try to validate the request body valid json fail, %w", err0)
+						return
+					}
+
+					bs, err1 := msgpack.Marshal(obj)
+					if err1 != nil {
+						err = fmt.Errorf("do msgpack encode fail, err=%w", err)
+						return
+					}
+					bodyReader = bytes.NewReader(bs)
+				default:
+					bodyReader = strings.NewReader(requestBody)
+				}
+			} else {
+				bodyReader = strings.NewReader(requestBody)
+			}
 
 			req, err = http.NewRequest(httpMethod, url, bodyReader)
 		} else {
@@ -101,13 +119,24 @@ func Send(
 	if err != nil {
 		return
 	}
-	client := &http.Client{
-		Jar: jar,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+
+	var checkRedirect func(req *http.Request, via []*http.Request) error
+	if disableRedirect {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
+			hasRedirect = true
+			return http.ErrUseLastResponse
+		}
+	} else {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
 			hasRedirect = true
 			return nil
-		},
-		Timeout: time.Duration(timeout) * time.Millisecond,
+		}
+	}
+
+	client := &http.Client{
+		Jar:           jar,
+		CheckRedirect: checkRedirect,
+		Timeout:       time.Duration(timeout) * time.Millisecond,
 	}
 	resp, err = client.Do(req)
 	if err != nil {
@@ -115,7 +144,7 @@ func Send(
 	}
 
 	latency = time.Since(start).Milliseconds()
-	//fmt.Println("hasRedirect: ", hasRedirect)
+	// fmt.Println("hasRedirect: ", hasRedirect)
 
 	if hook.SaveCookie != "" {
 		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)

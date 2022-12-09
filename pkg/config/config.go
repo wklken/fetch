@@ -15,6 +15,26 @@ type RunConfig struct {
 }
 
 type Order struct {
-	Pattern  string
+	Pattern string
+	// TODO: not supported yet
 	Parallel bool
+}
+
+type Retry struct {
+	Enable bool
+	// retry times
+	Count int
+	// in ms
+	Interval int
+	// match the status_codes will do retry
+	StatusCodes []int
+}
+
+type CaseConfig struct {
+	// timeout in ms
+	Timeout int
+
+	Retry Retry
+
+	Repeat int
 }

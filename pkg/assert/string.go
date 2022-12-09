@@ -30,7 +30,7 @@ func StartsWith(s, prefix interface{}) (bool, string) {
 		return true, "OK"
 	}
 
-	return false, fmt.Sprintf("startswith, string=`%v`, prefix=`%v`", prettyLine(s), prefix)
+	return false, fmt.Sprintf("startswith | `%v` should starts with `%v`", prettyLine(s), prefix)
 }
 
 func EndsWith(s, suffix interface{}) (bool, string) {
@@ -38,12 +38,12 @@ func EndsWith(s, suffix interface{}) (bool, string) {
 		return true, "OK"
 	}
 
-	return false, fmt.Sprintf("endswith, string=`%v`, suffix=`%v`", prettyLine(s), suffix)
+	return false, fmt.Sprintf("endswith | `%v` should ends with `%v`", prettyLine(s), suffix)
 }
 
 func NotStartsWith(s, prefix interface{}) (bool, string) {
 	if test(s, prefix, strings.HasPrefix) {
-		return false, fmt.Sprintf("not_startswith, string=`%v`, prefix=`%v`", prettyLine(s), prefix)
+		return false, fmt.Sprintf("not_startswith | `%v` should not starts with `%v`", prettyLine(s), prefix)
 	}
 
 	return true, "OK"
@@ -51,7 +51,7 @@ func NotStartsWith(s, prefix interface{}) (bool, string) {
 
 func NotEndsWith(s, suffix interface{}) (bool, string) {
 	if test(s, suffix, strings.HasSuffix) {
-		return false, fmt.Sprintf("not_endswith, string=`%v`, suffix=`%v`", prettyLine(s), suffix)
+		return false, fmt.Sprintf("not_endswith | `%v` should not ends with `%v`", prettyLine(s), suffix)
 	}
 
 	return true, "OK"

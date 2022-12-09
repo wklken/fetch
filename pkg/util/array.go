@@ -7,3 +7,12 @@ func ToLower(ss []string) []string {
 	}
 	return l
 }
+
+func ItemInIntArray(item int, array []int) bool {
+	for _, a := range array {
+		if a == item {
+			return true
+		}
+	}
+	return false
+}

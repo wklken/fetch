@@ -49,3 +49,7 @@ value =  ["world"]
 [[assert.json]]
 path = "length(json.array)"
 value = 4
+
+[[assert.json]]
+path = "json.abcdefg"
+value = 1

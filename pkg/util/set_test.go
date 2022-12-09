@@ -8,9 +8,7 @@ import (
 )
 
 var _ = Describe("Set", func() {
-
 	Describe("StringSet", func() {
-
 		Describe("New", func() {
 			It("NewStringSet", func() {
 				s := util.NewStringSet()
@@ -89,9 +87,8 @@ var _ = Describe("Set", func() {
 				s2 := s.ToString(",")
 
 				isEqual := s2 == "hello,world" || s2 == "world,hello"
-				//assert.Equal(GinkgoT(), "hello,world", s2)
+				// assert.Equal(GinkgoT(), "hello,world", s2)
 				assert.True(GinkgoT(), isEqual)
-
 			})
 
 			It("Diff", func() {
@@ -108,13 +105,10 @@ var _ = Describe("Set", func() {
 				assert.Equal(GinkgoT(), 1, s2.Size())
 				assert.True(GinkgoT(), s2.Has("hello"))
 			})
-
 		})
-
 	})
 
 	Describe("Int64Set", func() {
-
 		var s *util.Int64Set
 
 		BeforeEach(func() {
@@ -122,7 +116,7 @@ var _ = Describe("Set", func() {
 		})
 
 		It("NewInt64Set", func() {
-			//s := util.NewInt64Set()
+			// s := util.NewInt64Set()
 			assert.Len(GinkgoT(), s.Data, 0)
 			assert.Equal(GinkgoT(), 0, s.Size())
 		})
@@ -178,11 +172,9 @@ var _ = Describe("Set", func() {
 			sli2 := s.ToSlice()
 			assert.Len(GinkgoT(), sli2, 2)
 		})
-
 	})
 
 	Describe("SplitStringToSet", func() {
-
 		It("Empty string", func() {
 			s := util.SplitStringToSet("", ",")
 			assert.Equal(GinkgoT(), 0, s.Size())
@@ -194,5 +186,4 @@ var _ = Describe("Set", func() {
 			assert.True(GinkgoT(), s.Has("b"))
 		})
 	})
-
 })

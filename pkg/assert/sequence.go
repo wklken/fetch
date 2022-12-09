@@ -40,7 +40,7 @@ func Contains(s, contains interface{}) (bool, string) {
 		return false, "contains error"
 	}
 	if !found {
-		return false, fmt.Sprintf("contains, sequence=`%v`, contains=`%v`", prettyLine(s), contains)
+		return false, fmt.Sprintf("contains | `%v` does not contain`%v`", prettyLine(s), contains)
 	}
 
 	return true, "OK"
@@ -52,7 +52,7 @@ func NotContains(s, contains interface{}) (bool, string) {
 		return false, "not contains error"
 	}
 	if found {
-		return false, fmt.Sprintf("not contains, sequence=`%v`, not_contains=`%v`", prettyLine(s), contains)
+		return false, fmt.Sprintf("not_contains | `%v` should not contain `%v`", prettyLine(s), contains)
 	}
 
 	return true, "OK"
@@ -62,7 +62,7 @@ func In(element, s interface{}) (bool, string) {
 	ok, _ := Contains(s, element)
 	if !ok {
 		// if string
-		return false, fmt.Sprintf("in, element=`%v`, sequence=`%v`", element, prettyLine(s))
+		return false, fmt.Sprintf("in | `%v` not in `%v`", element, prettyLine(s))
 	}
 
 	return true, "OK"
@@ -71,7 +71,7 @@ func In(element, s interface{}) (bool, string) {
 func NotIn(element, s interface{}) (bool, string) {
 	ok, _ := NotContains(s, element)
 	if !ok {
-		return false, fmt.Sprintf("not_in, element=`%v`, sequence=`%v`", element, prettyLine(s))
+		return false, fmt.Sprintf("not_in | `%v` should not in `%v`", element, prettyLine(s))
 	}
 
 	return true, "OK"
@@ -83,7 +83,6 @@ func NotIn(element, s interface{}) (bool, string) {
 // return (true, false) if element was not found.
 // return (true, true) if element was found.
 func includeElement(list interface{}, element interface{}) (ok, found bool) {
-
 	listValue := reflect.ValueOf(list)
 	elementValue := reflect.ValueOf(element)
 	defer func() {
@@ -113,5 +112,4 @@ func includeElement(list interface{}, element interface{}) (ok, found bool) {
 		}
 	}
 	return true, false
-
 }

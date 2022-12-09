@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -27,7 +28,7 @@ func getConfigType(path string) (string, error) {
 		return "json", nil
 	case "toml":
 		return "toml", nil
-	//case "hcl":
+	// case "hcl":
 	//	return "hcl", nil
 	case "properties", "props", "prop":
 		return "prop", nil
@@ -58,4 +59,24 @@ func ReadFromFile(path string) (v *viper.Viper, err error) {
 	}
 
 	return v, nil
+}
+
+// ReadLines read the file content, and return the lines
+// NOTE: we trans all line to lower case
+func ReadLines(path string) (lines []string, err error) {
+	var readFile *os.File
+	readFile, err = os.Open(path)
+	if err != nil {
+		return
+	}
+
+	scanner := bufio.NewScanner(readFile)
+	scanner.Split(bufio.ScanLines)
+
+	for scanner.Scan() {
+		lines = append(lines, strings.ToLower(scanner.Text()))
+	}
+
+	readFile.Close()
+	return
 }

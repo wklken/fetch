@@ -34,9 +34,9 @@ func Info(format string, a ...interface{}) {
 	}
 }
 
-func OK() {
+func Pass() {
 	if !quiet {
-		color.New(color.FgGreen).PrintfFunc()("OK\n")
+		color.New(color.FgGreen).PrintfFunc()("Pass\n")
 	}
 }
 
@@ -48,6 +48,6 @@ func Error(format string, a ...interface{}) {
 
 func Fail(format string, a ...interface{}) {
 	if !quiet {
-		color.New(color.FgRed).PrintfFunc()("FAIL: "+format+"\n", a...)
+		color.New(color.FgRed).PrintfFunc()("Fail | "+format+"\n", a...)
 	}
 }

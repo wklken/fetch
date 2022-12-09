@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,66 +16,42 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin/binding"
-	"github.com/jmespath/go-jmespath"
+	"github.com/panjf2000/ants/v2"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
 	"github.com/wklken/httptest/pkg/assert"
+	"github.com/wklken/httptest/pkg/assertion"
 	"github.com/wklken/httptest/pkg/client"
 	"github.com/wklken/httptest/pkg/config"
 	"github.com/wklken/httptest/pkg/log"
 	"github.com/wklken/httptest/pkg/util"
 )
 
-const tableTPL = `
-┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│                         │           total │              ok │            fail │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│                   cases │          %6d │          %6d │          %6d │
-├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│              assertions │          %6d │          %6d │          %6d │
-├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
-│ total run duration: %6d ms                                                 │
-└───────────────────────────────────────────────────────────────────────────────┘`
 const (
 	DebugEnvName = "HTTPTEST_DEBUG"
 )
 
 var (
-	verbose = false
-	quiet   = false
-	cfgFile string
+	verbose   = false
+	quiet     = false
+	cfgFile   string
+	parallels = 1
 )
 
-func getRunningOrderedFiles(pathes []string, orders []config.Order) (files []string, err error) {
-
-	hits := util.NewStringSet()
-	for _, order := range orders {
-		//pattern := order.Pattern
-		var matches []string
-		matches, err = filepath.Glob(order.Pattern)
-		if err != nil {
-			return
-		}
-		files = append(files, matches...)
-		hits.Append(matches...)
-	}
-
-	for _, p := range pathes {
-		if !hits.Has(p) {
-			files = append(files, p)
-		}
-	}
-
-	return
+type RunInParallelArgs struct {
+	Path      string
+	RunConfig *config.RunConfig
 }
 
 // runCmd represents the run command
@@ -84,7 +60,6 @@ var runCmd = &cobra.Command{
 	Short: "Run cases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		var runConfig config.RunConfig
 		if cfgFile != "" {
 			if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
@@ -113,45 +88,86 @@ var runCmd = &cobra.Command{
 		}
 
 		// parse files in order to run
-		orderedCases, err := getRunningOrderedFiles(args, runConfig.Order)
+		orderedCases, err := util.GetRunningOrderedFiles(args, runConfig.Order)
 		if err != nil {
 			log.Error("parse config file `Order` fail, err=%s", err)
 			os.Exit(1)
 			return
 		}
 
-		totalStats := Stats{}
-
+		totalStats := util.Stats{}
+		// the log
 		log.BeQuiet(quiet)
 
-		start := time.Now()
-		for _, path := range orderedCases {
-			s := run(path, &runConfig)
-			totalStats.MergeAssertCount(s)
-
-			if runConfig.FailFast && (s.failCaseCount > 0 || s.failAssertCount > 0) {
-				log.Info("failFast=True, quit, the execute result: 1")
-				os.Exit(1)
-			}
-
-			// if got fail assert, the case is fail
-			if s.failCaseCount > 0 || s.failAssertCount > 0 {
-				totalStats.failCaseCount += 1
-			} else {
-				totalStats.okCaseCount += 1
-			}
+		// the progress bar
+		totalCases := int64(len(orderedCases))
+		var bar *progressbar.ProgressBar
+		if quiet {
+			bar = progressbar.DefaultSilent(totalCases)
+		} else {
+			bar = progressbar.Default(totalCases)
 		}
-		latency := time.Since(start).Milliseconds()
 
-		log.Info(tableTPL,
-			len(args), totalStats.okCaseCount, totalStats.failCaseCount,
-			totalStats.okAssertCount+totalStats.failAssertCount, totalStats.okAssertCount, totalStats.failAssertCount,
-			latency)
-		if totalStats.failCaseCount > 0 {
+		start := time.Now()
+		if parallels <= 1 {
+			for _, path := range orderedCases {
+				s := run(path, &runConfig)
+
+				bar.Add(1)
+
+				// 2. collect the result
+				totalStats.MergeAssertCount(s)
+
+				// FIXME: log one by one, not at the last
+
+				if runConfig.FailFast && !(s.AllPassed()) {
+					log.Info("failFast=True, quit, the execute result: 1")
+					os.Exit(1)
+				}
+			}
+		} else {
+			var wg sync.WaitGroup
+			sc := util.StatsCollection{}
+			p, _ := ants.NewPoolWithFunc(parallels, func(i interface{}) {
+				defer wg.Done()
+				defer bar.Add(1)
+				args := i.(RunInParallelArgs)
+
+				s := run(args.Path, args.RunConfig)
+				if runConfig.FailFast && !(s.AllPassed()) {
+					log.Info("failFast=True, quit, the execute result: 1")
+					// FIXME: should stop all, not only the goroutine
+					os.Exit(1)
+				}
+
+				sc.Add(s)
+				// FIXME: log one by one, not at the last
+			})
+			defer p.Release()
+
+			for _, path := range orderedCases {
+				// TODO: -p 10 to run in parallel with 10 goroutines
+				wg.Add(1)
+
+				args := RunInParallelArgs{
+					Path:      path,
+					RunConfig: &runConfig,
+				}
+				p.Invoke(args)
+			}
+			wg.Wait()
+			totalStats = sc.GetStats()
+		}
+
+		totalStats.PrintMessages()
+
+		latency := time.Since(start).Milliseconds()
+		totalStats.Report(latency)
+		if totalStats.AllPassed() {
+			log.Info("the execute result: 0")
+		} else {
 			log.Info("the execute result: 1")
 			os.Exit(1)
-		} else {
-			log.Info("the execute result: 0")
 		}
 	},
 }
@@ -163,460 +179,232 @@ func init() {
 	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
 	// -q quiet
 	runCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "be quiet")
+	// -p parallel
+	runCmd.PersistentFlags().IntVarP(&parallels, "parallel", "p", 1, "run in parallel")
 
 	// -e dev.toml
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
 }
 
-type Stats struct {
-	okCaseCount     int64
-	failCaseCount   int64
-	okAssertCount   int64
-	failAssertCount int64
-}
+// func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
+// 	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
+// 	log.Error(format, a...)
+// }
 
-func (s *Stats) MergeAssertCount(s1 Stats) {
-	// NOTE: here only
-	s.okAssertCount += s1.okAssertCount
-	s.failAssertCount += s1.failAssertCount
-}
-
-func logRunCaseFail(path string, c *config.Case, format string, a ...interface{}) {
-	log.Tip("Run Case: %s | %s | [%s %s]", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL)
-	log.Error(format, a...)
-}
-
-func run(path string, runConfig *config.RunConfig) (stats Stats) {
+func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
+	// FIXME: should collect the log instead of print it(in parallel will be a problem)
 	v, err := config.ReadFromFile(path)
 	if err != nil {
-		log.Tip("Run Case: %s", path)
-		log.Error("read fail: %s", err)
-		stats.failCaseCount += 1
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("read fail: %s", err)
+		stats.IncrFailCaseCount()
 		return
 	}
+	// read lines, for display the failed asset line number
+	fileLines, err := config.ReadLines(path)
+	if err != nil {
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("read fail: %s", err)
+		stats.IncrFailCaseCount()
+		return
+	}
+
 	var c config.Case
 	err = v.Unmarshal(&c)
 	if err != nil {
-		log.Tip("Run Case: %s", path)
-		log.Error("parse fail: %s", err)
+		stats.AddTipMessage("Run Case: %s", path)
+		stats.AddErrorMessage("parse fail: %s", err)
 		return
 	}
+	// set the content
+	c.FileLines = fileLines
+
 	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	//fmt.Println("allKeys", allKeys)
-	//fmt.Printf("the case and data: %s, %+v", path, c)
+	// fmt.Println("allKeys", allKeys)
+	// fmt.Printf("the case and data: %s, %+v", path, c)
 
 	// do render
 	if runConfig.Render && len(runConfig.Env) > 0 {
+		finalEnv := runConfig.Env
+		// the priority of env in case is higher than env in config
+		if len(c.Env) > 0 {
+			for k, v := range c.Env {
+				finalEnv[k] = v
+			}
+		}
 		c.Render(runConfig.Env)
 	}
 
 	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
 	timeout := runConfig.Timeout
-
-	resp, hasRedirect, latency, err := client.Send(
-		filepath.Dir(path),
-		c.Request.Method, c.Request.URL, allKeys.Has("request.body"), c.Request.Body, c.Request.Header, c.Request.Cookie, c.Request.BasicAuth, c.Hook, timeout, debug)
-	if err != nil {
-		logRunCaseFail(path, &c, "Send HTTP Request fail: %s", err)
-		stats.failCaseCount += 1
-		return
+	if c.Config.Timeout > 0 {
+		timeout = c.Config.Timeout
 	}
 
-	log.Tip("Run Case: %s | %s | [%s %s] | %dms", path, c.Title, strings.ToUpper(c.Request.Method), c.Request.URL, latency)
+	// support repeat, if got repeat, on case will be repeat N times, as N cases
+	repeat := 1
+	if c.Config.Repeat > 0 {
+		repeat = c.Config.Repeat
+	}
 
-	stats = doAssertions(allKeys, resp, c, hasRedirect, latency)
+	for i := 0; i < repeat; i++ {
+		var (
+			resp        *http.Response
+			hasRedirect bool
+			latency     int64
+			err2        error
+			count       int
+		)
+		for {
+			resp, hasRedirect, latency, err2 = client.Send(
+				filepath.Dir(path),
+				c.Request.Method,
+				c.Request.URL,
+				allKeys.Has("request.body"),
+				c.Request.Body,
+				c.Request.Header,
+				c.Request.Cookie,
+				c.Request.BasicAuth,
+				c.Request.DisableRedirect,
+				c.Hook,
+				timeout,
+				debug,
+			)
+
+			if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
+				(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
+				time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
+				count++
+				continue
+			} else {
+				break
+			}
+
+		}
+		title := c.Title
+		if repeat > 1 {
+			title = fmt.Sprintf("%s (%d/%d)", c.Title, i+1, repeat)
+		}
+
+		if err2 != nil {
+			stats.AddTipMessage(
+				"Run Case: %s | %s | [%s %s] | %dms",
+				path,
+				title,
+				strings.ToUpper(c.Request.Method),
+				c.Request.URL,
+				latency,
+			)
+
+			if !allKeys.Has("assert.error_contains") {
+				stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
+				stats.IncrFailCaseCount()
+			} else {
+				// do assert with error_contains
+				s1 := assertion.DoErrorAssertions(c, err2)
+				stats.MergeAssertCount(s1)
+			}
+
+			if repeat > 1 && i < repeat-1 {
+				continue
+			}
+			return
+		}
+
+		stats.AddTipMessage(
+			"Run Case: %s | %s | [%s %s] | %dms",
+			path,
+			title,
+			strings.ToUpper(c.Request.Method),
+			c.Request.URL,
+			latency,
+		)
+
+		s := doAssertions(allKeys, resp, c, hasRedirect, latency)
+		stats.MergeAssertCount(s)
+	}
+
 	return
 }
 
-func doAssertions(allKeys *util.StringSet, resp *http.Response, c config.Case, hasRedirect bool, latency int64) (stats Stats) {
-
+func doAssertions(
+	allKeys *util.StringSet,
+	resp *http.Response,
+	c config.Case,
+	hasRedirect bool,
+	latency int64,
+) (stats util.Stats) {
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
 
-	bodyStr := strings.TrimSuffix(string(body), "\n")
 	contentType := client.GetContentType(resp.Header)
 
-	type Ctx struct {
-		f        assert.AssertFunc
-		element1 interface{}
-		element2 interface{}
-	}
+	// normal key-value assert
+	s := assertion.DoKeysAssertion(allKeys, resp, c, hasRedirect, latency, contentType, body)
+	stats.MergeAssertCount(s)
 
-	type keyAssert struct {
-		key string
-		ctx Ctx
-	}
-
-	// NOTE: the order
-	keyAsserts := []keyAssert{
-		// statuscode
-		{
-			key: "assert.statuscode",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCode,
-			},
-		},
-		{
-			key: "assert.statuscode_lt",
-			ctx: Ctx{
-				f:        assert.Less,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeLt,
-			},
-		},
-		{
-			key: "assert.statuscode_lte",
-			ctx: Ctx{
-				f:        assert.LessOrEqual,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeLte,
-			},
-		},
-		{
-			key: "assert.statuscode_gt",
-			ctx: Ctx{
-				f:        assert.Greater,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeGt,
-			},
-		},
-		{
-			key: "assert.statuscode_gte",
-			ctx: Ctx{
-				f:        assert.GreaterOrEqual,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeGte,
-			},
-		},
-		{
-			key: "assert.statuscode_in",
-			ctx: Ctx{
-				f:        assert.In,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeIn,
-			},
-		},
-		{
-			key: "assert.statuscode_not_in",
-			ctx: Ctx{
-				f:        assert.NotIn,
-				element1: resp.StatusCode,
-				element2: c.Assert.StatusCodeNotIn,
-			},
-		},
-		// status
-		{
-			key: "assert.status",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-				element2: strings.ToLower(c.Assert.Status),
-			},
-		},
-		{
-			key: "assert.status_in",
-			ctx: Ctx{
-				f:        assert.In,
-				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-				element2: util.ToLower(c.Assert.StatusIn),
-			},
-		},
-		{
-			key: "assert.status_not_in",
-			ctx: Ctx{
-				f:        assert.NotIn,
-				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-				element2: util.ToLower(c.Assert.StatusNotIn),
-			},
-		},
-		{
-			key: "assert.contenttype",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: strings.ToLower(contentType),
-				element2: strings.ToLower(c.Assert.ContentType),
-			},
-		},
-		{
-			key: "assert.contenttype_in",
-			ctx: Ctx{
-				f:        assert.In,
-				element1: strings.ToLower(contentType),
-				element2: util.ToLower(c.Assert.ContentTypeIn),
-			},
-		},
-		{
-			key: "assert.contenttype_not_in",
-			ctx: Ctx{
-				f:        assert.NotIn,
-				element1: strings.ToLower(contentType),
-				element2: util.ToLower(c.Assert.ContentTypeNotIn),
-			},
-		},
-		// contentlength
-		{
-			key: "assert.contentlength",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: resp.ContentLength,
-				element2: c.Assert.ContentLength,
-			},
-		},
-		{
-			key: "assert.contentlength_lt",
-			ctx: Ctx{
-				f:        assert.Less,
-				element1: resp.ContentLength,
-				element2: c.Assert.ContentLengthLt,
-			},
-		},
-		{
-			key: "assert.contentlength_lte",
-			ctx: Ctx{
-				f:        assert.LessOrEqual,
-				element1: resp.ContentLength,
-				element2: c.Assert.ContentLengthLte,
-			},
-		},
-		{
-			key: "assert.contentlength_gt",
-			ctx: Ctx{
-				f:        assert.Greater,
-				element1: resp.ContentLength,
-				element2: c.Assert.ContentLengthGt,
-			},
-		},
-		{
-			key: "assert.contentlength_gte",
-			ctx: Ctx{
-				f:        assert.GreaterOrEqual,
-				element1: resp.ContentLength,
-				element2: c.Assert.ContentLengthGte,
-			},
-		},
-		// latency
-		{
-			key: "assert.latency_lt",
-			ctx: Ctx{
-				f:        assert.Less,
-				element1: latency,
-				element2: c.Assert.LatencyLt,
-			},
-		},
-		{
-			key: "assert.latency_lte",
-			ctx: Ctx{
-				f:        assert.LessOrEqual,
-				element1: latency,
-				element2: c.Assert.LatencyLte,
-			},
-		},
-		{
-			key: "assert.latency_gt",
-			ctx: Ctx{
-				f:        assert.Greater,
-				element1: latency,
-				element2: c.Assert.LatencyGt,
-			},
-		},
-		{
-			key: "assert.latency_gte",
-			ctx: Ctx{
-				f:        assert.GreaterOrEqual,
-				element1: latency,
-				element2: c.Assert.LatencyGte,
-			},
-		},
-		// body
-		{
-			key: "assert.body",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: bodyStr,
-				element2: c.Assert.Body,
-			},
-		},
-		{
-			key: "assert.body_contains",
-			ctx: Ctx{
-				f:        assert.Contains,
-				element1: bodyStr,
-				element2: c.Assert.BodyContains,
-			},
-		},
-		{
-			key: "assert.body_not_contains",
-			ctx: Ctx{
-				f:        assert.NotContains,
-				element1: bodyStr,
-				element2: c.Assert.BodyNotContains,
-			},
-		},
-		{
-			key: "assert.body_startswith",
-			ctx: Ctx{
-				f:        assert.StartsWith,
-				element1: bodyStr,
-				element2: c.Assert.BodyStartsWith,
-			},
-		},
-		{
-			key: "assert.body_endswith",
-			ctx: Ctx{
-				f:        assert.EndsWith,
-				element1: bodyStr,
-				element2: c.Assert.BodyEndsWith,
-			},
-		},
-		{
-			key: "assert.body_not_startswith",
-			ctx: Ctx{
-				f:        assert.NotStartsWith,
-				element1: bodyStr,
-				element2: c.Assert.BodyNotStartsWith,
-			},
-		},
-		{
-			key: "assert.body_not_endswith",
-			ctx: Ctx{
-				f:        assert.NotEndsWith,
-				element1: bodyStr,
-				element2: c.Assert.BodyNotEndsWith,
-			},
-		},
-		{
-			key: "assert.hasredirect",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: hasRedirect,
-				element2: c.Assert.HasRedirect,
-			},
-		},
-		{
-			key: "assert.proto",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: resp.Proto,
-				element2: c.Assert.Proto,
-			},
-		},
-		{
-			key: "assert.protomajor",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: resp.ProtoMajor,
-				element2: c.Assert.ProtoMajor,
-			},
-		},
-		{
-			key: "assert.protominor",
-			ctx: Ctx{
-				f:        assert.Equal,
-				element1: resp.ProtoMinor,
-				element2: c.Assert.ProtoMinor,
-			},
-		},
-	}
-
-	for _, ka := range keyAsserts {
-		if allKeys.Has(ka.key) {
-			log.Infof("%s: ", ka.key)
-			ok, message := ka.ctx.f(ka.ctx.element1, ka.ctx.element2)
-			if ok {
-				log.OK()
-				stats.okAssertCount += 1
-			} else {
-				log.Fail(message)
-				stats.failAssertCount += 1
-			}
-		}
-	}
-
+	// header assert
 	if len(c.Assert.Header) > 0 {
-		for key, value := range c.Assert.Header {
-			log.Infof("assert.header.%s: ", key)
-			ok, message := assert.Equal(resp.Header.Get(key), value)
-			if ok {
-				log.OK()
-				stats.okAssertCount += 1
-			} else {
-				log.Fail(message)
-				stats.failAssertCount += 1
-			}
-
-		}
+		s1 := assertion.DoHeaderAssertions(c, resp.Header)
+		stats.MergeAssertCount(s1)
 	}
 
+	// xml assert
+	if allKeys.Has("assert.xml") && len(c.Assert.XML) > 0 {
+		s1 := assertion.DoXMLAssertions(body, c.Assert.XML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// html assert
+	if allKeys.Has("assert.html") && len(c.Assert.HTML) > 0 {
+		s1 := assertion.DoHTMLAssertions(body, c.Assert.HTML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// yaml assert
+	if allKeys.Has("assert.yaml") && len(c.Assert.YAML) > 0 {
+		s1 := assertion.DoYAMLAssertions(body, c.Assert.YAML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// toml assert
+	if allKeys.Has("assert.toml") && len(c.Assert.TOML) > 0 {
+		s1 := assertion.DoTOMLAssertions(body, c.Assert.TOML)
+		stats.MergeAssertCount(s1)
+	}
+
+	// cookie assert
+	if allKeys.Has("assert.cookie") && len(c.Assert.Cookie) > 0 {
+		s1 := assertion.DoCookieAssertions(resp.Cookies(), c.Assert.Cookie)
+		stats.MergeAssertCount(s1)
+	}
+
+	// json/msgpack assert
 	var jsonData interface{}
-	if contentType == binding.MIMEJSON {
-		err = binding.JSON.BindBody(body, &jsonData)
-		if err != nil {
-			log.Fail("binding.json fail: %s", err)
-			stats.failAssertCount += int64(len(c.Assert.Json))
-			return
+	if contentType == binding.MIMEJSON || contentType == binding.MIMEMSGPACK || contentType == binding.MIMEMSGPACK2 {
+		var f binding.BindingBody
+		switch contentType {
+		case binding.MIMEJSON:
+			f = binding.JSON
+		case binding.MIMEMSGPACK, binding.MIMEMSGPACK2:
+			f = binding.MsgPack
+		default:
+			f = nil
 		}
 
-		if allKeys.Has("assert.json") && len(c.Assert.Json) > 0 {
-			s1 := doJsonAssertions(jsonData, c.Assert.Json)
-			stats.MergeAssertCount(s1)
-		}
-	}
-
-	//   5. set timeout=x, each case?
-
-	return
-}
-
-func doJsonAssertions(jsonData interface{}, jsons []config.AssertJson) (stats Stats) {
-	for _, dj := range jsons {
-		path := dj.Path
-		expectedValue := dj.Value
-		log.Infof("assert.json.%s: ", path)
-
-		if jsonData == nil {
-			ok, message := assert.Equal(nil, expectedValue)
-			if ok {
-				stats.okAssertCount += 1
-			} else {
-				log.Fail(message)
-				stats.failAssertCount += 1
-			}
-			continue
-		}
-
-		actualValue, err := jmespath.Search(path, jsonData)
-		if err != nil {
-			log.Fail("search json data fail, err=%s, path=%s, expected=%s", err, path, expectedValue)
-		} else {
-			// missing
-			if actualValue == nil {
-				_, message := assert.Equal(nil, expectedValue)
-				log.Fail(message)
-				stats.failAssertCount += 1
-				continue
+		if f != nil {
+			// err = binding.JSON.BindBody(body, &jsonData)
+			err = f.BindBody(body, &jsonData)
+			if err != nil {
+				stats.AddFailMessage("binding.json fail: %s", err)
+				stats.IncrFailAssertCountByN(int64(len(c.Assert.JSON)))
+				return
 			}
 
-			//fmt.Printf("%T, %T", actualValue, expectedValue)
-			// make float64 compare with int64
-			if reflect.TypeOf(actualValue).Kind() == reflect.Float64 && reflect.TypeOf(expectedValue).Kind() == reflect.Int64 {
-				actualValue = int64(actualValue.(float64))
-			}
-
-			// not working there
-			//#[[assert.json]]
-			//#path = 'json.array[0:3]'
-			//#value =  [1, 2, 3]
-
-			ok, message := assert.Equal(actualValue, expectedValue)
-			if ok {
-				log.OK()
-				stats.okAssertCount += 1
-			} else {
-				log.Fail(message)
-				stats.failAssertCount += 1
+			if allKeys.Has("assert.json") && len(c.Assert.JSON) > 0 {
+				s1 := assertion.DoJSONAssertions(jsonData, c.Assert.JSON)
+				stats.MergeAssertCount(s1)
 			}
 		}
 	}
