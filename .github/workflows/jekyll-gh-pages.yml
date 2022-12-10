@@ -27,18 +27,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: ruby/setup-ruby@v1
+      # Use GitHub Actions' cache to shorten build times and decrease load on servers
+      - uses: actions/cache@v2
         with:
-          ruby-version: '3.0' # Not needed with a .ruby-version file
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: bundle install --gemfile=docs/Gemfile
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
       - name: Setup Pages
         uses: actions/configure-pages@v2
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      # Standard usage
+      - uses:  helaili/jekyll-action@v2
         with:
-          source: ./docs/
-          destination: ./_site
+          build_only: true
+          jekyll_src: ./docs/
+          build_dir: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 
