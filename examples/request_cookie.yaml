@@ -1,0 +1,16 @@
+title: http method set cookies
+description: http method set cookies
+request:
+  method: get
+  url: 'http://httpbin.org/cookies'
+  cookie: uid=123
+  header:
+    Content-Type: application/json
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 0
+  contentType: application/json
+  json:
+    - path: cookies.uid
+      value: '123'

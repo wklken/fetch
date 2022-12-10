@@ -1,0 +1,18 @@
+title: http method get retry
+description: http method get retry
+request:
+  method: get
+  url: 'http://httpbin.org/status/500'
+config:
+  retry:
+    enable: true
+    count: 3
+    interval: 1000
+    statusCodes:
+      - 200
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 10
+  contentType: application/json
+

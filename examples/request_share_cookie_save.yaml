@@ -1,0 +1,17 @@
+title: http method share cookies
+description: http method share cookies
+request:
+  method: get
+  url: 'http://httpbin.org/cookies/set?name1=value1&name2=value2'
+  header:
+    Content-Type: application/json
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 0
+  contentType: application/json
+  json:
+    - path: cookies.name1
+      value: value1
+hook:
+  save_cookie: share_cookies.txt

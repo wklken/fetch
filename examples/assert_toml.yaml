@@ -1,0 +1,15 @@
+title: toml assert
+description: toml assert
+request:
+  method: get
+  url: 'http://0.0.0.0:8080/someTOML'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 1
+  contentType: application/toml
+  toml:
+    - path: message
+      value: hey
+    - path: foo.bar
+      value: hello2

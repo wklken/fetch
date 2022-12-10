@@ -1,0 +1,33 @@
+title: json assert
+description: json assert
+request:
+  method: post
+  url: 'http://httpbin.org/post'
+  body: |
+    {
+        "hello": "world",
+        "array": [1, 2, 3, 4]
+    }
+  header:
+    Content-Type: application/json
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+  json:
+    - path: headers.Host
+      value: httpbin.org
+    - path: headers."Accept-Encoding"
+      value: gzip
+    - path: 'json.array[0]'
+      value: 1
+    - path: json.hello
+      value: world
+    - path: '*.hello'
+      value:
+        - world
+    - path: length(json.array)
+      value: 4
+    - path: json.abcdefg
+      value: 1

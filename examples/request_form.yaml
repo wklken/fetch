@@ -1,0 +1,13 @@
+title: http method post form
+description: http method post form
+request:
+  method: post
+  url: 'http://httpbin.org/post'
+  body: 'param1=value1&param2=value2'
+  header:
+    Content-Type: application/x-www-form-urlencoded
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json

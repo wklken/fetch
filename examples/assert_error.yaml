@@ -1,0 +1,10 @@
+title: http method get
+description: http method get
+request:
+  method: get
+  url: 'http://not.exists.local:8113/ping/'
+config:
+  timeout: 1
+assert:
+  error_contains: context deadline exceeded
+

@@ -1,0 +1,12 @@
+title: http method get headers
+description: http method get headers
+request:
+  method: get
+  url: 'http://httpbin.org/response-headers?freeform=hello'
+assert:
+  status: ok
+  statusCode: 200
+  contentType: application/json
+  header:
+    server: gunicorn/19.9.0
+    freeform: hello

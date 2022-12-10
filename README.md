@@ -1,7 +1,8 @@
 # httptest
 
-> A command line http test tool
-> Maintain the api test cases via git and pure text
+> Another http api test tool, lightweight and powerful, you can keep the test cases via git and pure text files(like yaml)
+
+See [https://wklken.me/httptest](https://wklken.me/httptest) for more information.
 
 We want to test the APIs via http requests and assert the responses, postman & newman are easy for this.
 
@@ -13,17 +14,6 @@ So, here is the httptest
 - easy to create/modify/copy and delete
 - maintained by git
 - run fast
-
-**note: not ready for production**
-
-## Screenshots
-
-
-![](./examples/screenshots/run.jpg)
-
-![](./examples/screenshots/run_with_debug.jpg)
-
-![](./examples/screenshots/run_quiet.jpg)
 
 ## Features
 
@@ -194,32 +184,6 @@ statusCode = 200
 contentLength_gt = 180
 contentType = "{{.content_type}}"
 ```
-
-
-## TODO
-
-- [ ] sub-command: `bootstrap` create the raw template, like `example.toml.tpl`
-- [ ] sub-command: `generate x` generate a case, from tpl
-- [ ] error: dns / connection reset/timeout and so on
-- [ ] how to test: long-live / file download / static file / websocket / keep-alive
-- [x] run in order glob, the pattern is based on the binary root dir
-- [ ] support request body type, msgpack/zip.....
-- [x] display: file / line number to show which case fail
-- [x] set timeout each case
-- [ ] case scope config, render=true, priority higher than global config
-- [ ] feature: ssl / https
-- [x] feature: retry
-- [x] feature: repeat
-- [ ] feature: data share between cases
-- [x] how to run in parallel
-- [ ] multiple cases in one file, like ginkgo?
-
-## Dependency
-
-- [config file parse: viper](https://github.com/spf13/viper)
-- [default config file: toml](https://toml.io/en/)
-- [examples send request to httpbin](http://httpbin.org/)
-- [json assertions via jmespath](https://jmespath.org/tutorial.html)
 
 ## Inspired by
 

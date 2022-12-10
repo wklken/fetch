@@ -1,0 +1,20 @@
+title: http method post msgpack
+description: http method post msgpack
+request:
+  method: post
+  url: 'http://127.0.0.1:8080/anything'
+  body: |
+    {
+        "hello": "world",
+        "a": "1",
+        "b": "2",
+        "c": "1",
+        "foo": "bar"
+    }
+  header:
+    Content-Type: application/msgpack
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json

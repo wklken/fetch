@@ -1,0 +1,20 @@
+title: http method basic auth
+description: http method basic auth
+request:
+  method: get
+  url: 'http://httpbin.org/basic-auth/hello/world'
+  header:
+    Content-Type: application/json
+  basic_auth:
+    username: hello
+    password: world
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 0
+  contentType: application/json
+  json:
+    - path: authenticated
+      value: true
+    - path: user
+      value: hello

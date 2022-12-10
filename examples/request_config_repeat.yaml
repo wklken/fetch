@@ -1,0 +1,12 @@
+title: http method get repeat
+description: http method get repeat
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+config:
+  repeat: 3
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 10
+  contentType: application/json

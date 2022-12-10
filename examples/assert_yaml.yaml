@@ -1,0 +1,15 @@
+title: yaml assert
+description: yaml assert
+request:
+  method: get
+  url: 'http://0.0.0.0:8080/someYAML'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 1
+  contentType: application/x-yaml
+  yaml:
+    - path: message
+      value: hey
+    - path: foo.bar
+      value: hello2

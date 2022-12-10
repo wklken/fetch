@@ -1,0 +1,7 @@
+title: http redirect
+description: http redirect
+request:
+  method: get
+  url: 'http://www.httpbin.org/get'
+assert:
+  hasRedirect: false

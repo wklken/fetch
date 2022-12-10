@@ -1,0 +1,16 @@
+title: cookie assert
+description: cookie assert
+request:
+  method: get
+  url: 'http://httpbin.org/cookies/set?name1=value1&name2=value2'
+  disable_redirect: true
+assert:
+  statusCode: 302
+  contentType: text/html
+  cookie:
+    - name: name1
+      value: value1
+      path: /
+    - name: name2
+      value: value3
+      path: /

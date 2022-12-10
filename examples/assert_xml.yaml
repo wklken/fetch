@@ -1,0 +1,15 @@
+title: xml assert
+description: xml assert
+request:
+  method: get
+  url: 'http://httpbin.org/xml'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/xml
+  xml:
+    - path: '/slideshow/slide[2]/title'
+      value: Overview
+    - path: /slideshow/@author
+      value: Overview
