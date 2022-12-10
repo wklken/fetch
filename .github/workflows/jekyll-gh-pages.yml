@@ -42,7 +42,8 @@ jobs:
           build_only: true
           jekyll_src: ./docs/
           build_dir: ./_site
-      - run: ls -alrt ./_site
+      - run: ls -alrt ./_site && ls -alrt ./docs/_site
+      - run: rm -rf ./_site && mv ./docs/_site ./_site && ls -alrt ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 
