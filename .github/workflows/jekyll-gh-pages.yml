@@ -42,10 +42,9 @@ jobs:
           build_only: true
           jekyll_src: ./docs/
           build_dir: ./_site
+      - run: ls -alrt ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./_site
 
   # Deployment job
   deploy:
