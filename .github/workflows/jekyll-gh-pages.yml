@@ -38,6 +38,9 @@ jobs:
             ${{ runner.os }}-gems-
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
+        run: |
+            bundle install --path=vendor/bundle --jobs 4 --retry 3
+            bundle clean
         with:
           source: ./docs/
           destination: ./_site
