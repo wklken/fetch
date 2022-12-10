@@ -27,20 +27,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0' # Not needed with a .ruby-version file
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: bundle exec rake
+      - run: bundle install --path=vendor/bundle --jobs 4 --retry 3 && bundle clean
       - name: Setup Pages
         uses: actions/configure-pages@v2
-      # Use GitHub Actions' cache to cache dependencies on servers
-      - uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
-        run: |
-            bundle install --path=vendor/bundle --jobs 4 --retry 3
-            bundle clean
         with:
           source: ./docs/
           destination: ./_site
