@@ -6,63 +6,17 @@ permalink: /usage/examples/
 
 ---
 
-simplest
 
-```toml
-[request]
-method = "get"
-url = "http://httpbin.org/get"
+- `title`/`description`: basic info of this case
+- `request`: the http request definition
+    - `method`: http method like `get/post/put/patch/delete/head`
+    - `url`: the target url
+- `assert`: the assertions for the response
+    - `status`: should be `ok`
+    - `statusCode`: should be `200`
+    - `contentLength_gt`: content-length should be greater than `180`
+    - `contentType`: should be `application/json`
 
-[assert]
-status = "OK"
-statusCode = 200
-```
-
-full normal assertions: [asserts.toml](./examples/asserts.toml) / [asserts.json](./examples/asserts.json) / [asserts.yaml](./examples/asserts.yaml) | [assert.prop](./examples/asserts.prop) | [assert.ini](./examples/asserts.ini)
-
-```toml
-[request]
-method = "get"
-url = "http://httpbin.org/get"
-[request.header]
-hello = "world"
-
-[assert]
-# status
-status = "ok"
-statusCode = 200
-statusCode_in = [400, 500]
-statusCode_not_in = [200, 400]
-statusCode_lt = 100
-statusCode_lte = 100
-statusCode_gt = 500
-statusCode_gte = 500
-
-# content-length
-contentLength = 18
-contentLength_lt = 1
-contentLength_lte = 1
-contentLength_gt = 180
-contentLength_gte = 180
-
-# content-type
-contentType = "abc"
-
-# body
-body = "HTTPBIN is awesome"
-body_contains = "awesome2"
-body_not_contains = "awesome"
-body_startswith = "A"
-body_endswith = "a"
-body_not_startswith = "{"
-body_not_endswith = "}"
-
-# latency
-latency_lt = 0
-latency_lte = 0
-latency_gt = 100
-latency_gte = 100
-```
 
 json assertions
 

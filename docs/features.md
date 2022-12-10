@@ -5,36 +5,56 @@ nav_order: 2
 permalink: /features/
 ---
 
+## Request
+
+- http methods: `get/post/put/delete/patch/head/options`
+- cases config file types: `toml/yaml/json/ini/properties`
+- build request:
+    - post form
+    - send cookie
+    - send body via file `body = "@./post_body_file"`
+    - basic auth
+    - share cookie
+    - send and parse `application/msgpack`
+    - disable_redirect
+
+## Assert
+
+- proto/protoMajor/protoMinor
+- status/statusCode/contentLength/contentType/body
+- headers
+- cookies
+- error: `assert.error_contains` for send fail
+- operators:
+  - numeric: `_in/_not_in/_lt/_lte/_gt/_gte`
+  - string: `_contains/_not_contains/_startswith/_endswith`
+- latency
+- has redirected or not
+- json: use [jmespath](https://jmespath.org/tutorial.html) to get value then assert
+- xml/html: use xpath to get value then assert
+- yaml/toml: convert to json then use jmespath to get value then assert
+
+## Config file
+
+- use a config file: `./httptest run -c examples/config/dev.toml examples/get.toml`
+- config: `debug=true/false` to trigger debug print
+- config: `render=true/false` to use  go_template render the `env`
+- config: `failFast=true/false`, will exit if got one fail case while running
+- config: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
+
+## command line
+
+- show progress bar
+- show run result with stats
+- `exit code != 0` if got any fail assertions
+- show the fail assertion line number in file
+- verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+- quiet mode: `-q/--quiet` to silent the print, for check `$?` only
+- support run cases in order, `./httptest run -c examples/config/order.toml`
+- support run cases in parallel, `./httptest run -c *.yaml -p 10`
+- support case retry/repeat
 
 
-- **Define:**
-    - define the case via [toml](https://toml.io/en/) / yaml / json / properties / ini
-    - support http methods: get/post/put/delete/patch/head/options
-    - support post form, [examples/form.toml](./examples/form.toml)
-    - sent request body via external file `body = "@./post_body_file"` [examples/post_with_body_file.toml](./examples/post_with_body_file.toml)
-    - support [go template](https://golang.org/pkg/text/template/) render in all string value, the envs in config file, example: `./httptest run examples/use_template.toml -c examples/config/dev.toml -v`
-    - support send cookie [examples/cookies.toml](./examples/cookies.toml)
-    - support basic auth [examples/basic_auth.toml](./examples/basic_auth.toml)
-    - support share cookie [examples/share_cookies_save.toml](./examples/share_cookies_save.toml) and [examples/share_cookies_use.toml](./examples/share_cookies_use.toml)
-
-- **Assert:**
-    - assert status/statusCode/contentLength/contentType/body
-    - assert latency
-    - assert numeric support `_in/_not_in/_lt/_lte/_gt/_gte`
-    - assert string support `_contains/_not_contains/_startswith/_endswith`
-    - assert response json body, the path syntax is [jmespath](https://jmespath.org/tutorial.html) [examples/json.toml](./examples/json.toml)
-    - assert response headers [examples/header.toml](./examples/header.toml)
-    - assert response has redirected [examples/redirect.toml](./examples/redirect.toml)
-    - assert response proto/protoMajor/protoMinor
-
-- **Cli and Config:**
-    - `exit code != 0` if got any fail assertions
-    - verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
-    - quiet mode: `-q/--quiet` to silent the print, for check `$?` only
-    - show run result with stats
-    - configfile: `./httptest run -c examples/config/dev.toml examples/get.toml`
-    - configfile: `debug=true/false` to trigger debug print
-    - configfile: `render=true/false` to use  go_template render the `env`
-    - configfile: `failFast=true/false`, will exit if got one fail case while running
-    - configfile: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
-    - support run cases in order, `./httptest run -c examples/config/order.toml`
+    
+ 
+    
