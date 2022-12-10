@@ -1,0 +1,16 @@
+title: http method patch
+description: http method patch
+request:
+  method: patch
+  url: 'http://httpbin.org/patch'
+  body: |
+    {
+        "hello": "world"
+    }
+  header:
+    Content-Type: application/json
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json

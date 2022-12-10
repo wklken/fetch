@@ -1,0 +1,10 @@
+title: http method options
+description: http method options
+request:
+  method: options
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength: 0
+  contentType: text/html
