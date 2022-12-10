@@ -6,6 +6,20 @@ permalink: /usage/assert/
 nav_order: 4
 ---
 
+# Assert
+{: .no_toc }
+
+Some examples show how to assert the response.
+{: .fs-6 .fw-300 }
+
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## assert header
 
