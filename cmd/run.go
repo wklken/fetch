@@ -78,7 +78,7 @@ var runCmd = &cobra.Command{
 				return
 			}
 
-			log.Info("runConfig: %v", runConfig)
+			// log.Info("runConfig: %v", runConfig)
 		}
 
 		if len(args) == 0 && len(runConfig.Order) == 0 {
