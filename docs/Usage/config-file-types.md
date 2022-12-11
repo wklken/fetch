@@ -1,9 +1,23 @@
 ---
 layout: default
-title: Config files
+title: Config File Types
 parent: Usage
-permalink: /usage/config-files/
+permalink: /usage/config-file-types/
 nav_order: 1
+---
+
+# Config File Types
+{: .no_toc }
+
+You can use any of these file types for case
+{: .fs-6 .fw-300 }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
 ---
 
 ## TLDR

@@ -6,6 +6,20 @@ permalink: /usage/http-methods/
 nav_order: 2
 ---
 
+# HTTP Methods
+{: .no_toc }
+
+The HTTP methods supported
+{: .fs-6 .fw-300 }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ## TLDR
 
 Support http methods:

@@ -5,6 +5,8 @@ nav_order: 3
 permalink: /getting-started/
 ---
 
+# Getting Started
+
 just create a file: `http_get.yaml`
 
 ```yaml

@@ -5,6 +5,7 @@ nav_order: 5
 permalink: /changelog/
 ---
 
+# CHANGELOG
 
 ## v1.0.0 (2022-12-09)
 

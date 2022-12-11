@@ -200,6 +200,114 @@ assert:
   contentType: application/json
 ```
 
+## use tempalte 
+
+you can create an `config.yaml` with a lot of envs (`examples/config.yaml`)
+
+```yaml
+env:
+  hello: world
+  name: tom
+  host: 'http://httpbin.org'
+  content_type: application/json
+  array:
+    - a
+    - b
+    - c
+```
+
+then use [go template](https://golang.org/pkg/text/template/) in the case (`examples/request_use_template.yaml`)
+
+```yaml
+title: http method post, use template
+description: http method post use template
+request:
+  method: post
+  url: '{{.host}}/post'
+  body: |
+    {
+        "hello": "{{.name}}",
+        "world": {{if .debug}}"in debug mode"{{else}}"not debug mode"{{end}},
+        "array": "{{range $i, $a := .array}} {{$i}}{{$a}} {{end}}"
+    }
+  header:
+    Content-Type: '{{.content_type}}'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: '{{.content_type}}'
+```
+
+run with command
+
+```bash
+$ ./httptest run -c examples/config.yaml examples/request_use_template.yaml
+
+# will send
+DEBUG request: 
+> POST /post HTTP/1.1
+> Host: httpbin.org
+> User-Agent: Go-http-client/1.1
+> Content-Length: 83
+> Content-Type: application/json
+> Accept-Encoding: gzip
+> 
+> {
+>     "hello": "tom",
+>     "world": "not debug mode",
+>     "array": " 0a  1b  2c "
+> }
+> 
+```
+
+also, you can add `env` in case, which's priority is higher than `env` in config file(`./httptest -c config.yaml`) (`examples/request_use_template_local.yaml`)
+
+```yaml
+title: 'http method post, use template local'
+description: http method post, use template local
+request:
+  method: post
+  url: '{{.host}}/post'
+  body: |
+    {
+        "hello": "{{.name}}",
+        "world": {{if .debug}}"in debug mode"{{else}}"not debug mode"{{end}},
+        "array": "{{range $i, $a := .array}} {{$i}}{{$a}} {{end}}"
+    }
+  header:
+    Content-Type: '{{.content_type}}'
+env:
+  name: jerry
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: '{{.content_type}}'
+```
+
+run with command
+
+```bash
+$ ./httptest run -c examples/config.yaml examples/request_use_template_local.yaml
+
+# will send
+DEBUG request: 
+> POST /post HTTP/1.1
+> Host: httpbin.org
+> User-Agent: Go-http-client/1.1
+> Content-Length: 85
+> Content-Type: application/json
+> Accept-Encoding: gzip
+> 
+> {
+>     "hello": "jerry",
+>     "world": "not debug mode",
+>     "array": " 0a  1b  2c "
+> }
+> 
+```
+
 ## config: set a timeout for case
 
 ```yaml
@@ -216,6 +324,8 @@ assert:
   contentLength_gt: 10
   contentType: application/json
 ```
+
+the priority of `timeout` in case is higher than `timeout` in config file(`./httptest -c config.yaml`)
 
 ## config: set repeat for case
 

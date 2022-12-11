@@ -5,6 +5,8 @@ nav_order: 2
 permalink: /features/
 ---
 
+# Features
+
 ## Request
 
 - http methods: `get/post/put/delete/patch/head/options`
