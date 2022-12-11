@@ -53,4 +53,5 @@ env:
 - `timeout`: `ms`, the timeout for each case (default `0`, means `no timeout`)
 - `failFast`: if true, will exit if got fail(default `false`)
 - `order`: run cases in order
+   - if `order` is not empty, you can run without any file path, just only the config `./httptest -c config.yaml`
 
