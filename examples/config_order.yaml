@@ -12,6 +12,6 @@ env:
     - b
     - c
 order:
-  - pattern: examples/http_post.toml
-  - pattern: examples/http_get.toml
+  - pattern: examples/http_post.yaml
+  - pattern: examples/http_get.yaml
   - pattern: examples/http_*

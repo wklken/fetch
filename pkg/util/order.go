@@ -15,9 +15,16 @@ func GetRunningOrderedFiles(pathes []string, orders []config.Order) (files []str
 		if err != nil {
 			return
 		}
-		files = append(files, matches...)
-		hits.Append(matches...)
+
+		for _, m := range matches {
+			if !hits.Has(m) {
+				files = append(files, m)
+				hits.Add(m)
+			}
+		}
 	}
+
+	// fmt.Println("the hits:", files)
 
 	for _, p := range pathes {
 		if !hits.Has(p) {

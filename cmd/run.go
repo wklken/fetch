@@ -82,7 +82,7 @@ var runCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 && len(runConfig.Order) == 0 {
-			log.Error("args required")
+			log.Error("args required, please input the case file path")
 			os.Exit(1)
 			return
 		}
