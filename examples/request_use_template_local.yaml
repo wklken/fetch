@@ -1,0 +1,21 @@
+title: 'http method post, use template local'
+description: http method post, use template local
+request:
+  method: post
+  url: '{{.host}}/post'
+  body: |
+    {
+        "hello": "{{.name}}",
+        "world": {{if .debug}}"in debug mode"{{else}}"not debug mode"{{end}},
+        "array": "{{range $i, $a := .array}} {{$i}}{{$a}} {{end}}"
+    }
+  header:
+    Content-Type: '{{.content_type}}'
+env:
+  name: jerry
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: '{{.content_type}}'
+

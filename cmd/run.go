@@ -78,7 +78,7 @@ var runCmd = &cobra.Command{
 				return
 			}
 
-			log.Info("runConfig: %v", runConfig)
+			// log.Info("runConfig: %v", runConfig)
 		}
 
 		if len(args) == 0 && len(runConfig.Order) == 0 {
@@ -394,12 +394,16 @@ func doAssertions(
 		}
 
 		if f != nil {
-			// err = binding.JSON.BindBody(body, &jsonData)
-			err = f.BindBody(body, &jsonData)
-			if err != nil {
-				stats.AddFailMessage("binding.json fail: %s", err)
-				stats.IncrFailAssertCountByN(int64(len(c.Assert.JSON)))
-				return
+			if len(body) != 0 {
+				err = f.BindBody(body, &jsonData)
+				if err != nil {
+					stats.AddFailMessage("binding.json fail: %s", err)
+					stats.IncrFailAssertCountByN(int64(len(c.Assert.JSON)))
+					return
+				}
+			} else {
+				// the http method: head got no response body, but header is application/json
+				jsonData = nil
 			}
 
 			if allKeys.Has("assert.json") && len(c.Assert.JSON) > 0 {
