@@ -11,7 +11,7 @@ import (
 
 func DoHeaderAssertions(c config.Case, respHeader http.Header) (stats util.Stats) {
 	for key, value := range c.Assert.Header {
-		stats.AddInfoMessage("assert.header.%s: ", key)
+		stats.AddInfofMessage("assert.header.%s: ", key)
 		ok, message := assert.Equal(respHeader.Get(key), value)
 		if ok {
 			stats.AddPassMessage()
