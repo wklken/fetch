@@ -12,8 +12,6 @@ import (
 	"strings"
 
 	"github.com/wklken/httptest/pkg/util"
-
-	"github.com/wklken/httptest/pkg/log"
 )
 
 const (
@@ -47,16 +45,14 @@ func prettyFormatDump(dump []byte, linePrefix string) string {
 	return strings.Join(newLines, "\n")
 }
 
-func dumpRequest(debug bool, req *http.Request) {
-	// dump request, for debug
-	if debug {
-		dump, err := httputil.DumpRequestOut(req, true)
-		if err != nil {
-			log.Info("DEBUG request: dump err %s", err)
-		} else {
-			log.Info("DEBUG request: \n%s", prettyFormatDump(dump, "> "))
-		}
+func dumpRequest(req *http.Request) (logs []string) {
+	dump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		logs = append(logs, fmt.Sprintf("dump request fail: %s", err))
+	} else {
+		logs = append(logs, fmt.Sprintf("%s", prettyFormatDump(dump, "> ")))
 	}
+	return
 }
 
 // from: https://github.com/henvic/httpretty/blob/master/printer.go
@@ -90,36 +86,34 @@ func isBinaryMediatype(mediatype string) bool {
 	return false
 }
 
-func dumpResponse(debug bool, resp *http.Response) {
-	// dump request, for debug
-	if debug {
-		dump, err := httputil.DumpResponse(resp, true)
-		if err != nil {
-			log.Info("DEBUG response: dump err %s", err)
-		} else {
+func dumpResponse(resp *http.Response) (logs []string) {
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		logs = append(logs, fmt.Sprintf("dump response fail: %s", err))
+	} else {
 
-			if contentType := resp.Header.Get("Content-Type"); contentType != "" && isBinaryMediatype(contentType) {
-				log.Info("DEBUG response: * body contains binary data")
-				return
-			}
-
-			respLines := prettyFormatDump(dump, "< ")
-
-			// fmt.Println("the contentLength:", resp.ContentLength)
-			if resp.ContentLength > maxResponseBodyLength || len(respLines) > maxResponseBodyLength {
-				actualLength := resp.ContentLength
-				if actualLength == -1 {
-					actualLength = int64(len(respLines))
-				}
-
-				log.Info("DEBUG response* body is too long (%d bytes) to print, skipping  (longer than %d bytes)\n", actualLength, maxResponseBodyLength)
-				log.Info("%s", util.TruncateString(respLines, maxResponseBodyLength))
-				return
-			}
-
-			log.Info("DEBUG response: \n%s", prettyFormatDump(dump, "< "))
+		if contentType := resp.Header.Get("Content-Type"); contentType != "" && isBinaryMediatype(contentType) {
+			logs = append(logs, fmt.Sprintf("response: * body contains binary data"))
+			return
 		}
+
+		respLines := prettyFormatDump(dump, "< ")
+
+		// fmt.Println("the contentLength:", resp.ContentLength)
+		if resp.ContentLength > maxResponseBodyLength || len(respLines) > maxResponseBodyLength {
+			actualLength := resp.ContentLength
+			if actualLength == -1 {
+				actualLength = int64(len(respLines))
+			}
+
+			logs = append(logs, fmt.Sprintf("response: * body is too long (%d bytes) to print, skipping  (longer than %d bytes)\n", actualLength, maxResponseBodyLength))
+			logs = append(logs, fmt.Sprintf("%s", util.TruncateString(respLines, maxResponseBodyLength)))
+			return
+		}
+
+		logs = append(logs, fmt.Sprintf("%s", prettyFormatDump(dump, "< ")))
 	}
+	return logs
 }
 
 func parseBodyIfGotAFile(caseDir string, body string) (content string, err error) {
