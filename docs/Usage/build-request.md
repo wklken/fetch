@@ -20,6 +20,25 @@ Some examples show how to build reuqest.
 
 ---
 
+## set headers
+
+```yaml
+title: set header
+description: set header
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+  header:
+    User-Agent: "test-client"
+    
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+```
+
+
 ## post form
 
 ```yaml

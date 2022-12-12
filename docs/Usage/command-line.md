@@ -23,7 +23,7 @@ The cli options.
 ## overview
 
 ```bash
-$ ./httptest -h                           
+$ ./httptest -h
 A command lin http test tool. Complete documentation is available at https://github.com/wklken/httptest
 
 Usage:
@@ -62,9 +62,50 @@ will show the request/response detail
 
 ```bash
 $ ./httptest run examples/http_get.yaml -v
-DEBUG request:
+ 100% |███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| (1/1, 2 it/s)
+Run Case: examples/http_get.yaml | example | [GET http://httpbin.org/get] | 466ms
 > GET /get HTTP/1.1
-> ......
+> Host: httpbin.org
+> User-Agent: Go-http-client/1.1
+> Accept-Encoding: gzip
+>
+>
+< HTTP/1.1 200 OK
+< Content-Length: 272
+< Access-Control-Allow-Credentials: true
+< Access-Control-Allow-Origin: *
+< Connection: keep-alive
+< Content-Type: application/json
+< Date: Mon, 12 Dec 2022 15:22:23 GMT
+< Server: gunicorn/19.9.0
+<
+< {
+<   "args": {},
+<   "headers": {
+<     "Accept-Encoding": "gzip",
+<     "Host": "httpbin.org",
+<     "User-Agent": "Go-http-client/1.1",
+<     "X-Amzn-Trace-Id": "Root=1-6397472f-07cfba2c0e88067e1abead0c"
+<   },
+<   "origin": "1.1.1.1",
+<   "url": "http://httpbin.org/get"
+< }
+<
+assert.statuscode: Pass
+assert.status: Pass
+assert.contenttype: Pass
+assert.contentlength_gt: Pass
+
+┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│                         │           total │          passed │          failed │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│                   cases │               1 │               1 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│              assertions │               4 │               4 │               0 │
+├─────────────────────────┴─────────────────┴─────────────────┴─────────────────┤
+│                    Time :    467 ms                                           │
+└───────────────────────────────────────────────────────────────────────────────┘
+the execute result: 0
 ```
 
 ### quiet `-q`
