@@ -28,7 +28,7 @@ func Send(
 	hook config.Hook,
 	timeout int,
 	debug bool,
-) (resp *http.Response, hasRedirect bool, latency int64, err error) {
+) (resp *http.Response, hasRedirect bool, latency int64, debugLogs []string, err error) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	requestBody, err := parseBodyIfGotAFile(caseDir, body)
 	if err != nil {
@@ -111,7 +111,9 @@ func Send(
 		}
 	}
 
-	dumpRequest(debug, req)
+	if debug {
+		debugLogs = append(debugLogs, dumpRequest(req)...)
+	}
 
 	// do send
 	start := time.Now()
@@ -153,7 +155,9 @@ func Send(
 		}
 	}
 
-	dumpResponse(debug, resp)
+	if debug {
+		debugLogs = append(debugLogs, dumpResponse(resp)...)
+	}
 
 	return
 }

@@ -252,11 +252,12 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			resp        *http.Response
 			hasRedirect bool
 			latency     int64
+			debugLogs   []string
 			err2        error
 			count       int
 		)
 		for {
-			resp, hasRedirect, latency, err2 = client.Send(
+			resp, hasRedirect, latency, debugLogs, err2 = client.Send(
 				filepath.Dir(path),
 				c.Request.Method,
 				c.Request.URL,
@@ -279,23 +280,28 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			} else {
 				break
 			}
-
 		}
+
 		title := c.Title
 		if repeat > 1 {
 			title = fmt.Sprintf("%s (%d/%d)", c.Title, i+1, repeat)
 		}
+		stats.AddTipMessage(
+			"Run Case: %s | %s | [%s %s] | %dms",
+			path,
+			title,
+			strings.ToUpper(c.Request.Method),
+			c.Request.URL,
+			latency,
+		)
+
+		if len(debugLogs) > 0 {
+			for _, l := range debugLogs {
+				stats.AddInfoMessage(l)
+			}
+		}
 
 		if err2 != nil {
-			stats.AddTipMessage(
-				"Run Case: %s | %s | [%s %s] | %dms",
-				path,
-				title,
-				strings.ToUpper(c.Request.Method),
-				c.Request.URL,
-				latency,
-			)
-
 			if !allKeys.Has("assert.error_contains") {
 				stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
 				stats.IncrFailCaseCount()
@@ -310,15 +316,6 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			}
 			return
 		}
-
-		stats.AddTipMessage(
-			"Run Case: %s | %s | [%s %s] | %dms",
-			path,
-			title,
-			strings.ToUpper(c.Request.Method),
-			c.Request.URL,
-			latency,
-		)
 
 		s := doAssertions(allKeys, resp, c, hasRedirect, latency)
 		stats.MergeAssertCount(s)
