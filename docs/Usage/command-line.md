@@ -153,3 +153,9 @@ env:
 ```
 
 please see [Usage/Config](/usage/config/) for more detail
+
+### proxy `--proxy`
+
+```
+$ ./httptest run examples/http_get.yaml --proxy http://127.0.0.1:9999
+```

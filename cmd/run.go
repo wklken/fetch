@@ -46,6 +46,7 @@ var (
 	verbose   = false
 	quiet     = false
 	cfgFile   string
+	proxy     string
 	parallels = 1
 )
 
@@ -182,6 +183,9 @@ func init() {
 	// -p parallel
 	runCmd.PersistentFlags().IntVarP(&parallels, "parallel", "p", 1, "run in parallel")
 
+	// --proxy http://myproxy:9999
+	runCmd.PersistentFlags().StringVarP(&proxy, "proxy", "", "", "proxy for http request")
+
 	// -e dev.toml
 	runCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file(like dev.toml/prod.toml")
 }
@@ -269,6 +273,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				c.Request.DisableRedirect,
 				c.Hook,
 				timeout,
+				proxy,
 				debug,
 			)
 
