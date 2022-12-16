@@ -30,7 +30,7 @@ request:
   url: 'http://httpbin.org/get'
   header:
     User-Agent: "test-client"
-    
+
 assert:
   status: ok
   statusCode: 200
@@ -175,6 +175,8 @@ request:
   url: 'http://httpbin.org/basic-auth/hello/world'
   header:
     Content-Type: application/json
+    # equals to
+    # Authorization: Basic aGVsbG86d29ybGQ=
   basic_auth:
     username: hello
     password: world
@@ -219,7 +221,7 @@ assert:
   contentType: application/json
 ```
 
-## use tempalte 
+## use tempalte
 
 you can create an `config.yaml` with a lot of envs (`examples/config.yaml`)
 
@@ -264,20 +266,20 @@ run with command
 $ ./httptest run -c examples/config.yaml examples/request_use_template.yaml
 
 # will send
-DEBUG request: 
+DEBUG request:
 > POST /post HTTP/1.1
 > Host: httpbin.org
 > User-Agent: Go-http-client/1.1
 > Content-Length: 83
 > Content-Type: application/json
 > Accept-Encoding: gzip
-> 
+>
 > {
 >     "hello": "tom",
 >     "world": "not debug mode",
 >     "array": " 0a  1b  2c "
 > }
-> 
+>
 ```
 
 also, you can add `env` in case, which's priority is higher than `env` in config file(`./httptest -c config.yaml`) (`examples/request_use_template_local.yaml`)
@@ -311,20 +313,20 @@ run with command
 $ ./httptest run -c examples/config.yaml examples/request_use_template_local.yaml
 
 # will send
-DEBUG request: 
+DEBUG request:
 > POST /post HTTP/1.1
 > Host: httpbin.org
 > User-Agent: Go-http-client/1.1
 > Content-Length: 85
 > Content-Type: application/json
 > Accept-Encoding: gzip
-> 
+>
 > {
 >     "hello": "jerry",
 >     "world": "not debug mode",
 >     "array": " 0a  1b  2c "
 > }
-> 
+>
 ```
 
 ## config: set a timeout for case
