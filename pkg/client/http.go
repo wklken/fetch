@@ -15,6 +15,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/vmihailenco/msgpack/v5"
 	"github.com/wklken/httptest/pkg/config"
+	"github.com/wklken/httptest/pkg/version"
 )
 
 func Send(
@@ -89,6 +90,9 @@ func Send(
 		for k, v := range headers {
 			req.Header.Set(k, v)
 		}
+	}
+	if req.Header.Get("User-Agent") == "" {
+		req.Header.Set("User-Agent", fmt.Sprintf("httptest/%s", version.Version))
 	}
 
 	// set header: basic_auth
