@@ -253,15 +253,15 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 
 	for i := 0; i < repeat; i++ {
 		var (
-			resp        *http.Response
-			hasRedirect bool
-			latency     int64
-			debugLogs   []string
-			err2        error
-			count       int
+			resp          *http.Response
+			redirectCount int64
+			latency       int64
+			debugLogs     []string
+			err2          error
+			count         int
 		)
 		for {
-			resp, hasRedirect, latency, debugLogs, err2 = client.Send(
+			resp, redirectCount, latency, debugLogs, err2 = client.Send(
 				filepath.Dir(path),
 				c.Request.Method,
 				c.Request.URL,
@@ -322,7 +322,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			return
 		}
 
-		s := doAssertions(allKeys, resp, c, hasRedirect, latency)
+		s := doAssertions(allKeys, resp, c, redirectCount, latency)
 		stats.MergeAssertCount(s)
 	}
 
@@ -333,7 +333,7 @@ func doAssertions(
 	allKeys *util.StringSet,
 	resp *http.Response,
 	c config.Case,
-	hasRedirect bool,
+	redirectCount int64,
 	latency int64,
 ) (stats util.Stats) {
 	body, err := io.ReadAll(resp.Body)
@@ -343,7 +343,7 @@ func doAssertions(
 	contentType := client.GetContentType(resp.Header)
 
 	// normal key-value assert
-	s := assertion.DoKeysAssertion(allKeys, resp, c, hasRedirect, latency, contentType, body)
+	s := assertion.DoKeysAssertion(allKeys, resp, c, redirectCount, latency, contentType, body)
 	stats.MergeAssertCount(s)
 
 	// header assert

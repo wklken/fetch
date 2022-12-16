@@ -31,7 +31,7 @@ func Send(
 	timeout int,
 	proxy string,
 	debug bool,
-) (resp *http.Response, hasRedirect bool, latency int64, debugLogs []string, err error) {
+) (resp *http.Response, redirectCount int64, latency int64, debugLogs []string, err error) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	requestBody, err := parseBodyIfGotAFile(caseDir, body)
 	if err != nil {
@@ -131,12 +131,12 @@ func Send(
 	var checkRedirect func(req *http.Request, via []*http.Request) error
 	if disableRedirect {
 		checkRedirect = func(req *http.Request, via []*http.Request) error {
-			hasRedirect = true
+			redirectCount += 1
 			return http.ErrUseLastResponse
 		}
 	} else {
 		checkRedirect = func(req *http.Request, via []*http.Request) error {
-			hasRedirect = true
+			redirectCount += 1
 			return nil
 		}
 	}
