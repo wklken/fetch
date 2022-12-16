@@ -5,3 +5,7 @@ request:
   url: 'http://www.httpbin.org/get'
 assert:
   hasRedirect: false
+  redirectCount_lt: 10
+  redirectCount_lte: 10
+  redirectCount_gt: 0
+  redirectCount_gte: 0

@@ -25,12 +25,13 @@ func DoKeysAssertion(
 	allKeys *util.StringSet,
 	resp *http.Response,
 	c config.Case,
-	hasRedirect bool,
+	redirectCount int64,
 	latency int64,
 	contentType string,
 	body []byte,
 ) (stats util.Stats) {
 	bodyStr := strings.TrimSuffix(string(body), "\n")
+	fmt.Println(allKeys.ToString(","))
 
 	// NOTE: the order
 	keyAsserts := []keyAssert{
@@ -271,12 +272,45 @@ func DoKeysAssertion(
 				element2: c.Assert.BodyNotEndsWith,
 			},
 		},
+		// redirect
 		{
 			key: "assert.hasredirect",
 			ctx: Ctx{
 				f:        assert.Equal,
-				element1: hasRedirect,
+				element1: redirectCount > 0,
 				element2: c.Assert.HasRedirect,
+			},
+		},
+		{
+			key: "assert.redirectcount_lt",
+			ctx: Ctx{
+				f:        assert.Less,
+				element1: redirectCount,
+				element2: c.Assert.RedirectCountLt,
+			},
+		},
+		{
+			key: "assert.redirectcount_lte",
+			ctx: Ctx{
+				f:        assert.LessOrEqual,
+				element1: redirectCount,
+				element2: c.Assert.RedirectCountLte,
+			},
+		},
+		{
+			key: "assert.redirectcount_gt",
+			ctx: Ctx{
+				f:        assert.Greater,
+				element1: redirectCount,
+				element2: c.Assert.RedirectCountGt,
+			},
+		},
+		{
+			key: "assert.redirectcount_gte",
+			ctx: Ctx{
+				f:        assert.GreaterOrEqual,
+				element1: redirectCount,
+				element2: c.Assert.RedirectCountGte,
 			},
 		},
 		{

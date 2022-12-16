@@ -58,7 +58,11 @@ type Assert struct {
 	// will pass if the error message contains the string
 	ErrorContains string `mapstructure:"error_contains"`
 
-	HasRedirect bool
+	HasRedirect      bool  `mapstructure:"has_redirect"`
+	RedirectCountLt  int64 `mapstructure:"redirectCount_lt"`
+	RedirectCountLte int64 `mapstructure:"redirectCount_lte"`
+	RedirectCountGt  int64 `mapstructure:"redirectCount_gt"`
+	RedirectCountGte int64 `mapstructure:"redirectCount_gte"`
 
 	Proto      string // e.g. "HTTP/1.0"
 	ProtoMajor int    // e.g. 1
