@@ -31,7 +31,6 @@ func DoKeysAssertion(
 	body []byte,
 ) (stats util.Stats) {
 	bodyStr := strings.TrimSuffix(string(body), "\n")
-	fmt.Println(allKeys.ToString(","))
 
 	// NOTE: the order
 	keyAsserts := []keyAssert{
