@@ -8,7 +8,26 @@ See [https://wklken.me/httptest](https://wklken.me/httptest) for more informatio
 
 ## Installation
 
-TODO:
+### Binary releases
+
+See the available binaries for different operating systems/architectures from the [releases page](https://github.com/wklken/httptest/releases).
+
+### go install
+
+```bash
+go install github.com/wklken/httptest@latest
+```
+
+### Build from source
+
+- dependencies: go1.19
+
+```bash
+git clone https://github.com/wklken/httptest.git
+cd httptest
+make build
+```
+
 ## Getting Started
 
 ```yaml
