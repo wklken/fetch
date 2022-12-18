@@ -21,6 +21,57 @@ Some examples show how to assert the response.
 
 ---
 
+## assert basic key-values
+
+```yaml
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+  header:
+    hello: world
+assert:
+  status: ok
+  status_in:
+    - ok
+  status_not_in:
+    - not found
+  statusCode: 200
+  statusCode_in:
+    - 400
+    - 500
+  statusCode_not_in:
+    - 200
+    - 400
+  statusCode_lt: 100
+  statusCode_lte: 100
+  statusCode_gt: 500
+  statusCode_gte: 500
+  contentLength: 18
+  contentLength_lt: 1
+  contentLength_lte: 1
+  contentLength_gt: 180
+  contentLength_gte: 180
+  contentType: abc
+  contentType_in:
+    - application/json
+  contentType_not_in:
+    - application/json
+  body: HTTPBIN is awesome
+  body_contains: awesome2
+  body_not_contains: awesome
+  body_startswith: A
+  body_endswith: a
+  body_not_startswith: '{'
+  body_not_endswith: '}'
+  latency_lt: 0
+  latency_lte: 0
+  latency_gt: 100
+  latency_gte: 100
+  proto: "HTTP/2.0"
+  protoMajor: 2
+  protoMinor: 0
+```
+
 ## assert header
 
 ```yaml
@@ -204,4 +255,8 @@ request:
   url: 'http://www.httpbin.org/get'
 assert:
   hasRedirect: false
+  redirectCount_lt: 10
+  redirectCount_lte: 10
+  redirectCount_gt: 0
+  redirectCount_gte: 0
 ```
