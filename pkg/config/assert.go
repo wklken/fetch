@@ -44,7 +44,9 @@ type Assert struct {
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
 
-	Header map[string]interface{}
+	Header       map[string]interface{}
+	HeaderExists []string `mapstructure:"header_exists"`
+
 	JSON   []AssertJSON   `mapstructure:"json"`
 	XML    []AssertXML    `mapstructure:"xml"`
 	HTML   []AssertHTML   `mapstructure:"html"`

@@ -1,5 +1,7 @@
 package util
 
+import "strings"
+
 // TruncateBytes truncate []byte to specific length
 func TruncateBytes(content []byte, length int) []byte {
 	if len(content) > length {
@@ -28,4 +30,8 @@ func OmitMiddle(s string, head int, tail int) string {
 	}
 
 	return s[:head] + "..." + s[len(s)-tail:]
+}
+
+func PrettyStringSlice(s []string) string {
+	return "[" + strings.Join(s, ", ") + "]"
 }
