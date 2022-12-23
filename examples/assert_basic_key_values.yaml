@@ -31,12 +31,15 @@ assert:
   contentType_not_in:
     - application/json
   body: HTTPBIN is awesome
-  body_contains: awesome2
-  body_not_contains: awesome
+  body_contains: Hello
+  body_not_contains: Hello
+  body_icontains: hello
   body_startswith: A
   body_endswith: a
   body_not_startswith: '{'
   body_not_endswith: '}'
+  body_regexp: ".ello"
+  body_not_regexp: ".ello"
   latency_lt: 0
   latency_lte: 0
   latency_gt: 100

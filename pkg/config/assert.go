@@ -39,20 +39,25 @@ type Assert struct {
 
 	BodyContains      string `mapstructure:"body_contains"`
 	BodyNotContains   string `mapstructure:"body_not_contains"`
+	BodyIContains     string `mapstructure:"body_icontains"`
 	BodyStartsWith    string `mapstructure:"body_startswith"`
 	BodyEndsWith      string `mapstructure:"body_endswith"`
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
+	BodyRegexp        string `mapstructure:"body_regexp"`
+	BodyNotRegexp     string `mapstructure:"body_not_regexp"`
 
 	Header       map[string]interface{}
 	HeaderExists []string `mapstructure:"header_exists"`
 
-	JSON   []AssertJSON   `mapstructure:"json"`
-	XML    []AssertXML    `mapstructure:"xml"`
-	HTML   []AssertHTML   `mapstructure:"html"`
-	YAML   []AssertYAML   `mapstructure:"yaml"`
-	TOML   []AssertTOML   `mapstructure:"toml"`
-	Cookie []AssertCookie `mapstructure:"cookie"`
+	JSON []AssertJSON `mapstructure:"json"`
+	XML  []AssertXML  `mapstructure:"xml"`
+	HTML []AssertHTML `mapstructure:"html"`
+	YAML []AssertYAML `mapstructure:"yaml"`
+	TOML []AssertTOML `mapstructure:"toml"`
+
+	Cookie       []AssertCookie `mapstructure:"cookie"`
+	CookieExists []string       `mapstructure:"cookie_exists"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 

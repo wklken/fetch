@@ -240,6 +240,30 @@ func DoKeysAssertion(
 			},
 		},
 		{
+			key: "assert.body_icontains",
+			ctx: Ctx{
+				f:        assert.Contains,
+				element1: strings.ToLower(bodyStr),
+				element2: strings.ToLower(c.Assert.BodyIContains),
+			},
+		},
+		{
+			key: "assert.body_regexp",
+			ctx: Ctx{
+				f:        assert.Regexp,
+				element1: bodyStr,
+				element2: c.Assert.BodyRegexp,
+			},
+		},
+		{
+			key: "assert.body_not_regexp",
+			ctx: Ctx{
+				f:        assert.NotRegexp,
+				element1: bodyStr,
+				element2: c.Assert.BodyNotRegexp,
+			},
+		},
+		{
 			key: "assert.body_startswith",
 			ctx: Ctx{
 				f:        assert.StartsWith,

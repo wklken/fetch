@@ -377,8 +377,8 @@ func doAssertions(
 	}
 
 	// cookie assert
-	if allKeys.Has("assert.cookie") && len(c.Assert.Cookie) > 0 {
-		s1 := assertion.DoCookieAssertions(resp.Cookies(), c.Assert.Cookie)
+	if (allKeys.Has("assert.cookie") && len(c.Assert.Cookie) > 0) || len(c.Assert.CookieExists) > 0 {
+		s1 := assertion.DoCookieAssertions(c, resp.Cookies())
 		stats.MergeAssertCount(s1)
 	}
 
