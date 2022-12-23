@@ -44,6 +44,8 @@ type Assert struct {
 	BodyEndsWith      string `mapstructure:"body_endswith"`
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
+	BodyRegexp        string `mapstructure:"body_regexp"`
+	BodyNotRegexp     string `mapstructure:"body_not_regexp"`
 
 	Header       map[string]interface{}
 	HeaderExists []string `mapstructure:"header_exists"`

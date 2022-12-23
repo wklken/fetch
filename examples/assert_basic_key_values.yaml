@@ -38,6 +38,8 @@ assert:
   body_endswith: a
   body_not_startswith: '{'
   body_not_endswith: '}'
+  body_regexp: ".ello"
+  body_not_regexp: ".ello"
   latency_lt: 0
   latency_lte: 0
   latency_gt: 100
