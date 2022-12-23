@@ -31,8 +31,9 @@ assert:
   contentType_not_in:
     - application/json
   body: HTTPBIN is awesome
-  body_contains: awesome2
-  body_not_contains: awesome
+  body_contains: Hello
+  body_not_contains: Hello
+  body_icontains: hello
   body_startswith: A
   body_endswith: a
   body_not_startswith: '{'

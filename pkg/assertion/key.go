@@ -240,6 +240,14 @@ func DoKeysAssertion(
 			},
 		},
 		{
+			key: "assert.body_icontains",
+			ctx: Ctx{
+				f:        assert.Contains,
+				element1: strings.ToLower(bodyStr),
+				element2: strings.ToLower(c.Assert.BodyIContains),
+			},
+		},
+		{
 			key: "assert.body_startswith",
 			ctx: Ctx{
 				f:        assert.StartsWith,

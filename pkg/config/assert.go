@@ -39,6 +39,7 @@ type Assert struct {
 
 	BodyContains      string `mapstructure:"body_contains"`
 	BodyNotContains   string `mapstructure:"body_not_contains"`
+	BodyIContains     string `mapstructure:"body_icontains"`
 	BodyStartsWith    string `mapstructure:"body_startswith"`
 	BodyEndsWith      string `mapstructure:"body_endswith"`
 	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
