@@ -4,3 +4,4 @@ brews:
   tap:
     owner: wklken
     name: homebrew-httptest
+    token: "{{ .Env.TAP_GITHUB_TOKEN }}"
