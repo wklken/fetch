@@ -22,3 +22,5 @@ httptest
 examples/share_cookies.txt
 *.pyc
 .vscode
+
+todo.md

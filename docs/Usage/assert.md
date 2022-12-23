@@ -87,6 +87,9 @@ assert:
   header:
     server: gunicorn/19.9.0
     freeform: hello
+  header_exists:
+    - "server"
+    - "freeform"
 ```
 
 ## assert cookie

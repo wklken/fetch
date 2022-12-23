@@ -117,7 +117,7 @@ var runCmd = &cobra.Command{
 				bar.Add(1)
 
 				// 2. collect the result
-				totalStats.MergeAssertCount(s)
+				totalStats.MergeAssertAndCaseCount(s)
 
 				// FIXME: log one by one, not at the last
 
@@ -347,7 +347,7 @@ func doAssertions(
 	stats.MergeAssertCount(s)
 
 	// header assert
-	if len(c.Assert.Header) > 0 {
+	if len(c.Assert.Header) > 0 || len(c.Assert.HeaderExists) > 0 {
 		s1 := assertion.DoHeaderAssertions(c, resp.Header)
 		stats.MergeAssertCount(s1)
 	}

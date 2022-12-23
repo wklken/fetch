@@ -36,6 +36,17 @@ func (s *Stats) MergeAssertCount(s1 Stats) {
 	s.okAssertCount += s1.okAssertCount
 	s.failAssertCount += s1.failAssertCount
 
+	messages := s1.GetMessages()
+	if len(messages) > 0 {
+		s.messages = append(s.messages, messages...)
+	}
+}
+
+func (s *Stats) MergeAssertAndCaseCount(s1 Stats) {
+	// NOTE: here only
+	s.okAssertCount += s1.okAssertCount
+	s.failAssertCount += s1.failAssertCount
+
 	// if got fail assert, the case is fail
 	if s1.AllPassed() {
 		if s1.GetOkCaseCount() > 0 {
@@ -175,7 +186,7 @@ func (sc *StatsCollection) Add(s Stats) {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	sc.stats.MergeAssertCount(s)
+	sc.stats.MergeAssertAndCaseCount(s)
 }
 
 func (sc *StatsCollection) GetStats() Stats {
