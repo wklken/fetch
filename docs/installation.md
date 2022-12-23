@@ -30,6 +30,13 @@ See the available binaries for different operating systems/architectures from th
 go install github.com/wklken/httptest@latest
 ```
 
+### hombrew
+
+```bash
+brew tap wklken/httptest
+brew install httptest
+```
+
 ### Build from source
 
 - dependencies: go1.19
