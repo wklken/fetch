@@ -47,12 +47,14 @@ type Assert struct {
 	Header       map[string]interface{}
 	HeaderExists []string `mapstructure:"header_exists"`
 
-	JSON   []AssertJSON   `mapstructure:"json"`
-	XML    []AssertXML    `mapstructure:"xml"`
-	HTML   []AssertHTML   `mapstructure:"html"`
-	YAML   []AssertYAML   `mapstructure:"yaml"`
-	TOML   []AssertTOML   `mapstructure:"toml"`
-	Cookie []AssertCookie `mapstructure:"cookie"`
+	JSON []AssertJSON `mapstructure:"json"`
+	XML  []AssertXML  `mapstructure:"xml"`
+	HTML []AssertHTML `mapstructure:"html"`
+	YAML []AssertYAML `mapstructure:"yaml"`
+	TOML []AssertTOML `mapstructure:"toml"`
+
+	Cookie       []AssertCookie `mapstructure:"cookie"`
+	CookieExists []string       `mapstructure:"cookie_exists"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 
