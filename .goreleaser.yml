@@ -1,0 +1,6 @@
+brews:
+- name: httptest
+  homepage: https://github.com/wklken/homebrew-httptest
+  tap:
+    owner: wklken
+    name: homebrew-httptest
