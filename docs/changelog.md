@@ -7,6 +7,44 @@ permalink: /changelog/
 
 # CHANGELOG
 
+## v1.0.2(2022-12-23)
+
+### Add
+
+- assert: header_exists/cookie_exists/body_icontains/body_regexp/body_not_regexp
+
+### Documentation
+
+- add more examples and docs
+
+### CICD
+
+- add goreleaser on github action
+
+
+## v1.0.1(2022-12-18)
+
+### Bug Fixes
+
+- Json assertion type not match / repsonse body length=0 EOF
+- Fix ordering wrong, duplicate files in the pattern
+- Verbose output log print order
+
+### Documentation
+
+- Refactor examples
+- Update docs
+- Update readme
+- Add more examples
+
+### Features
+
+- Add more examples
+- Add http proxy
+- Add default user-agent
+- Support hasRedirect and redirectCount_{op}
+
+
 ## v1.0.0 (2022-12-09)
 
 ### config
