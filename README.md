@@ -25,6 +25,16 @@ brew tap wklken/httptest
 brew install httptest
 ```
 
+### docker
+
+```bash
+docker run --rm --net=host wklken/httptest help
+
+# apple m1*/m2*
+docker pull --platform=linux/amd64 wklken/httptest
+docker run --rm --net=host wklken/httptest help
+```
+
 ### Build from source
 
 - dependencies: go1.19
