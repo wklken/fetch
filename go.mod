@@ -2,6 +2,10 @@ module github.com/wklken/httptest
 
 go 1.20
 
+replace github.com/wklken/httptest/cmd => ./cmd
+
+replace github.com/wklken/httptest/pkg => ./pkg
+
 require (
 	github.com/fatih/color v1.14.1
 	github.com/gin-gonic/gin v1.8.2
