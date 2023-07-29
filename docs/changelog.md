@@ -11,7 +11,7 @@ permalink: /changelog/
 
 ### Add
 
-- assert: header_exists/cookie_exists/body_icontains/body_regexp/body_not_regexp
+- assert: header_exists/cookie_exists/body_icontains/body_matches/body_not_matches
 
 ### Documentation
 

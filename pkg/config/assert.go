@@ -44,8 +44,8 @@ type Assert struct {
 	BodyEndsWith      string `yaml:"body_endswith" mapstructure:"body_endswith"`
 	BodyNotStartsWith string `yaml:"body_not_startswith" mapstructure:"body_not_startswith"`
 	BodyNotEndsWith   string `yaml:"body_not_endswith" mapstructure:"body_not_endswith"`
-	BodyRegexp        string `yaml:"body_regexp" mapstructure:"body_regexp"`
-	BodyNotRegexp     string `yaml:"body_not_regexp" mapstructure:"body_not_regexp"`
+	BodyMatches       string `yaml:"body_matches" mapstructure:"body_matches"`
+	BodyNotMatches    string `yaml:"body_not_matches" mapstructure:"body_not_matches"`
 
 	Header       map[string]interface{} `yaml:"header"`
 	HeaderExists []string               `yaml:"header_exists" mapstructure:"header_exists"`

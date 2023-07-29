@@ -248,19 +248,19 @@ func DoKeysAssertion(
 			},
 		},
 		{
-			key: "assert.body_regexp",
+			key: "assert.body_matches",
 			ctx: Ctx{
-				f:        assert.Regexp,
+				f:        assert.Matches,
 				element1: bodyStr,
-				element2: c.Assert.BodyRegexp,
+				element2: c.Assert.BodyMatches,
 			},
 		},
 		{
-			key: "assert.body_not_regexp",
+			key: "assert.body_not_matches",
 			ctx: Ctx{
-				f:        assert.NotRegexp,
+				f:        assert.NotMatches,
 				element1: bodyStr,
-				element2: c.Assert.BodyNotRegexp,
+				element2: c.Assert.BodyNotMatches,
 			},
 		},
 		{

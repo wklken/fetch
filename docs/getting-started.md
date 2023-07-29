@@ -30,8 +30,18 @@ $ ./httptest run http_get.yaml
 
 ![](assets/images/getting-started.jpg)
 
-If you want to know more about how to use httptest, see [Usage](/httptest/usage/)
+the `title` and `description` are not required
 
+```yaml
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+```
 
 also, you can add more than one case in the yaml(note: separated by three dashes `---`)
 
@@ -54,3 +64,5 @@ assert:
   contentLength_gt: 180
   contentType: application/json
 ```
+
+If you want to know more about how to use httptest, see [Usage](/httptest/usage/)
