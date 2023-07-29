@@ -55,5 +55,46 @@ func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stat
 		}
 	}
 
+	// header value matches
+	if len(c.Assert.HeaderValueMatches) > 0 {
+		for key, valueRegex := range c.Assert.HeaderValueMatches {
+			stats.AddInfofMessage("assert.header_value_matches.%s: ", key)
+
+			ok, message := assert.Matches(respHeader.Get(key), valueRegex)
+			if ok {
+				stats.AddPassMessage()
+				stats.IncrOkAssertCount()
+			} else {
+				// the ka.key is like assert.latency_lt
+				lineNumber := c.GuessAssertLineNumber(c.Index, key)
+				if lineNumber > 0 {
+					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
+				}
+				stats.AddFailMessage(message)
+				stats.IncrFailAssertCount()
+			}
+		}
+	}
+
+	// key-value
+	if len(c.Assert.HeaderValueContains) > 0 {
+		for key, value := range c.Assert.HeaderValueContains {
+			stats.AddInfofMessage("assert.header_value_contains.%s: ", key)
+			ok, message := assert.Contains(respHeader.Get(key), value)
+			if ok {
+				stats.AddPassMessage()
+				stats.IncrOkAssertCount()
+			} else {
+				// the ka.key is like assert.latency_lt
+				lineNumber := c.GuessAssertLineNumber(c.Index, key)
+				if lineNumber > 0 {
+					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
+				}
+				stats.AddFailMessage(message)
+				stats.IncrFailAssertCount()
+			}
+		}
+	}
+
 	return
 }
