@@ -1,0 +1,17 @@
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+---
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
