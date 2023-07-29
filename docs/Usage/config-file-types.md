@@ -80,6 +80,28 @@ assert:
   latency_gte: 100
 ```
 
+if you choose, you can add more than one case in the yaml(note: separated by three dashes `---`)
+
+```yaml
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+---
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 180
+  contentType: application/json
+```
+
 ### example: toml
 
 ```
