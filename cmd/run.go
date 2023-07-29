@@ -202,7 +202,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		stats.AddTipMessage("Run Case: %s", path)
 		stats.AddErrorMessage("read fail: %s", err)
 		// FIXME: case it a file? or each section in file?
-		stats.IncrFailCaseCount()
+		stats.IncrFailFileCount()
 		return
 	}
 
@@ -294,6 +294,11 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 					// do assert with error_contains
 					s1 := assertion.DoErrorAssertions(c, err2)
 					stats.MergeAssertCount(s1)
+					if stats.GetFailAssertCount() > 0 {
+						stats.IncrFailCaseCount()
+					} else {
+						stats.IncrOkCaseCount()
+					}
 				}
 
 				if repeat > 1 && i < repeat-1 {
@@ -303,7 +308,13 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			}
 
 			s := doAssertions(allKeys, resp, c, redirectCount, latency)
+			// fmt.Printf("s: %+v\n", stats)
 			stats.MergeAssertCount(s)
+			if stats.GetFailAssertCount() > 0 {
+				stats.IncrFailCaseCount()
+			} else {
+				stats.IncrOkCaseCount()
+			}
 		}
 
 	}
@@ -321,6 +332,12 @@ func doAssertions(
 	body, err := io.ReadAll(resp.Body)
 	// TODO: handle err
 	assert.NoError(err)
+
+	// sometimes the content-length is -1(means unknown), we recalculate it
+	// NOTE: I DON'T KNOW if the logical is ok or not
+	if resp.ContentLength == -1 {
+		resp.ContentLength = int64(len(body))
+	}
 
 	contentType := client.GetContentType(resp.Header)
 
