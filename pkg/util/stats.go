@@ -11,6 +11,8 @@ const tableTPL = `
 ┌─────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
 │                         │           total │          passed │          failed │
 ├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│                   files │          %6d │          %6d │          %6d │
+├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
 │                   cases │          %6d │          %6d │          %6d │
 ├─────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
 │              assertions │          %6d │          %6d │          %6d │
@@ -24,6 +26,8 @@ type Message struct {
 }
 
 type Stats struct {
+	okFileCount     int64
+	failFileCount   int64
 	okCaseCount     int64
 	failCaseCount   int64
 	okAssertCount   int64
@@ -54,18 +58,28 @@ func (s *Stats) MergeAssertAndCaseCount(s1 Stats) {
 		} else {
 			s.okCaseCount++
 		}
+		s.okFileCount++
 	} else {
 		if s1.GetFailCaseCount() > 0 {
 			s.failCaseCount += s1.GetFailCaseCount()
 		} else {
 			s.failCaseCount++
 		}
+		s.failFileCount++
 	}
 
 	messages := s1.GetMessages()
 	if len(messages) > 0 {
 		s.messages = append(s.messages, messages...)
 	}
+}
+
+func (s *Stats) IncrOkFileCount() {
+	s.okFileCount++
+}
+
+func (s *Stats) IncrFailFileCount() {
+	s.failFileCount++
 }
 
 func (s *Stats) IncrOkCaseCount() {
@@ -88,6 +102,14 @@ func (s *Stats) IncrFailAssertCountByN(n int64) {
 	s.failAssertCount += n
 }
 
+func (s *Stats) GetOkAssertCount() int64 {
+	return s.okAssertCount
+}
+
+func (s *Stats) GetFailAssertCount() int64 {
+	return s.failAssertCount
+}
+
 func (s *Stats) GetOkCaseCount() int64 {
 	return s.okCaseCount
 }
@@ -101,10 +123,19 @@ func (s *Stats) AllPassed() bool {
 }
 
 func (s *Stats) Report(latency int64) {
-	log.Info(tableTPL,
-		s.okCaseCount+s.failCaseCount, s.okCaseCount, s.failCaseCount,
-		s.okAssertCount+s.failAssertCount, s.okAssertCount, s.failAssertCount,
-		latency)
+	log.Info(
+		tableTPL,
+		s.okFileCount+s.failFileCount,
+		s.okFileCount,
+		s.failFileCount,
+		s.okCaseCount+s.failCaseCount,
+		s.okCaseCount,
+		s.failCaseCount,
+		s.okAssertCount+s.failAssertCount,
+		s.okAssertCount,
+		s.failAssertCount,
+		latency,
+	)
 }
 
 func (s *Stats) AddMessage(msg Message) {

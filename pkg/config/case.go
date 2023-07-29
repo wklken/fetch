@@ -31,7 +31,7 @@ type Case struct {
 }
 
 func (c *Case) ID() string {
-	if c.Index == 0 {
+	if c.Index == 1 {
 		if c.Title != "" {
 			return fmt.Sprintf("%s | %s", c.Path, c.Title)
 		} else {
@@ -64,7 +64,7 @@ func (c *Case) Render(ctx map[string]interface{}) {
 // yaml: status: ok
 // ini: status=ok
 func (c *Case) GuessAssertLineNumber(caseIndex int, key string) int {
-	fmt.Println("c.guess", caseIndex, key, c.FileLines[caseIndex])
+	// fmt.Println("c.guess", caseIndex, key, c.FileLines[caseIndex])
 	parts := strings.Split(key, ".")
 	if len(parts) > 0 {
 		key = parts[len(parts)-1]
