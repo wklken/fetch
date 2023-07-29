@@ -9,7 +9,7 @@ import (
 	"github.com/wklken/httptest/pkg/util"
 )
 
-func DoHeaderAssertions(c config.Case, respHeader http.Header) (stats util.Stats) {
+func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stats) {
 	// key-value
 	if len(c.Assert.Header) > 0 {
 		for key, value := range c.Assert.Header {
@@ -20,7 +20,7 @@ func DoHeaderAssertions(c config.Case, respHeader http.Header) (stats util.Stats
 				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
-				lineNumber := c.GuessAssertLineNumber(key)
+				lineNumber := c.GuessAssertLineNumber(c.Index, key)
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
@@ -38,7 +38,7 @@ func DoHeaderAssertions(c config.Case, respHeader http.Header) (stats util.Stats
 			ok := respHeader.Get(key) != ""
 			if !ok {
 				message := fmt.Sprintf("header key `%s` not exists", key)
-				lineNumber := c.GuessAssertLineNumber("header_exists")
+				lineNumber := c.GuessAssertLineNumber(c.Index, "header_exists")
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}

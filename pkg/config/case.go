@@ -15,6 +15,8 @@ type Hook struct {
 type Case struct {
 	Title       string
 	Description string
+	Path        string
+	Index       int
 
 	Config CaseConfig `mapstructure:"config"`
 	Env    map[string]interface{}
@@ -23,7 +25,25 @@ type Case struct {
 	Assert  Assert
 	Hook    Hook
 
-	FileLines []string
+	// caseIndex => {lineNo: lineContent}
+	FileLines map[int]map[int]string
+	AllKeys   []string
+}
+
+func (c *Case) ID() string {
+	if c.Index == 0 {
+		if c.Title != "" {
+			return fmt.Sprintf("%s | %s", c.Path, c.Title)
+		} else {
+			return fmt.Sprintf("%s | -", c.Path)
+		}
+	}
+
+	if c.Title != "" {
+		return fmt.Sprintf("%s[%d] | %s", c.Path, c.Index, c.Title)
+	} else {
+		return fmt.Sprintf("%s[%d] | -", c.Path, c.Index)
+	}
 }
 
 func (c *Case) Render(ctx map[string]interface{}) {
@@ -43,7 +63,8 @@ func (c *Case) Render(ctx map[string]interface{}) {
 // json: "status": "ok"
 // yaml: status: ok
 // ini: status=ok
-func (c *Case) GuessAssertLineNumber(key string) int {
+func (c *Case) GuessAssertLineNumber(caseIndex int, key string) int {
+	fmt.Println("c.guess", caseIndex, key, c.FileLines[caseIndex])
 	parts := strings.Split(key, ".")
 	if len(parts) > 0 {
 		key = parts[len(parts)-1]
@@ -60,13 +81,19 @@ func (c *Case) GuessAssertLineNumber(key string) int {
 		fmt.Sprintf(`%s =`, key),
 	}
 
-	// NOTE: maybe get the wrong line number!
-	// scan from the end of the file
-	count := len(c.FileLines)
-	for i := count - 1; i >= 0; i-- {
+	// protect
+	if caseIndex > len(c.FileLines) {
+		caseIndex = len(c.FileLines)
+	}
+	// caseIndex => {lineNo: lineContent}
+
+	linesMapping := c.FileLines[caseIndex]
+	// {lineNo: lineContent}
+
+	for lineNo, lineContent := range linesMapping {
 		for _, k := range keys {
-			if strings.Contains(c.FileLines[i], k) {
-				return i + 1
+			if strings.Contains(lineContent, k) {
+				return lineNo
 			}
 		}
 	}

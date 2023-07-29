@@ -8,7 +8,7 @@ import (
 	"github.com/wklken/httptest/pkg/util"
 )
 
-func DoErrorAssertions(c config.Case, err error) (stats util.Stats) {
+func DoErrorAssertions(c *config.Case, err error) (stats util.Stats) {
 	stats.AddInfofMessage("assert.error_contains: ")
 	ok, message := assert.Contains(err.Error(), c.Assert.ErrorContains)
 	if ok {
@@ -16,7 +16,7 @@ func DoErrorAssertions(c config.Case, err error) (stats util.Stats) {
 		stats.IncrOkAssertCount()
 	} else {
 		// the ka.key is like assert.latency_lt
-		lineNumber := c.GuessAssertLineNumber("assert.error_contains")
+		lineNumber := c.GuessAssertLineNumber(c.Index, "assert.error_contains")
 		if lineNumber > 0 {
 			message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 		}
