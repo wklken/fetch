@@ -7,73 +7,73 @@ import (
 )
 
 type Assert struct {
-	Status      string
-	StatusIn    []string `mapstructure:"status_in"`
-	StatusNotIn []string `mapstructure:"status_not_in"`
+	Status      string   `yaml:"status"`
+	StatusIn    []string `yaml:"status_in" mapstructure:"status_in"`
+	StatusNotIn []string `yaml:"status_not_in" mapstructure:"status_not_in"`
 
-	StatusCode      int
-	StatusCodeIn    []int `mapstructure:"statusCode_in"`
-	StatusCodeNotIn []int `mapstructure:"statusCode_not_in"`
-	StatusCodeLt    int   `mapstructure:"statusCode_lt"`
-	StatusCodeLte   int   `mapstructure:"statusCode_lte"`
-	StatusCodeGt    int   `mapstructure:"statusCode_gt"`
-	StatusCodeGte   int   `mapstructure:"statusCode_gte"`
+	StatusCode      int   `yaml:"statusCode"`
+	StatusCodeIn    []int `yaml:"statusCode_in" mapstructure:"statusCode_in"`
+	StatusCodeNotIn []int `yaml:"statusCode_not_in" mapstructure:"statusCode_not_in"`
+	StatusCodeLt    int   `yaml:"statusCode_lt" mapstructure:"statusCode_lt"`
+	StatusCodeLte   int   `yaml:"statusCode_lte" mapstructure:"statusCode_lte"`
+	StatusCodeGt    int   `yaml:"statusCode_gt" mapstructure:"statusCode_gt"`
+	StatusCodeGte   int   `yaml:"statusCode_gte" mapstructure:"statusCode_gte"`
 
-	ContentLength    int64
-	ContentLengthLt  int64 `mapstructure:"contentLength_lt"`
-	ContentLengthLte int64 `mapstructure:"contentLength_lte"`
-	ContentLengthGt  int64 `mapstructure:"contentLength_gt"`
-	ContentLengthGte int64 `mapstructure:"contentLength_gte"`
+	ContentLength    int64 `yaml:"contentLength"`
+	ContentLengthLt  int64 `yaml:"contentLength_lt" mapstructure:"contentLength_lt"`
+	ContentLengthLte int64 `yaml:"contentLength_lte" mapstructure:"contentLength_lte"`
+	ContentLengthGt  int64 `yaml:"contentLength_gt" mapstructure:"contentLength_gt"`
+	ContentLengthGte int64 `yaml:"contentLength_gte" mapstructure:"contentLength_gte"`
 
-	ContentType      string
-	ContentTypeIn    []string `mapstructure:"contentType_in"`
-	ContentTypeNotIn []string `mapstructure:"contentType_not_in"`
+	ContentType      string   `yaml:"contentType"`
+	ContentTypeIn    []string `yaml:"contentType_in" mapstructure:"contentType_in"`
+	ContentTypeNotIn []string `yaml:"contentType_not_in" mapstructure:"contentType_not_in"`
 
 	// latency
-	LatencyLt  int64 `mapstructure:"latency_lt"`
-	LatencyLte int64 `mapstructure:"latency_lte"`
-	LatencyGt  int64 `mapstructure:"latency_gt"`
-	LatencyGte int64 `mapstructure:"latency_gte"`
+	LatencyLt  int64 `yaml:"latency_lt" mapstructure:"latency_lt"`
+	LatencyLte int64 `yaml:"latency_lte" mapstructure:"latency_lte"`
+	LatencyGt  int64 `yaml:"latency_gt" mapstructure:"latency_gt"`
+	LatencyGte int64 `yaml:"latency_gte" mapstructure:"latency_gte"`
 
-	Body string
+	Body string `yaml:"body"`
 
-	BodyContains      string `mapstructure:"body_contains"`
-	BodyNotContains   string `mapstructure:"body_not_contains"`
-	BodyIContains     string `mapstructure:"body_icontains"`
-	BodyStartsWith    string `mapstructure:"body_startswith"`
-	BodyEndsWith      string `mapstructure:"body_endswith"`
-	BodyNotStartsWith string `mapstructure:"body_not_startswith"`
-	BodyNotEndsWith   string `mapstructure:"body_not_endswith"`
-	BodyRegexp        string `mapstructure:"body_regexp"`
-	BodyNotRegexp     string `mapstructure:"body_not_regexp"`
+	BodyContains      string `yaml:"body_contains" mapstructure:"body_contains"`
+	BodyNotContains   string `yaml:"body_not_contains" mapstructure:"body_not_contains"`
+	BodyIContains     string `yaml:"body_icontains" mapstructure:"body_icontains"`
+	BodyStartsWith    string `yaml:"body_startswith" mapstructure:"body_startswith"`
+	BodyEndsWith      string `yaml:"body_endswith" mapstructure:"body_endswith"`
+	BodyNotStartsWith string `yaml:"body_not_startswith" mapstructure:"body_not_startswith"`
+	BodyNotEndsWith   string `yaml:"body_not_endswith" mapstructure:"body_not_endswith"`
+	BodyRegexp        string `yaml:"body_regexp" mapstructure:"body_regexp"`
+	BodyNotRegexp     string `yaml:"body_not_regexp" mapstructure:"body_not_regexp"`
 
-	Header       map[string]interface{}
-	HeaderExists []string `mapstructure:"header_exists"`
+	Header       map[string]interface{} `yaml:"header"`
+	HeaderExists []string               `yaml:"header_exists" mapstructure:"header_exists"`
 
-	JSON []AssertJSON `mapstructure:"json"`
-	XML  []AssertXML  `mapstructure:"xml"`
-	HTML []AssertHTML `mapstructure:"html"`
-	YAML []AssertYAML `mapstructure:"yaml"`
-	TOML []AssertTOML `mapstructure:"toml"`
+	JSON []AssertJSON `yaml:"json" mapstructure:"json"`
+	XML  []AssertXML  `yaml:"xml" mapstructure:"xml"`
+	HTML []AssertHTML `yaml:"html" mapstructure:"html"`
+	YAML []AssertYAML `yaml:"yaml" mapstructure:"yaml"`
+	TOML []AssertTOML `yaml:"toml" mapstructure:"toml"`
 
-	Cookie       []AssertCookie `mapstructure:"cookie"`
-	CookieExists []string       `mapstructure:"cookie_exists"`
+	Cookie       []AssertCookie `yaml:"cookie" mapstructure:"cookie"`
+	CookieExists []string       `yaml:"cookie_exists" mapstructure:"cookie_exists"`
 
 	// FIXME: cookie assert, should set_cookie key exist or key-value
 
 	// if request fail like dial fail/context deadline exceeded, will do assert error_contains only,
 	// will pass if the error message contains the string
-	ErrorContains string `mapstructure:"error_contains"`
+	ErrorContains string `yaml:"error_contains" mapstructure:"error_contains"`
 
-	HasRedirect      bool  `mapstructure:"has_redirect"`
-	RedirectCountLt  int64 `mapstructure:"redirectCount_lt"`
-	RedirectCountLte int64 `mapstructure:"redirectCount_lte"`
-	RedirectCountGt  int64 `mapstructure:"redirectCount_gt"`
-	RedirectCountGte int64 `mapstructure:"redirectCount_gte"`
+	HasRedirect      bool  `yaml:"has_redirect" mapstructure:"has_redirect"`
+	RedirectCountLt  int64 `yaml:"redirectCount_lt" mapstructure:"redirectCount_lt"`
+	RedirectCountLte int64 `yaml:"redirectCount_lte" mapstructure:"redirectCount_lte"`
+	RedirectCountGt  int64 `yaml:"redirectCount_gt" mapstructure:"redirectCount_gt"`
+	RedirectCountGte int64 `yaml:"redirectCount_gte" mapstructure:"redirectCount_gte"`
 
-	Proto      string // e.g. "HTTP/1.0"
-	ProtoMajor int    // e.g. 1
-	ProtoMinor int    // e.g. 0
+	Proto      string `yaml:"proto"`      // e.g. "HTTP/1.0"
+	ProtoMajor int    `yaml:"protoMajor"` // e.g. 1
+	ProtoMinor int    `yaml:"protoMinor"` // e.g. 0
 	// TODO: gt/gte/lt/lte
 }
 

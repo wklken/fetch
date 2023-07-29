@@ -19,7 +19,7 @@ func anyStringHasPrefix(l []string, prefix string) bool {
 }
 
 func DoCookieAssertions(
-	c config.Case,
+	c *config.Case,
 	cookies []*http.Cookie,
 ) (stats util.Stats) {
 	cookieUniqueKeys := []string{}
@@ -58,7 +58,7 @@ func DoCookieAssertions(
 		for _, name := range c.Assert.CookieExists {
 			if !cookieNames.Has(name) {
 				message := fmt.Sprintf("cookie name `%s` not exists", name)
-				lineNumber := c.GuessAssertLineNumber("cookie_exists")
+				lineNumber := c.GuessAssertLineNumber(c.Index, "cookie_exists")
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}

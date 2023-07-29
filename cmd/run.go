@@ -196,134 +196,116 @@ func init() {
 // }
 
 func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
-	// FIXME: should collect the log instead of print it(in parallel will be a problem)
-	v, err := config.ReadFromFile(path)
+	// TODO: the path is one single file, but may got more than one case!
+	cases, err := config.ReadCasesFromFile(path)
 	if err != nil {
 		stats.AddTipMessage("Run Case: %s", path)
 		stats.AddErrorMessage("read fail: %s", err)
-		stats.IncrFailCaseCount()
-		return
-	}
-	// read lines, for display the failed asset line number
-	fileLines, err := config.ReadLines(path)
-	if err != nil {
-		stats.AddTipMessage("Run Case: %s", path)
-		stats.AddErrorMessage("read fail: %s", err)
+		// FIXME: case it a file? or each section in file?
 		stats.IncrFailCaseCount()
 		return
 	}
 
-	var c config.Case
-	err = v.Unmarshal(&c)
-	if err != nil {
-		stats.AddTipMessage("Run Case: %s", path)
-		stats.AddErrorMessage("parse fail: %s", err)
-		return
-	}
-	// set the content
-	c.FileLines = fileLines
-
-	allKeys := util.NewStringSetWithValues(v.AllKeys())
-	// fmt.Println("allKeys", allKeys)
-	// fmt.Printf("the case and data: %s, %+v", path, c)
-
-	// do render
-	if runConfig.Render && len(runConfig.Env) > 0 {
-		finalEnv := runConfig.Env
-		// the priority of env in case is higher than env in config
-		if len(c.Env) > 0 {
-			for k, v := range c.Env {
-				finalEnv[k] = v
+	for _, c := range cases {
+		allKeys := util.NewStringSetWithValues(c.AllKeys)
+		// do render
+		if runConfig.Render && len(runConfig.Env) > 0 {
+			finalEnv := runConfig.Env
+			// the priority of env in case is higher than env in config
+			if len(c.Env) > 0 {
+				for k, v := range c.Env {
+					finalEnv[k] = v
+				}
 			}
+			c.Render(runConfig.Env)
 		}
-		c.Render(runConfig.Env)
-	}
 
-	debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
-	timeout := runConfig.Timeout
-	if c.Config.Timeout > 0 {
-		timeout = c.Config.Timeout
-	}
+		debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
+		timeout := runConfig.Timeout
+		if c.Config.Timeout > 0 {
+			timeout = c.Config.Timeout
+		}
 
-	// support repeat, if got repeat, on case will be repeat N times, as N cases
-	repeat := 1
-	if c.Config.Repeat > 0 {
-		repeat = c.Config.Repeat
-	}
+		// support repeat, if got repeat, on case will be repeat N times, as N cases
+		repeat := 1
+		if c.Config.Repeat > 0 {
+			repeat = c.Config.Repeat
+		}
 
-	for i := 0; i < repeat; i++ {
-		var (
-			resp          *http.Response
-			redirectCount int64
-			latency       int64
-			debugLogs     []string
-			err2          error
-			count         int
-		)
-		for {
-			resp, redirectCount, latency, debugLogs, err2 = client.Send(
-				filepath.Dir(path),
-				c.Request.Method,
+		for i := 0; i < repeat; i++ {
+			var (
+				resp          *http.Response
+				redirectCount int64
+				latency       int64
+				debugLogs     []string
+				err2          error
+				count         int
+			)
+			for {
+				resp, redirectCount, latency, debugLogs, err2 = client.Send(
+					filepath.Dir(path),
+					c.Request.Method,
+					c.Request.URL,
+					allKeys.Has("request.body"),
+					c.Request.Body,
+					c.Request.Header,
+					c.Request.Cookie,
+					c.Request.BasicAuth,
+					c.Request.DisableRedirect,
+					c.Hook,
+					timeout,
+					proxy,
+					debug,
+				)
+
+				if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
+					(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
+					time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
+					count++
+					continue
+				} else {
+					break
+				}
+			}
+
+			title := c.ID()
+			if repeat > 1 {
+				title = fmt.Sprintf("%s (%d/%d)", c.ID(), i+1, repeat)
+			}
+			stats.AddTipMessage(
+				"Run Case: %s | [%s %s] | %dms",
+				title,
+				strings.ToUpper(c.Request.Method),
 				c.Request.URL,
-				allKeys.Has("request.body"),
-				c.Request.Body,
-				c.Request.Header,
-				c.Request.Cookie,
-				c.Request.BasicAuth,
-				c.Request.DisableRedirect,
-				c.Hook,
-				timeout,
-				proxy,
-				debug,
+				latency,
 			)
 
-			if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
-				(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
-				time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
-				count++
-				continue
-			} else {
-				break
-			}
-		}
-
-		title := c.Title
-		if repeat > 1 {
-			title = fmt.Sprintf("%s (%d/%d)", c.Title, i+1, repeat)
-		}
-		stats.AddTipMessage(
-			"Run Case: %s | %s | [%s %s] | %dms",
-			path,
-			title,
-			strings.ToUpper(c.Request.Method),
-			c.Request.URL,
-			latency,
-		)
-
-		if len(debugLogs) > 0 {
-			for _, l := range debugLogs {
-				stats.AddInfoMessage(l)
-			}
-		}
-
-		if err2 != nil {
-			if !allKeys.Has("assert.error_contains") {
-				stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
-				stats.IncrFailCaseCount()
-			} else {
-				// do assert with error_contains
-				s1 := assertion.DoErrorAssertions(c, err2)
-				stats.MergeAssertCount(s1)
+			if len(debugLogs) > 0 {
+				for _, l := range debugLogs {
+					stats.AddInfoMessage(l)
+				}
 			}
 
-			if repeat > 1 && i < repeat-1 {
-				continue
+			if err2 != nil {
+				if !allKeys.Has("assert.error_contains") {
+					stats.AddErrorMessage("Send HTTP Request fail: %s", err2)
+					stats.IncrFailCaseCount()
+				} else {
+					// do assert with error_contains
+					s1 := assertion.DoErrorAssertions(c, err2)
+					stats.MergeAssertCount(s1)
+				}
+
+				if repeat > 1 && i < repeat-1 {
+					continue
+				}
+				return
 			}
-			return
+
+			s := doAssertions(allKeys, resp, c, redirectCount, latency)
+			stats.MergeAssertCount(s)
 		}
 
-		s := doAssertions(allKeys, resp, c, redirectCount, latency)
-		stats.MergeAssertCount(s)
 	}
 
 	return
@@ -332,7 +314,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 func doAssertions(
 	allKeys *util.StringSet,
 	resp *http.Response,
-	c config.Case,
+	c *config.Case,
 	redirectCount int64,
 	latency int64,
 ) (stats util.Stats) {

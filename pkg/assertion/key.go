@@ -24,7 +24,7 @@ type keyAssert struct {
 func DoKeysAssertion(
 	allKeys *util.StringSet,
 	resp *http.Response,
-	c config.Case,
+	c *config.Case,
 	redirectCount int64,
 	latency int64,
 	contentType string,
@@ -371,7 +371,7 @@ func DoKeysAssertion(
 				stats.IncrOkAssertCount()
 			} else {
 				// the ka.key is like assert.latency_lt
-				lineNumber := c.GuessAssertLineNumber(ka.key)
+				lineNumber := c.GuessAssertLineNumber(c.Index, ka.key)
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
