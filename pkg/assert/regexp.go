@@ -5,13 +5,13 @@ import (
 	"regexp"
 )
 
-func regexpMatch(text string, expr string) bool {
+func RegexpMatch(text string, expr string) bool {
 	r := regexp.MustCompile(expr)
 	return r.FindStringIndex(text) != nil
 }
 
 func Matches(text, expr interface{}) (bool, string) {
-	if test(text, expr, regexpMatch) {
+	if test(text, expr, RegexpMatch) {
 		return true, "OK"
 	}
 
@@ -19,7 +19,7 @@ func Matches(text, expr interface{}) (bool, string) {
 }
 
 func NotMatches(text, expr interface{}) (bool, string) {
-	if !test(text, expr, regexpMatch) {
+	if !test(text, expr, RegexpMatch) {
 		return true, "OK"
 	}
 

@@ -47,8 +47,10 @@ type Assert struct {
 	BodyMatches       string `yaml:"body_matches" mapstructure:"body_matches"`
 	BodyNotMatches    string `yaml:"body_not_matches" mapstructure:"body_not_matches"`
 
-	Header       map[string]interface{} `yaml:"header"`
-	HeaderExists []string               `yaml:"header_exists" mapstructure:"header_exists"`
+	Header              map[string]interface{} `yaml:"header"`
+	HeaderExists        []string               `yaml:"header_exists" mapstructure:"header_exists"`
+	HeaderValueMatches  map[string]string      `yaml:"header_value_matches" mapstructure:"header_value_matches"`
+	HeaderValueContains map[string]string      `yaml:"header_value_contains" mapstructure:"header_value_contains"`
 
 	JSON []AssertJSON `yaml:"json" mapstructure:"json"`
 	XML  []AssertXML  `yaml:"xml" mapstructure:"xml"`
