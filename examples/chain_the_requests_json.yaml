@@ -1,0 +1,22 @@
+request:
+  method: get
+  url: 'https://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+parse:
+  - key: origin
+    source: body
+    jmespath: "origin"
+  - key: length
+    source: header
+    header: Content-Length
+---
+request:
+  method: get
+  url: 'https://httpbin.org/get'
+  header:
+    X-GOT-ORIGIN: '{{.origin}}'
+    X-GOT-LENGTH: '{{.length}}'
+assert:
+  statusCode: 302

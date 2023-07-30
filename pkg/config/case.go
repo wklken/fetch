@@ -12,6 +12,15 @@ type Hook struct {
 	SaveCookie string `mapstructure:"save_cookie"`
 }
 
+type Parse struct {
+	Key    string `yaml:"key" mapstructure:"key"`
+	Source string `yaml:"source" mapstructure:"source"`
+	// body: json
+	Jmespath string `yaml:"jmespath" mapstructure:"jmespath"`
+	// header name
+	Header string `yaml:"header" mapstructure:"header"`
+}
+
 type Case struct {
 	Title       string
 	Description string
@@ -24,6 +33,8 @@ type Case struct {
 	Request Request
 	Assert  Assert
 	Hook    Hook
+
+	Parse []Parse
 
 	// caseIndex => {lineNo: lineContent}
 	FileLines map[int]map[int]string

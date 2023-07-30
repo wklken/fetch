@@ -26,11 +26,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin/binding"
+	"github.com/jmespath/go-jmespath"
 	"github.com/panjf2000/ants/v2"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
-	"github.com/wklken/httptest/pkg/assert"
 	"github.com/wklken/httptest/pkg/assertion"
 	"github.com/wklken/httptest/pkg/client"
 	"github.com/wklken/httptest/pkg/config"
@@ -195,6 +195,10 @@ func init() {
 // 	log.Error(format, a...)
 // }
 
+type CaseContext struct {
+	Env map[string]interface{}
+}
+
 func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	// TODO: the path is one single file, but may got more than one case!
 	cases, err := config.ReadCasesFromFile(path)
@@ -206,18 +210,30 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		return
 	}
 
+	// to keep the envs between cases, parse from first case, and use the vars in the next case
+	caseContext := CaseContext{
+		Env: map[string]interface{}{},
+	}
+
 	for _, c := range cases {
 		allKeys := util.NewStringSetWithValues(c.AllKeys)
-		// do render
-		if runConfig.Render && len(runConfig.Env) > 0 {
-			finalEnv := runConfig.Env
-			// the priority of env in case is higher than env in config
-			if len(c.Env) > 0 {
-				for k, v := range c.Env {
-					finalEnv[k] = v
-				}
+		// do render, priority: caseContext.env > case.Env > runConfig.Env
+		finalEnv := map[string]interface{}{}
+		if runConfig.Env != nil {
+			finalEnv = runConfig.Env
+		}
+		if len(c.Env) > 0 {
+			for k, v := range c.Env {
+				finalEnv[k] = v
 			}
-			c.Render(runConfig.Env)
+		}
+		if len(caseContext.Env) > 0 {
+			for k, v := range caseContext.Env {
+				finalEnv[k] = v
+			}
+		}
+		if len(finalEnv) > 0 {
+			c.Render(caseContext.Env)
 		}
 
 		debug := (verbose || strings.ToLower(os.Getenv(DebugEnvName)) == "true" || runConfig.Debug) && !quiet
@@ -307,7 +323,14 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				return
 			}
 
-			s := doAssertions(allKeys, resp, c, redirectCount, latency)
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				stats.IncrFailCaseCount()
+				continue
+			}
+			// assert.NoError(err)
+
+			s := doAssertions(allKeys, resp, body, c, redirectCount, latency)
 			// fmt.Printf("s: %+v\n", stats)
 			stats.MergeAssertCount(s)
 			if stats.GetFailAssertCount() > 0 {
@@ -315,6 +338,17 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			} else {
 				stats.IncrOkCaseCount()
 			}
+
+			// do parse
+			if len(c.Parse) > 0 {
+				envs := doParse(c.Parse, body, resp.Header)
+				if len(envs) > 0 {
+					for k, v := range envs {
+						caseContext.Env[k] = v
+					}
+				}
+			}
+
 		}
 
 	}
@@ -322,17 +356,44 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	return
 }
 
+func doParse(parses []config.Parse, body []byte, header http.Header) map[string]interface{} {
+	envs := make(map[string]interface{})
+	for _, p := range parses {
+		// parse header
+		if p.Source == "header" {
+			envs[p.Key] = header.Get(p.Header)
+		}
+		// parse body
+		if p.Source == "body" {
+			if p.Jmespath != "" {
+				// FIXME: support msgpack here too
+				var jsonData interface{}
+				err := binding.JSON.BindBody(body, &jsonData)
+				if err != nil {
+					// log warning and do nothing
+					log.Warning("parse body fail, parse.key=`%s`, err=`%v`", p.Key, err)
+				}
+				actualValue, err := jmespath.Search(p.Jmespath, jsonData)
+				if err != nil {
+					log.Warning("parse body and jmespath.Search fail, parse.key=`%s`, err=`%v`", p.Key, err)
+					// log warning and do nothing
+				}
+				envs[p.Key] = actualValue
+			}
+			// FIXME: support parse html and xml
+		}
+	}
+	return envs
+}
+
 func doAssertions(
 	allKeys *util.StringSet,
 	resp *http.Response,
+	body []byte,
 	c *config.Case,
 	redirectCount int64,
 	latency int64,
 ) (stats util.Stats) {
-	body, err := io.ReadAll(resp.Body)
-	// TODO: handle err
-	assert.NoError(err)
-
 	// sometimes the content-length is -1(means unknown), we recalculate it
 	// NOTE: I DON'T KNOW if the logical is ok or not
 	if resp.ContentLength == -1 {
@@ -396,7 +457,7 @@ func doAssertions(
 
 		if f != nil {
 			if len(body) != 0 {
-				err = f.BindBody(body, &jsonData)
+				err := f.BindBody(body, &jsonData)
 				if err != nil {
 					stats.AddFailMessage("binding.json fail: %s", err)
 					stats.IncrFailAssertCountByN(int64(len(c.Assert.JSON)))

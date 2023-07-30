@@ -1,5 +1,4 @@
 debug: false
-render: true
 failFast: true
 timeout: 2000
 env:
