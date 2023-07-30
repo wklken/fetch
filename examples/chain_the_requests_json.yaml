@@ -19,4 +19,4 @@ request:
     X-GOT-ORIGIN: '{{.origin}}'
     X-GOT-LENGTH: '{{.length}}'
 assert:
-  statusCode: 302
+  statusCode: 200
