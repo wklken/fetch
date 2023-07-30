@@ -50,21 +50,12 @@ func (s *Stats) MergeAssertAndCaseCount(s1 Stats) {
 	// NOTE: here only
 	s.okAssertCount += s1.okAssertCount
 	s.failAssertCount += s1.failAssertCount
+	s.okCaseCount += s1.okCaseCount
+	s.failCaseCount += s1.failCaseCount
 
-	// if got fail assert, the case is fail
 	if s1.AllPassed() {
-		if s1.GetOkCaseCount() > 0 {
-			s.okCaseCount += s1.GetOkCaseCount()
-		} else {
-			s.okCaseCount++
-		}
 		s.okFileCount++
 	} else {
-		if s1.GetFailCaseCount() > 0 {
-			s.failCaseCount += s1.GetFailCaseCount()
-		} else {
-			s.failCaseCount++
-		}
 		s.failFileCount++
 	}
 

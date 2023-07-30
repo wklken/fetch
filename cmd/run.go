@@ -113,11 +113,14 @@ var runCmd = &cobra.Command{
 		if parallels <= 1 {
 			for _, path := range orderedCases {
 				s := run(path, &runConfig)
+				// fmt.Printf("stats: %+v\n", s)
 
 				bar.Add(1)
 
 				// 2. collect the result
 				totalStats.MergeAssertAndCaseCount(s)
+
+				// fmt.Printf("totalStats: %+v\n", totalStats)
 
 				// FIXME: log one by one, not at the last
 
@@ -331,9 +334,10 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			// assert.NoError(err)
 
 			s := doAssertions(allKeys, resp, body, c, redirectCount, latency)
-			// fmt.Printf("s: %+v\n", stats)
+			// fmt.Printf("s: %+v\n", s)
 			stats.MergeAssertCount(s)
-			if stats.GetFailAssertCount() > 0 {
+
+			if s.GetFailAssertCount() > 0 {
 				stats.IncrFailCaseCount()
 			} else {
 				stats.IncrOkCaseCount()
