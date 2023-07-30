@@ -138,7 +138,6 @@ the config.yaml file example
 
 ```yaml
 debug: false
-render: true
 failFast: true
 timeout: 2000
 env:

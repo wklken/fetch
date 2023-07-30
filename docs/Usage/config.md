@@ -37,7 +37,6 @@ order:
   - pattern: examples/get.toml
   - pattern: examples/asserts.*
 
-render: true
 env:
   hello: world
   name: tom

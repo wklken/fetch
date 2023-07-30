@@ -40,7 +40,6 @@ permalink: /features/
 
 - use a config file: `./httptest run -c examples/config/dev.toml examples/get.toml`
 - config: `debug=true/false` to trigger debug print
-- config: `render=true/false` to use  go_template render the `env`
 - config: `failFast=true/false`, will exit if got one fail case while running
 - config: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
 

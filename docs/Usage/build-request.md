@@ -329,6 +329,36 @@ DEBUG request:
 >
 ```
 
+## chain the requests
+
+you can chain the requests, the response of the previous request will be parsed and saved in the context, then you can use it in the next request
+
+```yaml
+
+```yaml
+request:
+  method: get
+  url: 'https://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+parse:
+  - key: origin
+    source: body
+    jmespath: "origin"
+  - key: length
+    source: header
+    header: Content-Length
+---
+request:
+  method: get
+  url: 'https://httpbin.org/get'
+  header:
+    X-GOT-ORIGIN: '{{.origin}}'
+assert:
+  statusCode: 302
+```
+
 ## config: set a timeout for case
 
 ```yaml
