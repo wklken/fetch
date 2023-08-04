@@ -1,5 +1,3 @@
-title: 'http method post, use template local'
-description: http method post, use template local
 request:
   method: post
   url: '{{.host}}/post'

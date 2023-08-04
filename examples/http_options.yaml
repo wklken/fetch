@@ -1,5 +1,3 @@
-title: http method options
-description: http method options
 request:
   method: options
   url: 'http://httpbin.org/get'

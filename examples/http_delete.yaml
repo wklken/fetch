@@ -1,5 +1,3 @@
-title: http method delete
-description: http method delete
 request:
   method: delete
   url: 'http://httpbin.org/delete'

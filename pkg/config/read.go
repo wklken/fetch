@@ -24,23 +24,15 @@ func getFileExt(path string) string {
 	return ""
 }
 
+const ConfigType = "yaml"
+
 func getConfigType(path string) (string, error) {
 	ext := strings.ToLower(getFileExt(path))
 	switch ext {
 	case "yaml", "yml":
-		return "yaml", nil
-	case "json":
-		return "json", nil
-	case "toml":
-		return "toml", nil
-	// case "hcl":
-	//	return "hcl", nil
-	case "properties", "props", "prop":
-		return "prop", nil
-	case "ini":
-		return "ini", nil
+		return ConfigType, nil
 	default:
-		return "", fmt.Errorf("filt type `%s` not support yet", ext)
+		return "", fmt.Errorf("file type `%s` not support yet", ext)
 	}
 }
 
@@ -73,40 +65,41 @@ func ReadCasesFromFile(path string) (cases []*Case, err error) {
 		return
 	}
 
-	configType, err := getConfigType(path)
+	// only support yaml now
+	_, err = getConfigType(path)
 	if err != nil {
 		return
 	}
 
-	if configType != "yaml" {
-		var reader *os.File
-		reader, err = os.Open(path)
-		if err != nil {
-			return
-		}
+	// if configType != configType {
+	// 	var reader *os.File
+	// 	reader, err = os.Open(path)
+	// 	if err != nil {
+	// 		return
+	// 	}
 
-		v := viper.New()
-		v.SetConfigType(configType)
-		err = v.ReadConfig(reader)
-		if err != nil {
-			return
-		}
+	// 	v := viper.New()
+	// 	v.SetConfigType(configType)
+	// 	err = v.ReadConfig(reader)
+	// 	if err != nil {
+	// 		return
+	// 	}
 
-		var c Case
-		err = v.Unmarshal(&c)
-		if err != nil {
-			return
-		}
-		// set the content
-		c.FileLines = fileLines
-		c.AllKeys = v.AllKeys()
-		c.Path = path
-		c.Index = 1
+	// 	var c Case
+	// 	err = v.Unmarshal(&c)
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// 	// set the content
+	// 	c.FileLines = fileLines
+	// 	c.AllKeys = v.AllKeys()
+	// 	c.Path = path
+	// 	c.Index = 1
 
-		cases = append(cases, &c)
+	// 	cases = append(cases, &c)
 
-		return cases, nil
-	}
+	// 	return cases, nil
+	// }
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil {

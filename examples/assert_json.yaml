@@ -1,5 +1,3 @@
-title: json assert
-description: json assert
 request:
   method: post
   url: 'http://httpbin.org/post'

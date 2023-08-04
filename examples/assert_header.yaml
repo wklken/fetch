@@ -1,5 +1,3 @@
-title: http method get headers
-description: http method get headers
 request:
   method: get
   url: 'http://httpbin.org/response-headers?freeform=hello'

@@ -1,5 +1,3 @@
-title: http method post
-description: http method post
 request:
   method: post
   url: 'http://httpbin.org/post'

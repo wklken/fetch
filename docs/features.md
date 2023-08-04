@@ -10,15 +10,14 @@ permalink: /features/
 ## Request
 
 - http methods: `get/post/put/delete/patch/head/options`
-- cases config file types: `toml/yaml/json/ini/properties`
 - build request:
-    - post form
-    - send cookie
-    - send body via file `body = "@./post_body_file"`
-    - basic auth
-    - share cookie
-    - send and parse `application/msgpack`
-    - disable_redirect
+  - post form
+  - send cookie
+  - send body via file `body = "@./post_body_file"`
+  - basic auth
+  - share cookie
+  - send and parse `application/msgpack`
+  - disable_redirect
 
 ## Assert
 
@@ -38,7 +37,7 @@ permalink: /features/
 
 ## Config file
 
-- use a config file: `./httptest run -c examples/config/dev.toml examples/get.toml`
+- use a config file: `./httptest run -c examples/config/dev.yaml examples/request_get.yaml`
 - config: `debug=true/false` to trigger debug print
 - config: `failFast=true/false`, will exit if got one fail case while running
 - config: `timeout=1000`, will set request timeout to 1000ms, fail if exceed
@@ -49,12 +48,8 @@ permalink: /features/
 - show run result with stats
 - `exit code != 0` if got any fail assertions
 - show the fail assertion line number in file
-- verbose mode: `./httptest run -v examples/get.toml` or `export HTTPTEST_DEBUG = true`
+- verbose mode: `./httptest run -v examples/rquest_get.yaml` or `export HTTPTEST_DEBUG = true`
 - quiet mode: `-q/--quiet` to silent the print, for check `$?` only
-- support run cases in order, `./httptest run -c examples/config/order.toml`
+- support run cases in order, `./httptest run -c examples/config/order.yaml`
 - support run cases in parallel, `./httptest run -c *.yaml -p 10`
 - support case retry/repeat
-
-
-
-
