@@ -48,8 +48,6 @@ make build
 ## Getting Started
 
 ```yaml
-title: example
-description: a simple example
 request:
   method: get
   url: 'http://httpbin.org/get'
