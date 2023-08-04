@@ -20,6 +20,7 @@ httptest
 .coverage.cov
 .DS_Store
 examples/share_cookies.txt
+examples/save_response.txt
 *.pyc
 .vscode
 

@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httputil"
@@ -129,7 +128,7 @@ func parseBodyIfGotAFile(caseDir string, body string) (content string, err error
 		}
 
 		var dat []byte
-		dat, err = ioutil.ReadFile(realBodyFilePath)
+		dat, err = os.ReadFile(realBodyFilePath)
 		if err != nil {
 			return
 		}
@@ -150,7 +149,7 @@ func parseCookiesIfGotAFile(caseDir string, cookie string) (cookies []*http.Cook
 	}
 
 	var dat []byte
-	dat, err = ioutil.ReadFile(realCookieFilePath)
+	dat, err = os.ReadFile(realCookieFilePath)
 	if err != nil {
 		return
 	}
@@ -168,9 +167,15 @@ func saveCookies(caseDir string, savedPath string, jar *cookiejar.Jar, resp *htt
 	}
 	cookiePath := filepath.Join(caseDir, savedPath)
 	// log.Info("saved cookie into %s", cookiePath)
-	err = ioutil.WriteFile(cookiePath, bs, 0o644)
+	err = os.WriteFile(cookiePath, bs, 0o644)
 	if err != nil {
 		return
 	}
+	return
+}
+
+func saveResponseBody(caseDir string, savedPath string, respBody []byte) (err error) {
+	respBodyPath := filepath.Join(caseDir, savedPath)
+	err = os.WriteFile(respBodyPath, respBody, 0o644)
 	return
 }

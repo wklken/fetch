@@ -24,6 +24,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	golang.org/x/net v0.12.0
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -70,5 +71,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

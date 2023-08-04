@@ -9,7 +9,8 @@ import (
 
 // TODO: use reflect instead hard code
 type Hook struct {
-	SaveCookie string `mapstructure:"save_cookie"`
+	SaveCookie   string `mapstructure:"save_cookie"`
+	SaveResponse string `mapstructure:"save_response"`
 }
 
 type Parse struct {
