@@ -1,5 +1,3 @@
-title: http method put
-description: http method put
 request:
   method: put
   url: 'http://httpbin.org/put'

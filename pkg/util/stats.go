@@ -110,7 +110,7 @@ func (s *Stats) GetFailCaseCount() int64 {
 }
 
 func (s *Stats) AllPassed() bool {
-	return s.failCaseCount == 0 && s.failAssertCount == 0
+	return s.failCaseCount == 0 && s.failAssertCount == 0 && s.failFileCount == 0
 }
 
 func (s *Stats) Report(latency int64) {
