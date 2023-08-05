@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/cookiejar"
 	"net/http/httputil"
 	"os"
 	"path/filepath"
@@ -158,16 +157,16 @@ func parseCookiesIfGotAFile(caseDir string, cookie string) (cookies []*http.Cook
 	return
 }
 
-func saveCookies(caseDir string, savedPath string, jar *cookiejar.Jar, resp *http.Response) (err error) {
-	cookies := jar.Cookies(resp.Request.URL)
-	var bs []byte
-	bs, err = json.Marshal(cookies)
-	if err != nil {
-		return
-	}
+func saveCookies(caseDir string, savedPath string, cookieJsonBytes []byte, resp *http.Response) (err error) {
+	// cookies := jar.Cookies(resp.Request.URL)
+	// var bs []byte
+	// bs, err = json.Marshal(cookies)
+	// if err != nil {
+	// 	return
+	// }
 	cookiePath := filepath.Join(caseDir, savedPath)
 	// log.Info("saved cookie into %s", cookiePath)
-	err = os.WriteFile(cookiePath, bs, 0o644)
+	err = os.WriteFile(cookiePath, cookieJsonBytes, 0o644)
 	if err != nil {
 		return
 	}

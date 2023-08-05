@@ -9,6 +9,9 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	net_url "net/url"
+	"os/exec"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -165,8 +168,17 @@ func Send(
 	latency = time.Since(start).Milliseconds()
 	// fmt.Println("hasRedirect: ", hasRedirect)
 
+	// get the cookies
+	cookies := jar.Cookies(resp.Request.URL)
+	var cookieJsonBytes []byte
+	cookieJsonBytes, err = json.Marshal(cookies)
+	if err != nil {
+		// FIXME: the error should not make the request fail
+		return
+	}
+
 	if hook.SaveCookie != "" {
-		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)
+		err = saveCookies(caseDir, hook.SaveCookie, cookieJsonBytes, resp)
 		if err != nil {
 			return
 		}
@@ -187,9 +199,63 @@ func Send(
 		}
 	}
 
+	var headerJsonBytes []byte
+	headerJsonBytes, err = json.Marshal(resp.Header)
+	if err != nil {
+		// FIXME: the error should not make the request fail
+		return
+	}
+
+	if hook.RunShell != "" {
+		bashPath := filepath.Join(caseDir, hook.RunShell)
+		err = executeCmd("sh", bashPath, resp.StatusCode, headerJsonBytes, respBody, cookieJsonBytes, debug)
+		if err != nil {
+			return
+		}
+	}
+
+	if hook.RunPython != "" {
+		bashPath := filepath.Join(caseDir, hook.RunPython)
+		err = executeCmd("python", bashPath, resp.StatusCode, headerJsonBytes, respBody, cookieJsonBytes, debug)
+		if err != nil {
+			return
+		}
+	}
+
 	if debug {
 		debugLogs = append(debugLogs, dumpResponse(resp)...)
 	}
 
 	return
+}
+
+func executeCmd(
+	exe string,
+	bashPath string,
+	statusCode int,
+	headerJsonBytes []byte,
+	respBody []byte,
+	cookieJsonBytes []byte,
+	debug bool,
+) (err error) {
+	cmd := exec.Command(
+		exe,
+		bashPath,
+		strconv.Itoa(statusCode),
+		string(headerJsonBytes),
+		string(respBody),
+		string(cookieJsonBytes),
+	)
+	var o []byte
+	o, err = cmd.Output()
+	if err != nil {
+		fmt.Println("\nrun shell fail, err=", err)
+		return
+	}
+
+	if debug {
+		fmt.Println("\nrun shell success, output=\n", string(o))
+	}
+
+	return nil
 }
