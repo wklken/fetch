@@ -27,6 +27,7 @@ type Retry struct {
 	Interval int
 	// match the status_codes will do retry
 	StatusCodes []int
+	BodyMatches string
 }
 
 type CaseConfig struct {

@@ -30,6 +30,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
+	"github.com/wklken/httptest/pkg/assert"
 	"github.com/wklken/httptest/pkg/assertion"
 	"github.com/wklken/httptest/pkg/client"
 	"github.com/wklken/httptest/pkg/config"
@@ -201,6 +202,43 @@ type CaseContext struct {
 	Env map[string]interface{}
 }
 
+func responseMatchThenEndRetry(statusCode int, body []byte, retry config.Retry) bool {
+	if len(retry.StatusCodes) != 0 && len(retry.BodyMatches) != 0 {
+		ok, _ := assert.Matches(string(body), retry.BodyMatches)
+		return util.ItemInIntArray(statusCode, retry.StatusCodes) && ok
+	}
+
+	if len(retry.StatusCodes) > 0 {
+		return util.ItemInIntArray(statusCode, retry.StatusCodes)
+	}
+	if len(retry.BodyMatches) > 0 {
+		ok, _ := assert.Matches(string(body), retry.BodyMatches)
+		return ok
+	}
+
+	// end the retry, because no-assert
+	return false
+}
+
+func shouldRetry(retry config.Retry, currentCount int, currentErr error, statusCode int, respBody []byte) bool {
+	if !retry.Enable {
+		return false
+	}
+	if currentCount >= retry.Count {
+		return false
+	}
+
+	if currentErr != nil {
+		return true
+	}
+
+	if responseMatchThenEndRetry(statusCode, respBody, retry) {
+		return false
+	}
+
+	return true
+}
+
 func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 	// TODO: the path is one single file, but may got more than one case!
 	cases, err := config.ReadCasesFromFile(path)
@@ -278,8 +316,8 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 					debug,
 				)
 
-				if c.Config.Retry.Enable && count < c.Config.Retry.Count &&
-					(err2 != nil || util.ItemInIntArray(resp.StatusCode, c.Config.Retry.StatusCodes)) {
+				if shouldRetry(c.Config.Retry, count, err2, resp.StatusCode, respBody) {
+					fmt.Println("will retry", c.Config.Retry, count, err2, resp.StatusCode, respBody)
 					time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
 					count++
 					continue
