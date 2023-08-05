@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -254,6 +253,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 		for i := 0; i < repeat; i++ {
 			var (
 				resp          *http.Response
+				respBody      []byte
 				redirectCount int64
 				latency       int64
 				debugLogs     []string
@@ -261,7 +261,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				count         int
 			)
 			for {
-				resp, redirectCount, latency, debugLogs, err2 = client.Send(
+				resp, respBody, redirectCount, latency, debugLogs, err2 = client.Send(
 					filepath.Dir(path),
 					c.Request.Method,
 					c.Request.URL,
@@ -326,14 +326,16 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				return
 			}
 
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				stats.IncrFailCaseCount()
-				continue
-			}
+			// body, err := io.ReadAll(resp.Body)
+			// if err != nil {
+			// 	stats.IncrFailCaseCount()
+			// 	continue
+			// }
 			// assert.NoError(err)
 
-			s := doAssertions(allKeys, resp, body, c, redirectCount, latency)
+			// FIXME: if got no `[assert]`, just skip, mark as success
+
+			s := doAssertions(allKeys, resp, respBody, c, redirectCount, latency)
 			// fmt.Printf("s: %+v\n", s)
 			stats.MergeAssertCount(s)
 
@@ -345,7 +347,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 
 			// do parse
 			if len(c.Parse) > 0 {
-				envs := doParse(c.Parse, body, resp.Header)
+				envs := doParse(c.Parse, respBody, resp.Header)
 				if len(envs) > 0 {
 					for k, v := range envs {
 						caseContext.Env[k] = v
@@ -354,7 +356,6 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 			}
 
 		}
-
 	}
 
 	return

@@ -1,0 +1,10 @@
+request:
+  method: get
+  url: 'http://httpbin.org/get'
+assert:
+  status: ok
+  statusCode: 200
+  contentLength_gt: 0
+  contentType: application/json
+hook:
+  save_response: save_response.txt

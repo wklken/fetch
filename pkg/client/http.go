@@ -31,7 +31,7 @@ func Send(
 	timeout int,
 	proxy string,
 	debug bool,
-) (resp *http.Response, redirectCount int64, latency int64, debugLogs []string, err error) {
+) (resp *http.Response, respBody []byte, redirectCount int64, latency int64, debugLogs []string, err error) {
 	// NOTE: if c.Request.Body begin with `@`, means it's a file
 	requestBody, err := parseBodyIfGotAFile(caseDir, body)
 	if err != nil {
@@ -166,6 +166,18 @@ func Send(
 
 	if hook.SaveCookie != "" {
 		err = saveCookies(caseDir, hook.SaveCookie, jar, resp)
+		if err != nil {
+			return
+		}
+	}
+
+	respBody, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	if hook.SaveResponse != "" {
+		err = saveResponseBody(caseDir, hook.SaveResponse, respBody)
 		if err != nil {
 			return
 		}
