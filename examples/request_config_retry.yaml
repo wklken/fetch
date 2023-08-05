@@ -2,7 +2,7 @@ title: http method get retry
 description: http method get retry
 request:
   method: get
-  url: 'http://httpbin.org/status/500'
+  url: 'http://httpbin.org/status/200'
 config:
   retry:
     enable: true
@@ -10,6 +10,7 @@ config:
     interval: 1000
     statusCodes:
       - 200
+    bodyMatches: ".hello"
 assert:
   status: ok
   statusCode: 200

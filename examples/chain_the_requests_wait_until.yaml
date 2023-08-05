@@ -1,0 +1,28 @@
+request:
+  method: get
+  url: 'https://httpbin.org/get_task'
+assert:
+  status: ok
+  statusCode: 200
+parse:
+  - key: task_id
+    source: body
+    jmespath: "task_id"
+---
+request:
+  method: get
+  url: 'https://httpbin.org/tasks/{{.task_id}}'
+config:
+  retry:
+    enable: true
+    count: 10
+    interval: 1000
+    statusCodes:
+      - 200
+    bodyMatches: "COMPLETE"
+---
+request:
+  method: get
+  url: 'https://httpbin.org/tasks/{{.task_id}}/details'
+assert:
+  statusCode: 200
