@@ -234,6 +234,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				finalEnv[k] = v
 			}
 		}
+
 		if len(finalEnv) > 0 {
 			c.Render(caseContext.Env)
 		}
@@ -299,6 +300,15 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				latency,
 			)
 
+			if debug && len(finalEnv) > 0 {
+				stats.AddInfoMessage("--------------------")
+				for k, v := range finalEnv {
+					stats.AddInfoMessage("* %s=%v", k, v)
+				}
+				stats.AddInfoMessage("--------------------")
+				// stats.AddInfoMessage("Env: %+v", finalEnv)
+			}
+
 			if len(debugLogs) > 0 {
 				for _, l := range debugLogs {
 					stats.AddInfoMessage(l)
@@ -325,13 +335,6 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 				}
 				return
 			}
-
-			// body, err := io.ReadAll(resp.Body)
-			// if err != nil {
-			// 	stats.IncrFailCaseCount()
-			// 	continue
-			// }
-			// assert.NoError(err)
 
 			// FIXME: if got no `[assert]`, just skip, mark as success
 
