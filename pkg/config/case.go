@@ -11,6 +11,8 @@ import (
 type Hook struct {
 	SaveCookie   string `mapstructure:"save_cookie"`
 	SaveResponse string `mapstructure:"save_response"`
+	RunPython    string `mapstructure:"run_python"`
+	RunShell     string `mapstructure:"run_shell"`
 }
 
 type Parse struct {
