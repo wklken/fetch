@@ -7,4 +7,4 @@ assert:
   contentLength_gt: 0
   contentType: application/json
 hook:
-  run_python: echo.py
+  exec: python echo.py

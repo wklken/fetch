@@ -7,4 +7,4 @@ assert:
   contentLength_gt: 0
   contentType: application/json
 hook:
-  run_shell: echo.sh
+  exec: bash echo.sh
