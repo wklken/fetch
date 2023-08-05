@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	net_url "net/url"
@@ -175,6 +176,9 @@ func Send(
 	if err != nil {
 		return
 	}
+	// reset the resp body
+	resp.Body.Close()
+	resp.Body = ioutil.NopCloser(bytes.NewBuffer(respBody))
 
 	if hook.SaveResponse != "" {
 		err = saveResponseBody(caseDir, hook.SaveResponse, respBody)
