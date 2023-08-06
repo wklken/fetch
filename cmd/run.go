@@ -310,6 +310,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 					c.Request.Cookie,
 					c.Request.BasicAuth,
 					c.Request.DisableRedirect,
+					c.Request.MaxRedirects,
 					c.Hook,
 					timeout,
 					proxy,
