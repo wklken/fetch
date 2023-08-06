@@ -224,6 +224,11 @@ func Send(
 		}
 	}
 
+	// FIXME: put it here? or put it after the assertions?
+	if hook.Sleep > 0 {
+		time.Sleep(time.Duration(hook.Sleep) * time.Millisecond)
+	}
+
 	if debug {
 		debugLogs = append(debugLogs, dumpResponse(resp)...)
 	}

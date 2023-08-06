@@ -12,6 +12,7 @@ type Hook struct {
 	SaveCookie   string `mapstructure:"save_cookie"`
 	SaveResponse string `mapstructure:"save_response"`
 	Exec         string `mapstructure:"exec"`
+	Sleep        int    `mapstructure:"sleep"`
 }
 
 type Parse struct {
