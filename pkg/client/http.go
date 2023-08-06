@@ -30,6 +30,7 @@ func Send(
 	cookie string,
 	auth config.BasicAuth,
 	disableRedirect bool,
+	maxRedirects int,
 	hook config.Hook,
 	timeout int,
 	proxy string,
@@ -137,6 +138,14 @@ func Send(
 			redirectCount += 1
 			return http.ErrUseLastResponse
 		}
+	} else if maxRedirects > 0 {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
+			redirectCount += 1
+			if redirectCount > int64(maxRedirects) {
+				return http.ErrUseLastResponse
+			}
+			return nil
+		}
 	} else {
 		checkRedirect = func(req *http.Request, via []*http.Request) error {
 			redirectCount += 1
@@ -205,6 +214,7 @@ func Send(
 		return
 	}
 
+	// TODO: execute support get parsed result as context, return and merge with the context, for next case
 	if hook.Exec != "" {
 		processDir, _ := os.Getwd()
 		execDir := filepath.Join(processDir, caseDir)
