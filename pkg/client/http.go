@@ -5,13 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	net_url "net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -190,7 +189,7 @@ func Send(
 	}
 	// reset the resp body
 	resp.Body.Close()
-	resp.Body = ioutil.NopCloser(bytes.NewBuffer(respBody))
+	resp.Body = io.NopCloser(bytes.NewBuffer(respBody))
 
 	if hook.SaveResponse != "" {
 		err = saveResponseBody(caseDir, hook.SaveResponse, respBody)
@@ -206,17 +205,10 @@ func Send(
 		return
 	}
 
-	if hook.RunShell != "" {
-		bashPath := filepath.Join(caseDir, hook.RunShell)
-		err = executeCmd("sh", bashPath, resp.StatusCode, headerJsonBytes, respBody, cookieJsonBytes, debug)
-		if err != nil {
-			return
-		}
-	}
-
-	if hook.RunPython != "" {
-		bashPath := filepath.Join(caseDir, hook.RunPython)
-		err = executeCmd("python", bashPath, resp.StatusCode, headerJsonBytes, respBody, cookieJsonBytes, debug)
+	if hook.Exec != "" {
+		processDir, _ := os.Getwd()
+		execDir := filepath.Join(processDir, caseDir)
+		err = executeCmd(hook.Exec, execDir, resp.StatusCode, headerJsonBytes, respBody, cookieJsonBytes, debug)
 		if err != nil {
 			return
 		}
@@ -230,22 +222,28 @@ func Send(
 }
 
 func executeCmd(
-	exe string,
-	bashPath string,
+	command string,
+	execDir string,
 	statusCode int,
 	headerJsonBytes []byte,
 	respBody []byte,
 	cookieJsonBytes []byte,
 	debug bool,
 ) (err error) {
+	finalCmd := fmt.Sprintf("%s $statusCode $headerJson $respBody $cookieJson", command)
+	fmt.Println("finalCmd: ", finalCmd)
+
 	cmd := exec.Command(
-		exe,
-		bashPath,
-		strconv.Itoa(statusCode),
-		string(headerJsonBytes),
-		string(respBody),
-		string(cookieJsonBytes),
+		"bash",
+		"-c",
+		finalCmd,
 	)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, fmt.Sprintf("statusCode=%d", statusCode))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("headerJson=%s", string(headerJsonBytes)))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("respBody=%s", string(respBody)))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("cookieJson=%s", string(cookieJsonBytes)))
+	cmd.Dir = execDir
 	var o []byte
 	o, err = cmd.Output()
 	if err != nil {
