@@ -57,5 +57,5 @@ jobs:
         with:
           push: true
           tags: |
-            wklken/httptest:latest
-            wklken/httptest:${{  github.ref_name }}
+            wklken/fetch:latest
+            wklken/fetch:${{  github.ref_name }}
