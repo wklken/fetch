@@ -1,7 +1,7 @@
 brews:
-- name: httptest
-  homepage: https://github.com/wklken/homebrew-httptest
+- name: fetch
+  homepage: https://github.com/wklken/homebrew-fetch
   tap:
     owner: wklken
-    name: homebrew-httptest
+    name: homebrew-fetch
     token: "{{ .Env.TAP_GITHUB_TOKEN }}"
