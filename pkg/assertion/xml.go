@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cast"
-	"github.com/wklken/httptest/pkg/assert"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/assert"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/util"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/xmlpath.v2"
 )

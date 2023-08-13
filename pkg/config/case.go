@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wklken/httptest/pkg/tpl"
+	"github.com/wklken/fetch/pkg/tpl"
 )
 
 // TODO: use reflect instead hard code

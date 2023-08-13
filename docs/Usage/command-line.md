@@ -23,12 +23,12 @@ The cli options.
 ## overview
 
 ```bash
-$ ./httptest -h
-A command lin http test tool. Complete documentation is available at https://github.com/wklken/httptest
+$ ./fetch -h
+A command lin http test tool. Complete documentation is available at https://github.com/wklken/fetch
 
 Usage:
-  httptest [flags]
-  httptest [command]
+  fetch [flags]
+  fetch [command]
 
 Available Commands:
   bootstrap   A brief description of your command
@@ -39,9 +39,9 @@ Available Commands:
   version     Print the version number
 
 Flags:
-  -h, --help   help for httptest
+  -h, --help   help for fetch
 
-Use "httptest [command] --help" for more information about a command.
+Use "fetch [command] --help" for more information about a command.
 ```
 
 avaliable commands:
@@ -61,7 +61,7 @@ not ready commands:
 will show the request/response detail
 
 ```bash
-$ ./httptest run examples/http_get.yaml -v
+$ ./fetch run examples/http_get.yaml -v
  100% |███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| (1/1, 2 it/s)
 Run Case: examples/http_get.yaml | example | [GET http://httpbin.org/get] | 466ms
 > GET /get HTTP/1.1
@@ -113,7 +113,7 @@ the execute result: 0
 will no output at all
 
 ```bash
-$ ./httptest run examples/http_get.yaml -q
+$ ./fetch run examples/http_get.yaml -q
 $ echo $?
 0
 ```
@@ -123,7 +123,7 @@ $ echo $?
 will run all cases with `N` goroutines, much more faster than run cases one by one
 
 ```bash
-$ ./httptest run examples/http_*.yaml -p 5
+$ ./fetch run examples/http_*.yaml -p 5
 ```
 
 ### config `-c`
@@ -131,7 +131,7 @@ $ ./httptest run examples/http_*.yaml -p 5
 run cases with configs
 
 ```bash
-$ ./httptest run -c examples/config.yaml examples/request_use_template.yaml
+$ ./fetch run -c examples/config.yaml examples/request_use_template.yaml
 ```
 
 the config.yaml file example
@@ -156,5 +156,5 @@ please see [Usage/Config](/usage/config/) for more detail
 ### proxy `--proxy`
 
 ```
-$ ./httptest run examples/http_get.yaml --proxy http://127.0.0.1:9999
+$ ./fetch run examples/http_get.yaml --proxy http://127.0.0.1:9999
 ```

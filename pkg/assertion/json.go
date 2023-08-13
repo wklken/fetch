@@ -5,9 +5,9 @@ import (
 	"reflect"
 
 	"github.com/jmespath/go-jmespath"
-	"github.com/wklken/httptest/pkg/assert"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/assert"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJSON) (stats util.Stats) {

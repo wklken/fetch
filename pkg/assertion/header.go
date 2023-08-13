@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/wklken/httptest/pkg/assert"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/assert"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stats) {

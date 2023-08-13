@@ -30,7 +30,7 @@ import (
 	"fmt"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 func Equal(actual interface{}, expected interface{}) (bool, string) {

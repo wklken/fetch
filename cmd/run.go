@@ -30,16 +30,16 @@ import (
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
-	"github.com/wklken/httptest/pkg/assert"
-	"github.com/wklken/httptest/pkg/assertion"
-	"github.com/wklken/httptest/pkg/client"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/log"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/assert"
+	"github.com/wklken/fetch/pkg/assertion"
+	"github.com/wklken/fetch/pkg/client"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/log"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 const (
-	DebugEnvName = "HTTPTEST_DEBUG"
+	DebugEnvName = "FETCH_DEBUG"
 )
 
 var (

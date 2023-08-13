@@ -3,8 +3,8 @@ package assertion
 import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/goccy/go-yaml"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 func DoYAMLAssertions(body []byte, yamls []config.AssertYAML) (stats util.Stats) {

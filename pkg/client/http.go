@@ -17,8 +17,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/goccy/go-json"
 	"github.com/vmihailenco/msgpack/v5"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/version"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/version"
 )
 
 func Send(
@@ -96,7 +96,7 @@ func Send(
 		}
 	}
 	if req.Header.Get("User-Agent") == "" {
-		req.Header.Set("User-Agent", fmt.Sprintf("httptest/%s", version.Version))
+		req.Header.Set("User-Agent", fmt.Sprintf("fetch/%s", version.Version))
 	}
 
 	// set header: basic_auth

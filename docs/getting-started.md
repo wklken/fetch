@@ -22,10 +22,10 @@ assert:
   contentType: application/json
 ```
 
-then run the `httptest`
+then run the `fetch`
 
 ```bash
-$ ./httptest run http_get.yaml
+$ ./fetch run http_get.yaml
 ```
 
 ![](assets/images/getting-started.jpg)
@@ -65,4 +65,4 @@ assert:
   contentType: application/json
 ```
 
-If you want to know more about how to use httptest, see [Usage](/httptest/usage/)
+If you want to know more about how to use fetch, see [Usage](/fetch/usage/)

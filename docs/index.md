@@ -13,6 +13,6 @@ nav_order: 1
 
 We want to test the APIs via http requests and assert the responses, but it's hard to maintain the casesa,
 
-So, here is the httptest
+So, here is the fetch
 
 please let me know if you have any questions!

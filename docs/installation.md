@@ -22,29 +22,29 @@ Some examples show how to build reuqest.
 
 ### Binary releases
 
-See the available binaries for different operating systems/architectures from the [releases page](https://github.com/wklken/httptest/releases).
+See the available binaries for different operating systems/architectures from the [releases page](https://github.com/wklken/fetch/releases).
 
 ### go install
 
 ```bash
-go install github.com/wklken/httptest@latest
+go install github.com/wklken/fetch@latest
 ```
 
 ### hombrew
 
 ```bash
-brew tap wklken/httptest
-brew install httptest
+brew tap wklken/fetch
+brew install fetch
 ```
 
 ### docker
 
 ```bash
-docker run --rm --net=host wklken/httptest help
+docker run --rm --net=host wklken/fetch help
 
 # apple m1*/m2*
-docker pull --platform=linux/amd64 wklken/httptest
-docker run --rm --net=host wklken/httptest help
+docker pull --platform=linux/amd64 wklken/fetch
+docker run --rm --net=host wklken/fetch help
 ```
 
 ### Build from source
@@ -52,7 +52,7 @@ docker run --rm --net=host wklken/httptest help
 - dependencies: go1.19
 
 ```bash
-git clone https://github.com/wklken/httptest.git
-cd httptest
+git clone https://github.com/wklken/fetch.git
+cd fetch
 make build
 ```

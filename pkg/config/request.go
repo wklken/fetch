@@ -3,7 +3,7 @@ package config
 import (
 	"strings"
 
-	"github.com/wklken/httptest/pkg/tpl"
+	"github.com/wklken/fetch/pkg/tpl"
 )
 
 type BasicAuth struct {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/wklken/httptest/pkg/log"
+	"github.com/wklken/fetch/pkg/log"
 )
 
 func Render(s string, ctx map[string]interface{}) string {

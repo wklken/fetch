@@ -11,13 +11,13 @@ COPY main.go /app/
 COPY cmd /app/cmd
 COPY pkg /app/pkg
 
-RUN go build -o /httptest
+RUN go build -o /fetch
 
 # deploy
 FROM alpine:3.17
 
 WORKDIR /
 
-COPY --from=builder /httptest /usr/bin/httptest
+COPY --from=builder /fetch /usr/bin/fetch
 
-ENTRYPOINT [ "/usr/bin/httptest" ]
+ENTRYPOINT [ "/usr/bin/fetch" ]

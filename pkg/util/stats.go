@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/wklken/httptest/pkg/log"
+	"github.com/wklken/fetch/pkg/log"
 )
 
 const tableTPL = `

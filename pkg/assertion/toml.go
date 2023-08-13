@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/wklken/httptest/pkg/config"
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/config"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 func DoTOMLAssertions(body []byte, tomls []config.AssertTOML) (stats util.Stats) {

@@ -1,10 +1,10 @@
-module github.com/wklken/httptest
+module github.com/wklken/fetch
 
 go 1.20
 
-replace github.com/wklken/httptest/cmd => ./cmd
+replace github.com/wklken/fetch/cmd => ./cmd
 
-replace github.com/wklken/httptest/pkg => ./pkg
+replace github.com/wklken/fetch/pkg => ./pkg
 
 require (
 	github.com/fatih/color v1.15.0

@@ -263,7 +263,7 @@ assert:
 run with command
 
 ```bash
-$ ./httptest run -c examples/config.yaml examples/request_use_template.yaml
+$ ./fetch run -c examples/config.yaml examples/request_use_template.yaml
 
 # will send
 DEBUG request:
@@ -282,7 +282,7 @@ DEBUG request:
 >
 ```
 
-also, you can add `env` in case, which's priority is higher than `env` in config file(`./httptest -c config.yaml`) (`examples/request_use_template_local.yaml`)
+also, you can add `env` in case, which's priority is higher than `env` in config file(`./fetch -c config.yaml`) (`examples/request_use_template_local.yaml`)
 
 ```yaml
 title: 'http method post, use template local'
@@ -310,7 +310,7 @@ assert:
 run with command
 
 ```bash
-$ ./httptest run -c examples/config.yaml examples/request_use_template_local.yaml
+$ ./fetch run -c examples/config.yaml examples/request_use_template_local.yaml
 
 # will send
 DEBUG request:
@@ -376,7 +376,7 @@ assert:
   contentType: application/json
 ```
 
-the priority of `timeout` in case is higher than `timeout` in config file(`./httptest -c config.yaml`)
+the priority of `timeout` in case is higher than `timeout` in config file(`./fetch -c config.yaml`)
 
 ## config: set repeat for case
 

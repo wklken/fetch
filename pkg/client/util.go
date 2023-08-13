@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/wklken/httptest/pkg/util"
+	"github.com/wklken/fetch/pkg/util"
 )
 
 const (

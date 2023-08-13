@@ -3,7 +3,7 @@ package util
 import (
 	"path/filepath"
 
-	"github.com/wklken/httptest/pkg/config"
+	"github.com/wklken/fetch/pkg/config"
 )
 
 func GetRunningOrderedFiles(pathes []string, orders []config.Order) (files []string, err error) {

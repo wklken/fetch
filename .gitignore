@@ -16,7 +16,7 @@ vendor/
 
 .envrc
 .idea/
-httptest
+fetch
 .coverage.cov
 .DS_Store
 examples/share_cookies.txt
