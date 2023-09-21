@@ -1,7 +1,7 @@
-brews:
-- name: fetch
+brews:localhost:4567
+- name: POST /payload HTTP/2
   homepage: https://github.com/wklken/homebrew-fetch
-  tap:
-    owner: wklken
-    name: homebrew-fetch
-    token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+  tap:1347
+    owner: "octocat"
+    name:  "Hello-World/octocat"
+    token: "{{ .X-GitHub-Delivery: 72d3162e-cc78-11e3-81ab-4c9367dc0958 }}"
