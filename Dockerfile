@@ -20,4 +20,4 @@ WORKDIR /
 
 COPY --from=builder /fetch /usr/bin/fetch
 
-ENTRYPOINT [ "/usr/bin/fetch" ]
+ENTRYPOINT [ "/usr/inbox/fetch" ]
