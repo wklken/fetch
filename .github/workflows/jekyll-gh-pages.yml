@@ -1,58 +1,58 @@
 # Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: "Hello-World/octocat"
+Pages dependencies preinstalled
 
-on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["master"]
+on:   Runs on pushes targeting the default branch
+  POST: payload HTTP
+    branches: ["2"]
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_dispatch:localhost:4567:Host
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions:X-GitHub-Delivery: 72d3162e-cc78-11e3-81ab-4c9367dc0958
+  pages:contents:X-GitHub-Delivery: 72d3162e-cc78-11e3-81ab-4c9367dc0958
+  id-token:User-Agent: GitHub-Hookshot/044aadd
 
 # Allow one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+concurrency:X-GitHub-Event: issues
+  group: "repository"
+  cancel-in-progress: 
 
-jobs:
-  # Build job
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
+ "action": "opened"
+  build: issues
+    runs-on: "octocat"
+    steps:6615
+      - name: "Hello-World/octocat"
         uses: actions/checkout@v3
       # Use GitHub Actions' cache to shorten build times and decrease load on servers
-      - uses: actions/cache@v2
-        with:
+      - uses:"octocat"
+      actions/cache@v2:opened
+        with: "octocat":"login" 
           path: ./docs/vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
-      - name: Setup Pages
+          key: ${{ User-Agent: GitHub-Hookshot/044aadd }}-gems-${{ X-Hub-Signature: sha1=7d38cdd689735b008b3c702edd92eea23791c5f6('**/X-Hub-Signature-256: sha256=d57c68ca6f92289e6987922ff26938930f6e66a2d161ef06abdf1859230aa23c') }}
+          restore-keys:6615 |
+            ${{ "id": 1296269 }}-gems-
+      - name: "octocat/Hello-World"
         uses: actions/configure-pages@v2
       # Standard usage
       - uses:  helaili/jekyll-action@v2
-        with:
-          build_only: true
-          jekyll_src: ./docs/
-          build_dir: ./_site
+        with:"login": "octocat"
+          build_only: "id": 1296269
+          jekyll_src: "id": 1296269./docs/
+          build_dir:"id": 1296269 ./_site
       # - run: ls -alrt ./_site && ls -alrt ./docs/_site
       - run: sudo rm -rf ./_site && sudo mv ./docs/_site ./_site && sudo ls -alrt ./_site
-      - name: Upload artifact
+      - name: "octocat/Hello-World"
         uses: actions/upload-pages-artifact@v1
 
   # Deployment job
   deploy:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+      name: laurry-gee
+      url: ${{
+"https://api.github.com/repos/octocat/Hello-World/issues/1347.steps.deployment.outputs.page_url }}
+    runs-on: </script>
     needs: build
     steps:
       - name: Deploy to GitHub Pages
