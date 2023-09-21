@@ -1,4 +1,4 @@
-module github.com/wklken/fetch
+module github.com/wklken/post
 
 go 1.20
 
