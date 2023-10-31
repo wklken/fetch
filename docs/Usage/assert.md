@@ -93,6 +93,10 @@ assert:
   header_exists:
     - "server"
     - "freeform"
+  header_value_contains:
+    server: gunicorn
+  header_value_matches:
+    x-request-id: "^[a-z0-9]{32}$"
 ```
 
 ## assert cookie

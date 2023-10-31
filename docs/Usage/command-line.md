@@ -66,7 +66,7 @@ $ ./fetch run examples/http_get.yaml -v
 Run Case: examples/http_get.yaml | example | [GET http://httpbin.org/get] | 466ms
 > GET /get HTTP/1.1
 > Host: httpbin.org
-> User-Agent: Go-http-client/1.1
+> User-Agent: fetch/1.0.0
 > Accept-Encoding: gzip
 >
 >
@@ -84,7 +84,7 @@ Run Case: examples/http_get.yaml | example | [GET http://httpbin.org/get] | 466m
 <   "headers": {
 <     "Accept-Encoding": "gzip",
 <     "Host": "httpbin.org",
-<     "User-Agent": "Go-http-client/1.1",
+<     "User-Agent": "fetch/1.0.0",
 <     "X-Amzn-Trace-Id": "Root=1-6397472f-07cfba2c0e88067e1abead0c"
 <   },
 <   "origin": "1.1.1.1",
