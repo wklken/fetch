@@ -2,10 +2,6 @@ module github.com/wklken/fetch
 
 go 1.20
 
-replace github.com/wklken/fetch/cmd => ./cmd
-
-replace github.com/wklken/fetch/pkg => ./pkg
-
 require (
 	github.com/fatih/color v1.15.0
 	github.com/gin-gonic/gin v1.9.1
