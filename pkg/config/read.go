@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	//"path/filepath"
 )
 
 func getFileExt(path string) string {
@@ -101,7 +99,7 @@ func ReadCasesFromFile(path string) (cases []*Case, err error) {
 	// 	return cases, nil
 	// }
 
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error reading %s: %v", path, err)
 	}
@@ -109,7 +107,6 @@ func ReadCasesFromFile(path string) (cases []*Case, err error) {
 	decoder := yaml.NewDecoder(strings.NewReader(string(b)))
 	count := 0
 	for {
-		count += 1
 		var node yaml.Node
 		err1 := decoder.Decode(&node)
 		if err1 == io.EOF {
@@ -124,6 +121,11 @@ func ReadCasesFromFile(path string) (cases []*Case, err error) {
 			log.Fatalf("Failed to marshal YAML: %v", err2)
 		}
 
+		// if the section is empty, skip it
+		if len(out) == 1 && out[0] == '\n' {
+			continue
+		}
+
 		v := viper.New()
 		v.SetConfigType("yaml")
 		v.ReadConfig(bytes.NewBuffer(out))
@@ -133,6 +135,9 @@ func ReadCasesFromFile(path string) (cases []*Case, err error) {
 		if err3 != nil {
 			return nil, err3
 		}
+
+		count += 1
+
 		// FIXME: the lines is not correct from now!
 		c.FileLines = fileLines
 		c.AllKeys = v.AllKeys()

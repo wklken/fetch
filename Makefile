@@ -1,4 +1,9 @@
-.PHONY: dep test build
+.PHONY: init dep test build fmt
+
+init:
+	go install github.com/segmentio/golines@latest
+	go install mvdan.cc/gofumpt@latest
+
 
 build:
 	go build .
