@@ -35,3 +35,10 @@ func OmitMiddle(s string, head int, tail int) string {
 func PrettyStringSlice(s []string) string {
 	return "[" + strings.Join(s, ", ") + "]"
 }
+
+func StringArrayMapFunc(elements []string, f func(string) string) (result []string) {
+	for _, element := range elements {
+		result = append(result, f(element))
+	}
+	return
+}

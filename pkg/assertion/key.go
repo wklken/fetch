@@ -226,7 +226,8 @@ func DoKeysAssertion(
 		{
 			key: "assert.body_contains",
 			ctx: Ctx{
-				f:        assert.Contains,
+				// f:        assert.Contains,
+				f:        assert.StringContainsAll,
 				element1: bodyStr,
 				element2: c.Assert.BodyContains,
 			},
@@ -234,7 +235,8 @@ func DoKeysAssertion(
 		{
 			key: "assert.body_not_contains",
 			ctx: Ctx{
-				f:        assert.NotContains,
+				// f:        assert.NotContains,
+				f:        assert.StringNotContainsAll,
 				element1: bodyStr,
 				element2: c.Assert.BodyNotContains,
 			},
@@ -242,9 +244,10 @@ func DoKeysAssertion(
 		{
 			key: "assert.body_icontains",
 			ctx: Ctx{
-				f:        assert.Contains,
+				// f:        assert.Contains,
+				f:        assert.StringContainsAll,
 				element1: strings.ToLower(bodyStr),
-				element2: strings.ToLower(c.Assert.BodyIContains),
+				element2: util.StringArrayMapFunc(c.Assert.BodyIContains, strings.ToLower),
 			},
 		},
 		{

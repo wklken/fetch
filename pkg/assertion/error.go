@@ -10,7 +10,8 @@ import (
 
 func DoErrorAssertions(c *config.Case, err error) (stats util.Stats) {
 	stats.AddInfofMessage("assert.error_contains: ")
-	ok, message := assert.Contains(err.Error(), c.Assert.ErrorContains)
+	// ok, message := assert.Contains(err.Error(), c.Assert.ErrorContains)
+	ok, message := assert.StringContainsAll(err.Error(), c.Assert.ErrorContains)
 	if ok {
 		stats.AddPassMessage()
 		stats.IncrOkAssertCount()
