@@ -317,8 +317,13 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 					debug,
 				)
 
-				if shouldRetry(c.Config.Retry, count, err2, resp.StatusCode, respBody) {
-					fmt.Println("will retry", c.Config.Retry, count, err2, resp.StatusCode, respBody)
+				// resp maybe nil here
+				statusCode := 0
+				if resp != nil {
+					statusCode = resp.StatusCode
+				}
+				if shouldRetry(c.Config.Retry, count, err2, statusCode, respBody) {
+					fmt.Println("will retry", c.Config.Retry, count, err2, statusCode, respBody)
 					time.Sleep(time.Duration(c.Config.Retry.Interval) * time.Millisecond)
 					count++
 					continue

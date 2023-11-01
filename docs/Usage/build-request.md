@@ -269,7 +269,7 @@ $ ./fetch run -c examples/config.yaml examples/request_use_template.yaml
 DEBUG request:
 > POST /post HTTP/1.1
 > Host: httpbin.org
-> User-Agent: Go-http-client/1.1
+> User-Agent: fetch/1.0.0
 > Content-Length: 83
 > Content-Type: application/json
 > Accept-Encoding: gzip
@@ -316,7 +316,7 @@ $ ./fetch run -c examples/config.yaml examples/request_use_template_local.yaml
 DEBUG request:
 > POST /post HTTP/1.1
 > Host: httpbin.org
-> User-Agent: Go-http-client/1.1
+> User-Agent: fetch/1.0.0
 > Content-Length: 85
 > Content-Type: application/json
 > Accept-Encoding: gzip
