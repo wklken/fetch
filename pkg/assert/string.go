@@ -56,3 +56,39 @@ func NotEndsWith(s, suffix interface{}) (bool, string) {
 
 	return true, "OK"
 }
+
+// StringContainsAll string a should contains all elements
+func StringContainsAll(s, elements interface{}) (bool, string) {
+	listValue := reflect.ValueOf(elements)
+	if reflect.TypeOf(elements).Kind() != reflect.Slice {
+		return false, fmt.Sprintf("contains_all | `%v` should be slice", prettyLine(elements))
+	}
+
+	for i := 0; i < listValue.Len(); i++ {
+		element := listValue.Index(i).Interface()
+		if !test(s, element, strings.Contains) {
+			// FIXME: add index in error info
+			return false, fmt.Sprintf("contains | `%v` should contains `%v`", prettyLine(s), element)
+		}
+	}
+
+	return true, "OK"
+}
+
+// StringContainsAll string a should not contains all elements
+func StringNotContainsAll(s, elements interface{}) (bool, string) {
+	listValue := reflect.ValueOf(elements)
+	if reflect.TypeOf(elements).Kind() != reflect.Slice {
+		return false, fmt.Sprintf("contains_all | `%v` should be slice", prettyLine(elements))
+	}
+
+	for i := 0; i < listValue.Len(); i++ {
+		element := listValue.Index(i).Interface()
+		if test(s, element, strings.Contains) {
+			// FIXME: add index in error info
+			return false, fmt.Sprintf("contains | `%v` should not contains `%v`", prettyLine(s), element)
+		}
+	}
+
+	return true, "OK"
+}

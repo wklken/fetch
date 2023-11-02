@@ -7,6 +7,7 @@ nav_order: 4
 ---
 
 # Assert
+
 {: .no_toc }
 
 Some examples show how to assert the response.
@@ -14,6 +15,7 @@ Some examples show how to assert the response.
 
 
 ## Table of contents
+
 {: .no_toc .text-delta }
 
 1. TOC
@@ -73,6 +75,23 @@ assert:
   proto: "HTTP/2.0"
   protoMajor: 2
   protoMinor: 0
+```
+
+note: the `*contains` support a single string or a list of strings, if the value is a list, it's `AND` relationship.
+
+```yaml
+assert:
+  # body should both contains Hello and world
+  body_contains:
+    - Hello
+    - world
+  # body should not contains Hello and world
+  body_not_contains:
+    - Hello
+    - world
+  body_icontains:
+    - hello
+    - world
 ```
 
 ## assert header
@@ -138,6 +157,16 @@ config:
   timeout: 1
 assert:
   error_contains: context deadline exceeded
+```
+
+note: the `error_contains` support a single string or a list of strings, if the value is a list, it's `AND` relationship.
+
+```yaml
+assert:
+  # error should both contains Hello and world
+  error_contains:
+    - Hello
+    - world
 ```
 
 ## assert json

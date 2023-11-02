@@ -37,15 +37,15 @@ type Assert struct {
 
 	Body string `yaml:"body"`
 
-	BodyContains      string `yaml:"body_contains" mapstructure:"body_contains"`
-	BodyNotContains   string `yaml:"body_not_contains" mapstructure:"body_not_contains"`
-	BodyIContains     string `yaml:"body_icontains" mapstructure:"body_icontains"`
-	BodyStartsWith    string `yaml:"body_startswith" mapstructure:"body_startswith"`
-	BodyEndsWith      string `yaml:"body_endswith" mapstructure:"body_endswith"`
-	BodyNotStartsWith string `yaml:"body_not_startswith" mapstructure:"body_not_startswith"`
-	BodyNotEndsWith   string `yaml:"body_not_endswith" mapstructure:"body_not_endswith"`
-	BodyMatches       string `yaml:"body_matches" mapstructure:"body_matches"`
-	BodyNotMatches    string `yaml:"body_not_matches" mapstructure:"body_not_matches"`
+	BodyContains      []string `yaml:"body_contains" mapstructure:"body_contains"`
+	BodyNotContains   []string `yaml:"body_not_contains" mapstructure:"body_not_contains"`
+	BodyIContains     []string `yaml:"body_icontains" mapstructure:"body_icontains"`
+	BodyStartsWith    string   `yaml:"body_startswith" mapstructure:"body_startswith"`
+	BodyEndsWith      string   `yaml:"body_endswith" mapstructure:"body_endswith"`
+	BodyNotStartsWith string   `yaml:"body_not_startswith" mapstructure:"body_not_startswith"`
+	BodyNotEndsWith   string   `yaml:"body_not_endswith" mapstructure:"body_not_endswith"`
+	BodyMatches       string   `yaml:"body_matches" mapstructure:"body_matches"`
+	BodyNotMatches    string   `yaml:"body_not_matches" mapstructure:"body_not_matches"`
 
 	Header              map[string]interface{} `yaml:"header"`
 	HeaderExists        []string               `yaml:"header_exists" mapstructure:"header_exists"`
@@ -65,7 +65,7 @@ type Assert struct {
 
 	// if request fail like dial fail/context deadline exceeded, will do assert error_contains only,
 	// will pass if the error message contains the string
-	ErrorContains string `yaml:"error_contains" mapstructure:"error_contains"`
+	ErrorContains []string `yaml:"error_contains" mapstructure:"error_contains"`
 
 	HasRedirect      bool  `yaml:"has_redirect" mapstructure:"has_redirect"`
 	RedirectCountLt  int64 `yaml:"redirectCount_lt" mapstructure:"redirectCount_lt"`
@@ -115,8 +115,8 @@ func (a *Assert) Render(ctx map[string]interface{}) {
 
 	a.Body = tpl.Render(a.Body, ctx)
 
-	a.BodyContains = tpl.Render(a.BodyContains, ctx)
-	a.BodyNotContains = tpl.Render(a.BodyNotContains, ctx)
+	a.BodyContains = renderStringArray(a.BodyContains, ctx)
+	a.BodyNotContains = renderStringArray(a.BodyNotContains, ctx)
 	a.BodyStartsWith = tpl.Render(a.BodyStartsWith, ctx)
 	a.BodyEndsWith = tpl.Render(a.BodyEndsWith, ctx)
 	a.BodyNotStartsWith = tpl.Render(a.BodyNotStartsWith, ctx)
@@ -125,6 +125,17 @@ func (a *Assert) Render(ctx map[string]interface{}) {
 	for _, j := range a.JSON {
 		j.Render(ctx)
 	}
+}
+
+func renderStringArray(elements []string, ctx map[string]interface{}) []string {
+	if len(elements) == 0 {
+		return elements
+	}
+	n := make([]string, 0, len(elements))
+	for _, s := range elements {
+		n = append(n, tpl.Render(s, ctx))
+	}
+	return n
 }
 
 type AssertJSON struct {
