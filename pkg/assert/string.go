@@ -79,14 +79,14 @@ func StringContainsAll(s, elements interface{}) (bool, string) {
 func StringNotContainsAll(s, elements interface{}) (bool, string) {
 	listValue := reflect.ValueOf(elements)
 	if reflect.TypeOf(elements).Kind() != reflect.Slice {
-		return false, fmt.Sprintf("contains_all | `%v` should be slice", prettyLine(elements))
+		return false, fmt.Sprintf("not_contains_all | `%v` should be slice", prettyLine(elements))
 	}
 
 	for i := 0; i < listValue.Len(); i++ {
 		element := listValue.Index(i).Interface()
 		if test(s, element, strings.Contains) {
 			// FIXME: add index in error info
-			return false, fmt.Sprintf("contains | `%v` should not contains `%v`", prettyLine(s), element)
+			return false, fmt.Sprintf("not_contains | `%v` should not contains `%v`", prettyLine(s), element)
 		}
 	}
 

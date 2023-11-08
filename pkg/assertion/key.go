@@ -253,7 +253,8 @@ func DoKeysAssertion(
 		{
 			key: "assert.body_matches",
 			ctx: Ctx{
-				f:        assert.Matches,
+				// f:        assert.Matches,
+				f:        assert.StringMatchesAll,
 				element1: bodyStr,
 				element2: c.Assert.BodyMatches,
 			},
@@ -261,7 +262,8 @@ func DoKeysAssertion(
 		{
 			key: "assert.body_not_matches",
 			ctx: Ctx{
-				f:        assert.NotMatches,
+				// f:        assert.NotMatches,
+				f:        assert.StringNotMatchesAll,
 				element1: bodyStr,
 				element2: c.Assert.BodyNotMatches,
 			},
