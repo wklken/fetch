@@ -2,7 +2,7 @@
 
 fetch is a **lightweight** and **powerful** API testing tool.
 
-You can use git and configuration files (e.g. yaml/toml) to maintain all test cases.
+You can use git and yaml files to maintain all test cases.
 
 See [https://wklken.me/fetch](https://wklken.me/fetch) for more information.
 
@@ -69,7 +69,6 @@ See [examples](https://github.com/wklken/fetch/tree/master/examples) for a varie
 
 ## Features
 
-- config file types: yaml/toml/json/properties/ini
 - http methods: get/post/put/delete/patch/head/options
 - build request: file/template([go template](https://golang.org/pkg/text/template/))/set cookie/basic auth/share cookie/msgpack
 - assert response:
