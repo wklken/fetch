@@ -94,6 +94,20 @@ assert:
     - world
 ```
 
+note: the `*matches` support a single regex or a list of regexs, if the value is a list, it's `AND` relationship.
+
+```yaml
+assert:
+  # body should both matches .ello and .orld
+  body_matches:
+    - .ello
+    - .orld
+  # body should not matches .ello and .orld
+  body_not_matches:
+    - .ello
+    - .orld
+```
+
 ## assert header
 
 ```yaml
