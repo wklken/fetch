@@ -3,20 +3,10 @@ package assertion
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/wklken/fetch/pkg/config"
 	"github.com/wklken/fetch/pkg/util"
 )
-
-func anyStringHasPrefix(l []string, prefix string) bool {
-	for _, x := range l {
-		if strings.HasPrefix(x, prefix) {
-			return true
-		}
-	}
-	return false
-}
 
 func DoCookieAssertions(
 	c *config.Case,
@@ -43,7 +33,7 @@ func DoCookieAssertions(
 
 		stats.AddInfofMessage("assert.cookie.[%s]: ", cookieKey)
 
-		if anyStringHasPrefix(cookieUniqueKeys, cookieKey) {
+		if util.AnyStringHasPrefix(cookieUniqueKeys, cookieKey) {
 			stats.AddPassMessage()
 			stats.IncrOkAssertCount()
 		} else {

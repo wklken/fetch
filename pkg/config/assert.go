@@ -49,7 +49,7 @@ type Assert struct {
 
 	Header       map[string]interface{} `yaml:"header"`
 	HeaderExists []string               `yaml:"header_exists" mapstructure:"header_exists"`
-	// FIXME: support []string for matches
+	// FIXME: support []string for matches and contains    a string or array
 	HeaderValueMatches  map[string]string `yaml:"header_value_matches" mapstructure:"header_value_matches"`
 	HeaderValueContains map[string]string `yaml:"header_value_contains" mapstructure:"header_value_contains"`
 

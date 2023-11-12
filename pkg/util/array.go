@@ -1,9 +1,11 @@
 package util
 
-func ToLower(ss []string) []string {
+import "strings"
+
+func StringArrayToLower(ss []string) []string {
 	l := make([]string, 0, len(ss))
 	for _, s := range ss {
-		l = append(l, s)
+		l = append(l, strings.ToLower(s))
 	}
 	return l
 }

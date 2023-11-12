@@ -8,6 +8,15 @@ import (
 )
 
 var _ = Describe("Set", func() {
+	It("should create an empty StringSet", func() {
+		s := util.NewStringSet()
+
+		assert.Len(GinkgoT(), s.Data, 0)
+		assert.Equal(GinkgoT(), 0, s.Size())
+
+		assert.False(GinkgoT(), s.Has("hello"))
+	})
+
 	Describe("StringSet", func() {
 		Describe("New", func() {
 			It("NewStringSet", func() {
@@ -108,6 +117,19 @@ var _ = Describe("Set", func() {
 		})
 	})
 
+	Describe("SplitStringToSet", func() {
+		It("Empty string", func() {
+			s := util.SplitStringToSet("", ",")
+			assert.Equal(GinkgoT(), 0, s.Size())
+		})
+
+		It("Normal string a,b,c", func() {
+			s := util.SplitStringToSet("a,b,c", ",")
+			assert.Equal(GinkgoT(), 3, s.Size())
+			assert.True(GinkgoT(), s.Has("b"))
+		})
+	})
+
 	Describe("Int64Set", func() {
 		var s *util.Int64Set
 
@@ -171,19 +193,6 @@ var _ = Describe("Set", func() {
 
 			sli2 := s.ToSlice()
 			assert.Len(GinkgoT(), sli2, 2)
-		})
-	})
-
-	Describe("SplitStringToSet", func() {
-		It("Empty string", func() {
-			s := util.SplitStringToSet("", ",")
-			assert.Equal(GinkgoT(), 0, s.Size())
-		})
-
-		It("Normal string a,b,c", func() {
-			s := util.SplitStringToSet("a,b,c", ",")
-			assert.Equal(GinkgoT(), 3, s.Size())
-			assert.True(GinkgoT(), s.Has("b"))
 		})
 	})
 })

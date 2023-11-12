@@ -73,10 +73,6 @@ func (c *Case) Render(ctx map[string]interface{}) {
 }
 
 // GetAssertLineNumber will guess the assertion line number
-// toml: status = "ok"
-// json: "status": "ok"
-// yaml: status: ok
-// ini: status=ok
 func (c *Case) GuessAssertLineNumber(caseIndex int, key string) int {
 	// fmt.Println("c.guess", caseIndex, key, c.FileLines[caseIndex])
 	parts := strings.Split(key, ".")
@@ -85,14 +81,9 @@ func (c *Case) GuessAssertLineNumber(caseIndex int, key string) int {
 	}
 
 	keys := []string{
-		fmt.Sprintf("%s=", key),
-		fmt.Sprintf("%s =", key),
 		fmt.Sprintf(`"%s":`, key),
-		fmt.Sprintf(`"%s" :`, key),
 		fmt.Sprintf(`%s:`, key),
 		fmt.Sprintf(`%s :`, key),
-		fmt.Sprintf(`%s=`, key),
-		fmt.Sprintf(`%s =`, key),
 	}
 
 	// protect

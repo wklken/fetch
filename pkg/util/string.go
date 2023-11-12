@@ -42,3 +42,12 @@ func StringArrayMapFunc(elements []string, f func(string) string) (result []stri
 	}
 	return
 }
+
+func AnyStringHasPrefix(l []string, prefix string) bool {
+	for _, x := range l {
+		if strings.HasPrefix(x, prefix) {
+			return true
+		}
+	}
+	return false
+}
