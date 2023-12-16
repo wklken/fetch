@@ -105,7 +105,7 @@ func DoKeysAssertion(
 			ctx: Ctx{
 				f:        assert.In,
 				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-				element2: util.ToLower(c.Assert.StatusIn),
+				element2: util.StringArrayToLower(c.Assert.StatusIn),
 			},
 		},
 		{
@@ -113,7 +113,7 @@ func DoKeysAssertion(
 			ctx: Ctx{
 				f:        assert.NotIn,
 				element1: strings.ToLower(http.StatusText(resp.StatusCode)),
-				element2: util.ToLower(c.Assert.StatusNotIn),
+				element2: util.StringArrayToLower(c.Assert.StatusNotIn),
 			},
 		},
 		{
@@ -129,7 +129,7 @@ func DoKeysAssertion(
 			ctx: Ctx{
 				f:        assert.In,
 				element1: strings.ToLower(contentType),
-				element2: util.ToLower(c.Assert.ContentTypeIn),
+				element2: util.StringArrayToLower(c.Assert.ContentTypeIn),
 			},
 		},
 		{
@@ -137,7 +137,7 @@ func DoKeysAssertion(
 			ctx: Ctx{
 				f:        assert.NotIn,
 				element1: strings.ToLower(contentType),
-				element2: util.ToLower(c.Assert.ContentTypeNotIn),
+				element2: util.StringArrayToLower(c.Assert.ContentTypeNotIn),
 			},
 		},
 		// contentlength

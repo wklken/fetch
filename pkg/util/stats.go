@@ -35,6 +35,19 @@ type Stats struct {
 	messages        []Message
 }
 
+// NewDummyStats return a dummy stats, only for unittest
+func NewDummyStats() Stats {
+	return Stats{
+		okFileCount:     0,
+		failFileCount:   0,
+		okCaseCount:     0,
+		failCaseCount:   0,
+		okAssertCount:   0,
+		failAssertCount: 0,
+		messages:        []Message{},
+	}
+}
+
 func (s *Stats) MergeAssertCount(s1 Stats) {
 	// NOTE: here only
 	s.okAssertCount += s1.okAssertCount
