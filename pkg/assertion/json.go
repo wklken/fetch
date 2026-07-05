@@ -21,7 +21,7 @@ func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJSON) (stats ut
 			if ok {
 				stats.IncrOkAssertCount()
 			} else {
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 			continue
@@ -36,7 +36,7 @@ func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJSON) (stats ut
 			// missing
 			if actualValue == nil {
 				_, message := assert.Equal(nil, expectedValue)
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 				continue
 			}
@@ -83,7 +83,7 @@ func DoJSONAssertions(jsonData interface{}, jsons []config.AssertJSON) (stats ut
 				stats.AddPassMessage()
 				stats.IncrOkAssertCount()
 			} else {
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		}

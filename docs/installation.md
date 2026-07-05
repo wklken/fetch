@@ -49,7 +49,7 @@ docker run --rm --net=host wklken/fetch help
 
 ### Build from source
 
-- dependencies: go1.21
+- dependencies: go1.26
 
 ```bash
 git clone https://github.com/wklken/fetch.git

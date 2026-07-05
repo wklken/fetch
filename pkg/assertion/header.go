@@ -24,7 +24,7 @@ func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stat
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		}
@@ -42,7 +42,7 @@ func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stat
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 
 				allOK = false
@@ -70,7 +70,7 @@ func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stat
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		}
@@ -90,7 +90,7 @@ func DoHeaderAssertions(c *config.Case, respHeader http.Header) (stats util.Stat
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		}

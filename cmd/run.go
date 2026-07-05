@@ -355,7 +355,7 @@ func run(path string, runConfig *config.RunConfig) (stats util.Stats) {
 
 			if len(debugLogs) > 0 {
 				for _, l := range debugLogs {
-					stats.AddInfoMessage(l)
+					stats.AddInfoMessage("%s", l)
 				}
 			}
 

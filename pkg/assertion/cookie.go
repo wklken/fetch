@@ -37,7 +37,7 @@ func DoCookieAssertions(
 			stats.AddPassMessage()
 			stats.IncrOkAssertCount()
 		} else {
-			stats.AddFailMessage(fmt.Sprintf("no cookie equals to `%s`", cookieKey))
+			stats.AddFailMessage("no cookie equals to `%s`", cookieKey)
 			stats.IncrFailAssertCount()
 		}
 	}
@@ -52,7 +52,7 @@ func DoCookieAssertions(
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 
 				allOK = false

@@ -380,7 +380,7 @@ func DoKeysAssertion(
 				if lineNumber > 0 {
 					message = fmt.Sprintf("line:%d | %s", lineNumber, message)
 				}
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		}

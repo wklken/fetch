@@ -32,7 +32,7 @@ func DoXMLAssertions(body []byte, xmls []config.AssertXML) (stats util.Stats) {
 		p, err := xmlpath.Compile(path)
 		if err != nil {
 			message := fmt.Sprintf("wrong xpath %s, compile fail %s", path, err.Error())
-			stats.AddFailMessage(message)
+			stats.AddFailMessage("%s", message)
 			stats.IncrFailAssertCount()
 			continue
 		}
@@ -44,7 +44,7 @@ func DoXMLAssertions(body []byte, xmls []config.AssertXML) (stats util.Stats) {
 				stats.AddPassMessage()
 				stats.IncrOkAssertCount()
 			} else {
-				stats.AddFailMessage(message)
+				stats.AddFailMessage("%s", message)
 				stats.IncrFailAssertCount()
 			}
 		} else {
