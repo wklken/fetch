@@ -26,16 +26,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       # Use GitHub Actions' cache to shorten build times and decrease load on servers
-      - uses: actions/cache@v2
+      - uses: actions/cache@v6
         with:
           path: ./docs/vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile') }}
           restore-keys: |
             ${{ runner.os }}-gems-
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v6
       # Standard usage
       - uses:  helaili/jekyll-action@v2
         with:
@@ -45,7 +45,7 @@ jobs:
       # - run: ls -alrt ./_site && ls -alrt ./docs/_site
       - run: sudo rm -rf ./_site && sudo mv ./docs/_site ./_site && sudo ls -alrt ./_site
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v5
 
   # Deployment job
   deploy:
@@ -57,4 +57,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v5
